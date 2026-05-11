@@ -6,10 +6,12 @@ import time
 import os
 from typing import Tuple, Optional, Dict, List
 from ultralytics import YOLO
+import torch
 
 from .config import Config
 from .logger import EventLogger
 from .alerts import AlertManager
+from .performance import PerformanceMonitor, DetectionStats
 from . import utils
 
 
@@ -36,12 +38,42 @@ class BabyWatcher:
         # Load models
         pose_model_path = self.config.get("models.pose_model_path", "yolo26n-pose.pt")
         obj_model_path = self.config.get("models.object_model_path", "yolo26n.pt")
-        device = self.config.get("models.device", "cpu")
+        device_config = self.config.get("models.device", "auto")
+        half_precision = self.config.get("models.half_precision", False)
+        max_det = self.config.get("models.max_det", 300)
         
+        # Auto-detect device
+        if device_config.lower() == "auto":
+            device = 0 if torch.cuda.is_available() else "cpu"
+            device_name = "GPU (CUDA)" if torch.cuda.is_available() else "CPU"
+        else:
+            device = device_config
+            device_name = f"GPU ({device})" if device != "cpu" else "CPU"
+        
+        print(f"🖥️  Using {device_name}")
         print("🔄 Loading YOLO models...")
+        
         self.pose_model = YOLO(pose_model_path)
+        self.pose_model.to(device)
+        if half_precision and device != "cpu":
+            self.pose_model.half()
+        
         self.obj_model = YOLO(obj_model_path)
+        self.obj_model.to(device)
+        if half_precision and device != "cpu":
+            self.obj_model.half()
+        
         print("✅ Models loaded successfully")
+        
+        # Performance settings
+        self.skip_frames = self.config.get("performance.skip_frames", 0)
+        self.track_fps = self.config.get("performance.track_fps", True)
+        self.max_det = max_det
+        self.frames_skipped = 0
+        
+        # Performance monitoring
+        self.perf_monitor = PerformanceMonitor() if self.track_fps else None
+        self.detection_stats = DetectionStats()
         
         # Initialize logger
         log_dir = self.config.get("logging.log_dir", "logs")
@@ -77,23 +109,34 @@ class BabyWatcher:
         Returns:
             Tuple of (output_frame, info_dict)
         """
+        frame_start = self.perf_monitor.start_frame() if self.perf_monitor else None
         self.frame_count += 1
+        
+        # Frame skipping for performance
+        if self.skip_frames > 0 and self.frames_skipped < self.skip_frames:
+            self.frames_skipped += 1
+            # Return frame without processing
+            return frame, {'skipped': True}
+        
+        self.frames_skipped = 0
         
         # Resize frame
         frame = cv2.resize(frame, (self.img_size, self.img_size))
         
-        # Run YOLO predictions
+        # Run YOLO predictions with optimized settings
         pose_results = self.pose_model.predict(
             frame, 
             imgsz=self.img_size, 
-            conf=self.conf_thresh, 
+            conf=self.conf_thresh,
+            max_det=self.max_det,
             verbose=False
         )[0]
         
         obj_results = self.obj_model.predict(
             frame, 
             imgsz=self.img_size, 
-            conf=self.conf_thresh, 
+            conf=self.conf_thresh,
+            max_det=self.max_det,
             verbose=False
         )[0]
         
@@ -255,12 +298,27 @@ class BabyWatcher:
         utils.draw_warning_banner(frame, status)
         
         # ====== DRAW FPS ======
-        if self.show_fps:
+        perf_metrics = {}
+        if self.show_fps and self.perf_monitor:
+            perf_metrics = self.perf_monitor.end_frame(frame_start)
+            fps = perf_metrics.get('fps', 0)
+            cv2.putText(frame, f"FPS: {fps:.1f}",
+                        (10, self.img_size - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        elif self.show_fps:
             elapsed = time.time() - self.start_time
             fps = self.frame_count / elapsed if elapsed > 0 else 0
             cv2.putText(frame, f"FPS: {fps:.1f}",
                         (10, self.img_size - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        
+        # Update statistics
+        is_danger = hand_near_mouth and hand_holding_obj
+        self.detection_stats.update(
+            detected_pose=bool(pose_results.keypoints),
+            objects_count=len(detected_objects),
+            is_danger=is_danger
+        )
         
         return frame, {
             'status': status,
@@ -268,7 +326,8 @@ class BabyWatcher:
             'hand_mouth_distance': d_hand_mouth,
             'hand_object_distance': d_hand_obj,
             'hand_near_mouth': hand_near_mouth,
-            'hand_holding_obj': hand_holding_obj
+            'hand_holding_obj': hand_holding_obj,
+            **perf_metrics
         }
     
     def process_video(self, video_path: str, output_path: Optional[str] = None):
@@ -371,7 +430,34 @@ class BabyWatcher:
         Returns:
             Statistics dictionary
         """
-        return self.logger.get_daily_stats(date)
+        stats = self.logger.get_daily_stats(date)
+        stats['detection_stats'] = self.detection_stats.get_summary()
+        if self.perf_monitor:
+            stats['performance'] = self.perf_monitor.get_summary()
+        return stats
+    
+    def print_stats(self):
+        """Print processing statistics to console"""
+        detection_stats = self.detection_stats.get_summary()
+        print("\n" + "="*50)
+        print("📊 DETECTION STATISTICS")
+        print("="*50)
+        for key, value in detection_stats.items():
+            if isinstance(value, float):
+                print(f"{key:.<40} {value:.2f}")
+            else:
+                print(f"{key:.<40} {value}")
+        
+        if self.perf_monitor:
+            perf_stats = self.perf_monitor.get_summary()
+            print("\n" + "="*50)
+            print("⚡ PERFORMANCE METRICS")
+            print("="*50)
+            for key, value in perf_stats.items():
+                if isinstance(value, float):
+                    print(f"{key:.<40} {value:.2f}")
+                else:
+                    print(f"{key:.<40} {value}")
     
     def __repr__(self) -> str:
         return (f"<BabyWatcher: "

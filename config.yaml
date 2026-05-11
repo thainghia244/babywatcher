@@ -22,7 +22,16 @@ alerts:
 models:
   pose_model_path: "yolo26n-pose.pt"
   object_model_path: "yolo26n.pt"
-  device: "cpu"  # "cpu" hoặc "0" (GPU)
+  device: "auto"  # "cpu", "0" (GPU), or "auto" (auto-detect)
+  half_precision: false  # Dùng FP16 để tăng tốc độ trên GPU (yêu cầu GPU)
+  max_det: 300  # Số objects tối đa detect trên frame
+
+# Performance Settings
+performance:
+  skip_frames: 0  # Bỏ qua N frames để tăng FPS (0 = process all)
+  track_fps: true  # Theo dõi FPS
+  enable_profiling: false  # Bật profiling để debug
+  batch_size: 1  # Batch processing (1 = xử lý từng frame)
 
 # Logging Settings
 logging:
