@@ -86,6 +86,8 @@ def get_person_keypoints(person_data: np.ndarray) -> dict:
         'right_eye': person_data[2],
         'left_shoulder': person_data[5],
         'right_shoulder': person_data[6],
+        'left_elbow': person_data[7],
+        'right_elbow': person_data[8],
         'left_wrist': person_data[9],
         'right_wrist': person_data[10],
         'left_hip': person_data[11],
@@ -111,7 +113,7 @@ def calculate_shoulder_width(left_shoulder: np.ndarray,
 def get_nearest_object(hand_position: np.ndarray,
                        objects: List[np.ndarray]) -> Tuple[float, int]:
     """
-    Find nearest object to hand
+    Find nearest object to hand by object center.
     
     Args:
         hand_position: Hand coordinate
@@ -128,6 +130,37 @@ def get_nearest_object(hand_position: np.ndarray,
     min_idx = distances.index(min_dist)
     
     return (min_dist, min_idx)
+
+
+def get_nearest_object_box(hand_position: np.ndarray,
+                           object_boxes: List[Tuple[float, float, float, float]]) -> Tuple[float, int, np.ndarray]:
+    """
+    Find nearest object to hand using distance to box boundaries.
+    
+    Args:
+        hand_position: Hand coordinate
+        object_boxes: List of boxes (x1, y1, x2, y2)
+    
+    Returns:
+        Tuple of (distance, object_index, nearest_point)
+    """
+    if not object_boxes:
+        return (999.0, -1, np.array([0.0, 0.0]))
+    
+    distances = []
+    nearest_points = []
+    x, y = hand_position
+    
+    for box in object_boxes:
+        x1, y1, x2, y2 = box
+        closest_x = min(max(x, x1), x2)
+        closest_y = min(max(y, y1), y2)
+        nearest_point = np.array([closest_x, closest_y])
+        nearest_points.append(nearest_point)
+        distances.append(distance(hand_position, nearest_point))
+    
+    min_idx = int(np.argmin(distances))
+    return (distances[min_idx], min_idx, nearest_points[min_idx])
 
 
 def draw_distance_line(frame: np.ndarray,

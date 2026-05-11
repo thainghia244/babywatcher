@@ -4,3 +4,16 @@ numpy>=1.24.0
 PyYAML>=6.0
 pydub>=0.25.1
 python-dotenv>=1.0.0
+
+# Jetson Nano specific dependencies
+torch>=1.10.0  # PyTorch for Jetson
+torchvision>=0.11.0
+torchaudio>=0.10.0
+tensorrt>=8.0.0  # TensorRT for optimization
+pycuda>=2021.1  # CUDA Python bindings
+simpleaudio>=1.0.4  # Cross-platform audio
+scipy>=1.9.0  # Scientific computing
+matplotlib>=3.5.0  # Plotting (optional)
+seaborn>=0.11.0  # Statistical plots (optional)
+pandas>=1.5.0  # Data analysis
+scikit-learn>=1.2.0  # Machine learning

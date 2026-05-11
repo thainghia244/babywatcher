@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import time
 import os
+import platform
+import subprocess
 from typing import Tuple, Optional, Dict, List
 from ultralytics import YOLO
 import torch
@@ -17,17 +19,25 @@ from . import utils
 
 class BabyWatcher:
     """Main BabyWatcher detection system"""
-    
+
     def __init__(self, config_path: str = "config.yaml"):
         """
         Initialize BabyWatcher
-        
+
         Args:
             config_path: Path to configuration file
         """
         # Load configuration
         self.config = Config(config_path)
-        
+
+        # Detect platform
+        self.platform = self._detect_platform()
+        print(f"🖥️  Platform detected: {self.platform}")
+
+        # Jetson-specific setup
+        if self.platform == "jetson":
+            self._setup_jetson()
+
         # Extract configuration values
         self.img_size = self.config.get("detection.img_size", 640)
         self.conf_thresh = self.config.get("detection.conf_thresh", 0.4)
@@ -35,34 +45,29 @@ class BabyWatcher:
         self.hand_obj_thresh = self.config.get("detection.hand_obj_thresh", 60)
         self.dynamic_threshold = self.config.get("detection.dynamic_threshold", True)
         
+        # Enhanced object detection for small/occluded objects
+        self.small_object_conf_thresh = 0.2  # Lower threshold for small objects
+        self.hand_closing_thresh = 0.5  # Hand confidence threshold
+        self.inferred_object_distance_thresh = 25  # If hand-mouth < 25px, infer object
+
         # Load models
         pose_model_path = self.config.get("models.pose_model_path", "yolo26n-pose.pt")
         obj_model_path = self.config.get("models.object_model_path", "yolo26n.pt")
         device_config = self.config.get("models.device", "auto")
         half_precision = self.config.get("models.half_precision", False)
         max_det = self.config.get("models.max_det", 300)
-        
-        # Auto-detect device
-        if device_config.lower() == "auto":
-            device = 0 if torch.cuda.is_available() else "cpu"
-            device_name = "GPU (CUDA)" if torch.cuda.is_available() else "CPU"
-        else:
-            device = device_config
-            device_name = f"GPU ({device})" if device != "cpu" else "CPU"
-        
+        enable_tensorrt = self.config.get("hardware.enable_tensorrt", True)
+
+        # Auto-detect device with platform consideration
+        device, device_name = self._setup_device(device_config)
         print(f"🖥️  Using {device_name}")
-        print("🔄 Loading YOLO models...")
-        
-        self.pose_model = YOLO(pose_model_path)
-        self.pose_model.to(device)
-        if half_precision and device != "cpu":
-            self.pose_model.half()
-        
-        self.obj_model = YOLO(obj_model_path)
-        self.obj_model.to(device)
-        if half_precision and device != "cpu":
-            self.obj_model.half()
-        
+
+        # Load models with optimizations
+        self.pose_model, self.obj_model = self._load_models(
+            pose_model_path, obj_model_path, device, half_precision,
+            max_det, enable_tensorrt
+        )
+
         print("✅ Models loaded successfully")
         
         # Performance settings
@@ -145,6 +150,8 @@ class BabyWatcher:
         hand_near_mouth = False
         hand_holding_obj = False
         detected_objects = []
+        detected_boxes = []
+        object_candidate_boxes = []
         
         d_hand_mouth = 999.0
         d_hand_obj = 999.0
@@ -213,7 +220,14 @@ class BabyWatcher:
             classes = obj_results.boxes.cls.cpu().numpy()
             
             for box, conf, cls in zip(boxes, confs, classes):
-                if conf < self.conf_thresh:
+                # Use lower threshold for small objects that might be in hand
+                box_area = (box[2] - box[0]) * (box[3] - box[1])
+                threshold = self.small_object_conf_thresh if box_area < 5000 else self.conf_thresh
+                
+                if conf < threshold:
+                    # Collect lower-confidence near-hand candidates for inference
+                    if conf >= self.small_object_conf_thresh:
+                        object_candidate_boxes.append((x1, y1, x2, y2))
                     continue
                 if int(cls) == 0:  # Skip person class
                     continue
@@ -221,6 +235,7 @@ class BabyWatcher:
                 x1, y1, x2, y2 = box
                 center = utils.box_center((x1, y1, x2, y2))
                 detected_objects.append(center)
+                detected_boxes.append((x1, y1, x2, y2))
                 
                 # Draw object bounding box
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), 
@@ -228,23 +243,43 @@ class BabyWatcher:
         
         # ====== HAND-OBJECT INTERACTION ======
         for wrist in wrists:
-            nearest_dist, nearest_idx = utils.get_nearest_object(
-                wrist, detected_objects
+            nearest_dist, nearest_idx, nearest_point = utils.get_nearest_object_box(
+                wrist, detected_boxes
             )
             
             if nearest_idx >= 0:
-                nearest_obj = detected_objects[nearest_idx]
+                nearest_obj = detected_boxes[nearest_idx]
                 d_hand_obj = min(d_hand_obj, nearest_dist)
                 
-                # Draw distance line
+                # Draw distance line to nearest object edge
                 utils.draw_distance_line(
-                    frame, wrist, nearest_obj,
+                    frame, wrist, nearest_point,
                     label=f"H-O: {nearest_dist:.1f}",
                     color=(255, 255, 0)
                 )
                 
                 if nearest_dist < hand_obj_thresh:
                     hand_holding_obj = True
+
+        # Determine if there is a nearby low-confidence object candidate
+        candidate_nearby = False
+        if object_candidate_boxes:
+            for wrist in wrists:
+                candidate_dist, candidate_idx, candidate_point = utils.get_nearest_object_box(
+                    wrist, object_candidate_boxes
+                )
+                if candidate_dist < hand_obj_thresh * 1.2:
+                    candidate_nearby = True
+                    break
+
+        # ====== INFERRED OBJECT DETECTION (per person) ======
+        # Only infer object hold if there is a strong grasping signal
+        # AND a nearby candidate object or extremely close hand-to-mouth distance.
+        if not hand_holding_obj and hand_near_mouth and d_hand_mouth < self.inferred_object_distance_thresh:
+            hand_closing = self._detect_hand_closing(keypoints, nose, wrists)
+            if hand_closing and (candidate_nearby or d_hand_mouth < self.inferred_object_distance_thresh * 0.4):
+                hand_holding_obj = True
+                d_hand_obj = d_hand_mouth
         
         # ====== DETERMINE STATUS ======
         current_time = time.time()
@@ -436,31 +471,200 @@ class BabyWatcher:
             stats['performance'] = self.perf_monitor.get_summary()
         return stats
     
-    def print_stats(self):
-        """Print processing statistics to console"""
-        detection_stats = self.detection_stats.get_summary()
-        print("\n" + "="*50)
-        print("📊 DETECTION STATISTICS")
-        print("="*50)
-        for key, value in detection_stats.items():
-            if isinstance(value, float):
-                print(f"{key:.<40} {value:.2f}")
+    def _detect_hand_closing(self, keypoints: Dict, nose: np.ndarray, wrists: List) -> bool:
+        """
+        Detect if hand is closed (holding object) based on hand region size.
+        When hand is open, fingers extend outward. When closed, hand is compact.
+        
+        Args:
+            keypoints: Dictionary of detected keypoints
+            nose: Position of nose
+            wrists: List of wrist positions
+        
+        Returns:
+            True if hand appears to be closed/holding object
+        """
+        if not wrists:
+            return False
+        
+        try:
+            # Get hand-related keypoints
+            left_wrist = keypoints.get('left_wrist', None)
+            right_wrist = keypoints.get('right_wrist', None)
+            left_elbow = keypoints.get('left_elbow', None)
+            right_elbow = keypoints.get('right_elbow', None)
+            
+            # Check if hand is very close to mouth (indicating grasping)
+            for wrist in wrists:
+                dist_to_mouth = utils.distance(wrist, nose)
+                
+                if dist_to_mouth >= self.inferred_object_distance_thresh:
+                    continue
+                
+                # Require elbow/wrist relation if elbow is available.
+                if left_elbow is not None and left_wrist is not None:
+                    elbow_to_mouth = utils.distance(left_elbow, nose)
+                    wrist_to_mouth = dist_to_mouth
+                    if wrist_to_mouth < elbow_to_mouth * 0.65:
+                        return True
+                
+                if right_elbow is not None and right_wrist is not None:
+                    elbow_to_mouth = utils.distance(right_elbow, nose)
+                    wrist_to_mouth = dist_to_mouth
+                    if wrist_to_mouth < elbow_to_mouth * 0.65:
+                        return True
+                
+                # Only infer without elbow if hand is extremely close
+                if dist_to_mouth < self.inferred_object_distance_thresh * 0.4:
+                    return True
+            
+            return False
+        except Exception:
+            # If error in detection, do not infer held object to avoid false positives
+            return False
+    
+    def _detect_platform(self) -> str:
+        """Detect running platform"""
+        try:
+            # Check for Jetson
+            with open('/proc/device-tree/model', 'r') as f:
+                model = f.read().lower()
+                if 'jetson' in model:
+                    if 'nano' in model:
+                        return "jetson_nano"
+                    elif 'tx2' in model:
+                        return "jetson_tx2"
+                    elif 'xavier' in model:
+                        return "jetson_xavier"
+                    elif 'orin' in model:
+                        return "jetson_orin"
+                    else:
+                        return "jetson"
+        except:
+            pass
+
+        # Check for Raspberry Pi
+        try:
+            with open('/proc/cpuinfo', 'r') as f:
+                if 'Raspberry Pi' in f.read():
+                    return "raspberry_pi"
+        except:
+            pass
+
+        # Default to desktop
+        return "desktop"
+    
+    def _setup_jetson(self):
+        """Setup Jetson-specific configurations"""
+        try:
+            # Set power mode
+            power_mode = self.config.get("hardware.power_mode", "maxn")
+            subprocess.run(['sudo', 'nvpmodel', '-m', power_mode], check=True)
+            subprocess.run(['sudo', 'jetson_clocks'], check=True)
+            print(f"🔌 Jetson power mode set to: {power_mode}")
+
+            # Enable TensorRT if requested
+            if self.config.get("hardware.enable_tensorrt", True):
+                os.environ['USE_TENSORRT'] = '1'
+                print("🚀 TensorRT enabled for Jetson")
+
+        except Exception as e:
+            print(f"⚠️  Jetson setup warning: {e}")
+    
+    def _setup_device(self, device_config: str) -> Tuple[str, str]:
+        """Setup device with platform consideration"""
+        if device_config.lower() == "auto":
+            if self.platform.startswith("jetson"):
+                # Jetson always has GPU
+                device = "cuda:0"
+                device_name = f"Jetson {self.platform.split('_')[1].upper()} GPU"
+            elif torch.cuda.is_available():
+                device = "cuda:0"
+                device_name = "GPU (CUDA)"
             else:
-                print(f"{key:.<40} {value}")
+                device = "cpu"
+                device_name = "CPU"
+        else:
+            device = device_config
+            if device == "cpu":
+                device_name = "CPU"
+            else:
+                device_name = f"GPU ({device})"
+        
+        return device, device_name
+    
+    def _load_models(self, pose_path: str, obj_path: str, device: str,
+                    half_precision: bool, max_det: int, enable_tensorrt: bool):
+        """Load models with platform-specific optimizations"""
+        print("🔄 Loading YOLO models...")
+
+        # Load pose model
+        pose_model = YOLO(pose_path)
+
+        # Jetson-specific optimizations
+        if self.platform.startswith("jetson") and enable_tensorrt:
+            try:
+                # Export to TensorRT
+                pose_model.export(format='engine', device=device)
+                pose_model = YOLO(pose_path.replace('.pt', '.engine'))
+                print("🚀 Pose model converted to TensorRT")
+            except Exception as e:
+                print(f"⚠️  TensorRT conversion failed for pose model: {e}")
+
+        pose_model.to(device)
+        if half_precision and device != "cpu":
+            pose_model.half()
+
+        # Load object model
+        obj_model = YOLO(obj_path)
+
+        # Jetson-specific optimizations
+        if self.platform.startswith("jetson") and enable_tensorrt:
+            try:
+                # Export to TensorRT
+                obj_model.export(format='engine', device=device)
+                obj_model = YOLO(obj_path.replace('.pt', '.engine'))
+                print("🚀 Object model converted to TensorRT")
+            except Exception as e:
+                print(f"⚠️  TensorRT conversion failed for object model: {e}")
+
+        obj_model.to(device)
+        if half_precision and device != "cpu":
+            obj_model.half()
+
+        return pose_model, obj_model
+    
+    def print_stats(self):
+        """Print comprehensive statistics"""
+        print("\n" + "="*60)
+        print("📊 BABYWATCHER STATISTICS")
+        print("="*60)
+        print(f"Platform: {self.platform}")
+        print(f"Total Frames Processed: {self.frame_count}")
+        print(f"Total Runtime: {time.time() - self.start_time:.2f}s")
         
         if self.perf_monitor:
             perf_stats = self.perf_monitor.get_summary()
-            print("\n" + "="*50)
-            print("⚡ PERFORMANCE METRICS")
-            print("="*50)
+            print("\n⚡ PERFORMANCE METRICS")
+            print("-"*30)
             for key, value in perf_stats.items():
                 if isinstance(value, float):
                     print(f"{key:.<40} {value:.2f}")
                 else:
                     print(f"{key:.<40} {value}")
+        
+        detection_stats = self.detection_stats.get_summary()
+        print("\n🎯 DETECTION STATISTICS")
+        print("-"*30)
+        for key, value in detection_stats.items():
+            if isinstance(value, float):
+                print(f"{key:.<40} {value:.2f}")
+            else:
+                print(f"{key:.<40} {value}")
     
     def __repr__(self) -> str:
         return (f"<BabyWatcher: "
+                f"Platform={self.platform}, "
                 f"Models Loaded, "
                 f"Frames: {self.frame_count}, "
                 f"Alerts: {self.alert_manager}>")
