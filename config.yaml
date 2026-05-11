@@ -1,0 +1,64 @@
+# BabyWatcher Configuration File
+
+# Detection Settings
+detection:
+  img_size: 640
+  conf_thresh: 0.4
+  hand_mouth_thresh: 45
+  hand_obj_thresh: 60
+  dynamic_threshold: true  # Tính threshold động dựa trên shoulder width
+
+# Alert Settings
+alerts:
+  enable_sound: true
+  enable_email: false
+  enable_logs: true
+  danger_duration_threshold: 3.0  # Cảnh báo sau 3 giây liên tục
+  danger_level:
+    warning_duration: 2.0  # HAND TO MOUTH
+    critical_duration: 3.0  # OBJECT TO MOUTH
+
+# Model Settings
+models:
+  pose_model_path: "yolo26n-pose.pt"
+  object_model_path: "yolo26n.pt"
+  device: "cpu"  # "cpu" hoặc "0" (GPU)
+
+# Logging Settings
+logging:
+  log_dir: "logs"
+  log_file: "events_log.csv"
+  save_danger_clips: true
+  clips_dir: "danger_clips"
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+# Email Notifications (nếu enable_email=true)
+email:
+  enabled: false
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  sender_email: "your_email@gmail.com"
+  sender_password: "your_app_password"
+  recipient_email: "parent@example.com"
+  alert_threshold: 5.0  # Gửi email khi nguy hiểm > 5 giây
+
+# Sound Alerts
+sound:
+  alert_sound_path: "sounds/alarm.wav"
+  warning_sound_path: "sounds/warning.mp3"
+  volume: 0.8  # 0-1
+
+# Webhook (để gửi thông báo tới service khác)
+webhook:
+  enabled: false
+  url: "https://your-webhook-url.com/alert"
+  retry_count: 3
+
+# Display Settings
+display:
+  show_skeleton: true
+  show_keypoints: true
+  show_info_panel: true
+  show_fps: true
+  frame_width: 640
+  frame_height: 640
