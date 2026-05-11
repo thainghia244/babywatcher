@@ -68,3 +68,82 @@
 2026-05-11 19:13:00 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
 2026-05-11 19:17:03 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
 2026-05-11 19:17:03 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 99.35 | H-O: 47.63
+2026-05-11 19:25:53 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-05-11 19:25:53 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 99.35 | H-O: 47.63
+2026-05-11 19:26:21 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-05-11 19:26:21 - BabyWatcher - ERROR - Cannot open video: .\test_system.py
+2026-05-11 19:26:50 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-05-11 19:26:50 - BabyWatcher - INFO - Processing video: C:\Users\Th4iNghia\babywatcher\images\test.mp4
+2026-05-11 19:26:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 12.37 | H-O: 999.00
+2026-05-11 19:26:52 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.14s | H-M: 5.37 | H-O: 999.00
+2026-05-11 19:26:53 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.16s | H-M: 9.62 | H-O: 135.02
+2026-05-11 19:26:54 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.17s | H-M: 29.59 | H-O: 999.00
+2026-05-11 19:26:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.58s | H-M: 31.77 | H-O: 999.00
+2026-05-11 19:26:56 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.34s | H-M: 19.58 | H-O: 999.00
+2026-05-11 19:26:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.74s | H-M: 34.51 | H-O: 999.00
+2026-05-11 19:26:58 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 7.49s | H-M: 22.16 | H-O: 999.00
+2026-05-11 19:27:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.89s | H-M: 6.25 | H-O: 122.91
+2026-05-11 19:27:01 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.66s | H-M: 51.41 | H-O: 999.00
+2026-05-11 19:27:02 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 11.04s | H-M: 35.42 | H-O: 999.00
+2026-05-11 19:27:03 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 11.80s | H-M: 71.55 | H-O: 115.05
+2026-05-11 19:27:04 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 13.20s | H-M: 52.22 | H-O: 103.65
+2026-05-11 19:27:05 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 13.96s | H-M: 23.00 | H-O: 999.00
+2026-05-11 19:27:06 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 15.36s | H-M: 15.02 | H-O: 119.75
+2026-05-11 19:27:07 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 16.12s | H-M: 16.92 | H-O: 999.00
+2026-05-11 19:27:08 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 17.52s | H-M: 11.02 | H-O: 999.00
+2026-05-11 19:27:09 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 18.33s | H-M: 14.13 | H-O: 999.00
+2026-05-11 19:27:11 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 19.94s | H-M: 22.35 | H-O: 121.01
+2026-05-11 19:27:12 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 21.16s | H-M: 5.34 | H-O: 120.93
+2026-05-11 19:27:13 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 22.44s | H-M: 6.87 | H-O: 117.09
+2026-05-11 19:27:14 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 23.69s | H-M: 5.54 | H-O: 999.00
+2026-05-11 19:27:16 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 24.88s | H-M: 26.91 | H-O: 999.00
+2026-05-11 19:27:17 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 26.40s | H-M: 10.04 | H-O: 999.00
+2026-05-11 19:27:18 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 27.59s | H-M: 14.27 | H-O: 999.00
+2026-05-11 19:27:19 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 28.67s | H-M: 23.25 | H-O: 134.96
+2026-05-11 19:27:21 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 29.97s | H-M: 26.32 | H-O: 131.92
+2026-05-11 19:27:22 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 31.27s | H-M: 19.49 | H-O: 141.97
+2026-05-11 19:27:23 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 32.62s | H-M: 29.58 | H-O: 999.00
+2026-05-11 19:27:24 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.61s | H-M: 22.93 | H-O: 139.24
+2026-05-11 19:27:26 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.76s | H-M: 23.80 | H-O: 140.86
+2026-05-11 19:27:27 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.92s | H-M: 33.57 | H-O: 999.00
+2026-05-11 19:27:28 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.20s | H-M: 22.80 | H-O: 999.00
+2026-05-11 19:27:30 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.39s | H-M: 27.20 | H-O: 172.75
+2026-05-11 19:27:31 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.98s | H-M: 40.61 | H-O: 176.22
+2026-05-11 19:27:32 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.18s | H-M: 17.83 | H-O: 158.80
+2026-05-11 19:27:33 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.24s | H-M: 11.81 | H-O: 999.00
+2026-05-11 19:27:34 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 10.42s | H-M: 25.23 | H-O: 999.00
+2026-05-11 19:27:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 11.70s | H-M: 14.73 | H-O: 999.00
+2026-05-11 19:27:37 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 12.76s | H-M: 23.38 | H-O: 999.00
+2026-05-11 19:27:38 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 13.77s | H-M: 26.89 | H-O: 999.00
+2026-05-11 19:27:39 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 15.09s | H-M: 28.59 | H-O: 999.00
+2026-05-11 19:27:40 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 16.19s | H-M: 24.42 | H-O: 999.00
+2026-05-11 19:27:41 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 17.51s | H-M: 29.74 | H-O: 999.00
+2026-05-11 19:27:43 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 18.71s | H-M: 22.80 | H-O: 999.00
+2026-05-11 19:27:44 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 20.02s | H-M: 29.33 | H-O: 999.00
+2026-05-11 19:27:45 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 21.03s | H-M: 30.87 | H-O: 999.00
+2026-05-11 19:27:46 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 22.31s | H-M: 31.83 | H-O: 999.00
+2026-05-11 19:27:48 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 23.74s | H-M: 36.57 | H-O: 999.00
+2026-05-11 19:27:49 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 25.11s | H-M: 19.06 | H-O: 999.00
+2026-05-11 19:27:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 26.03s | H-M: 25.19 | H-O: 203.66
+2026-05-11 19:27:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 27.41s | H-M: 25.61 | H-O: 999.00
+2026-05-11 19:27:52 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 28.31s | H-M: 28.48 | H-O: 999.00
+2026-05-11 19:27:53 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 29.66s | H-M: 27.46 | H-O: 999.00
+2026-05-11 19:27:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 30.62s | H-M: 29.66 | H-O: 999.00
+2026-05-11 19:27:56 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 32.06s | H-M: 39.98 | H-O: 999.00
+2026-05-11 19:27:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 33.48s | H-M: 35.60 | H-O: 999.00
+2026-05-11 19:27:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 34.69s | H-M: 38.42 | H-O: 999.00
+2026-05-11 19:28:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 36.19s | H-M: 126.46 | H-O: 999.00
+2026-05-11 19:28:04 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.89s | H-M: 97.50 | H-O: 999.00
+2026-05-11 19:28:06 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.49s | H-M: 80.25 | H-O: 999.00
+2026-05-11 19:28:08 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.84s | H-M: 48.37 | H-O: 999.00
+2026-05-11 19:28:09 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.23s | H-M: 43.97 | H-O: 999.00
+2026-05-11 19:28:10 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.63s | H-M: 39.61 | H-O: 999.00
+2026-05-11 19:28:12 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.38s | H-M: 42.40 | H-O: 999.00
+2026-05-11 19:28:13 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.92s | H-M: 33.89 | H-O: 153.29
+2026-05-11 19:28:14 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.13s | H-M: 25.89 | H-O: 999.00
+2026-05-11 19:28:15 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.19s | H-M: 31.99 | H-O: 999.00
+2026-05-11 19:28:16 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 10.52s | H-M: 42.36 | H-O: 158.45
+2026-05-11 19:28:17 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 11.59s | H-M: 30.56 | H-O: 999.00
+2026-05-11 19:28:19 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 12.72s | H-M: 30.38 | H-O: 999.00
+2026-05-11 19:28:20 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 13.91s | H-M: 29.35 | H-O: 999.00
+2026-05-11 19:28:21 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 15.51s | H-M: 25.41 | H-O: 999.00
