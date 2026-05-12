@@ -32,7 +32,7 @@ BabyWatcher là hệ thống giám sát an toàn trẻ em sử dụng AI với w
 
 ---
 
-## 🔄 Chi Tiết Workflow Theo Thời Gian
+##  Chi Tiết Workflow Theo Thời Gian
 
 ### Phase 1: Khởi Tạo Hệ Thống (Initialization)
 
@@ -251,7 +251,7 @@ graph TD
 
 ---
 
-## 🔧 Workflow Theo Platform
+##  Workflow Theo Platform
 
 ### Desktop Workflow
 ```
@@ -271,7 +271,7 @@ CSI Camera → GStreamer Pipeline → TensorRT Engine → Overlay → HDMI Outpu
 
 ---
 
-## 📊 Workflow Metrics và Monitoring
+##  Workflow Metrics và Monitoring
 
 ### Real-time Metrics
 - **FPS**: Frames per second (target: 10+)
@@ -294,7 +294,7 @@ CSI Camera → GStreamer Pipeline → TensorRT Engine → Overlay → HDMI Outpu
 
 ---
 
-## 🚨 Alert Workflow
+##  Alert Workflow
 
 ### Alert Trigger Conditions
 ```python
@@ -322,7 +322,7 @@ EMAIL_THRESHOLD = 5.0     # Send email after 5s danger
 
 ---
 
-## 🔄 Error Handling và Recovery
+##  Error Handling và Recovery
 
 ### Error Types
 - **Camera Errors**: Connection lost, invalid stream
@@ -360,7 +360,7 @@ def handle_error(error_type, context):
 
 ---
 
-## 📈 Performance Optimization Workflow
+##  Performance Optimization Workflow
 
 ### Continuous Optimization
 1. **Monitor Performance**: Track FPS, memory, CPU usage
@@ -394,7 +394,7 @@ jetson_config:
 
 ---
 
-## 🔐 Security và Privacy Workflow
+##  Security và Privacy Workflow
 
 ### Data Protection
 - **Local Processing**: No cloud upload by default
@@ -410,7 +410,7 @@ jetson_config:
 
 ---
 
-## 📚 Workflow Documentation và Maintenance
+##  Workflow Documentation và Maintenance
 
 ### Code Documentation
 - **Inline Comments**: Explain complex logic
