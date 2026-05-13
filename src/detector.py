@@ -6,7 +6,7 @@ import time
 import os
 import platform
 import subprocess
-from typing import Tuple, Optional, Dict, List
+from typing import Tuple, Optional, Dict, List, Union
 from ultralytics import YOLO
 import torch
 
@@ -85,6 +85,13 @@ class BabyWatcher:
         log_file = self.config.get("logging.log_file", "events_log.csv")
         self.logger = EventLogger(log_dir, log_file)
         
+        # Initialize danger clips
+        self.save_danger_clips = self.config.get("logging.save_danger_clips", True)
+        self.danger_clips_dir = self.config.get("logging.clips_dir", "danger_clips")
+        if self.save_danger_clips and not os.path.exists(self.danger_clips_dir):
+            os.makedirs(self.danger_clips_dir)
+            self.logger.log_info(f"Created danger clips directory: {self.danger_clips_dir}")
+        
         # Initialize alert manager
         alerts_config = self.config.get_dict("alerts")
         self.alert_manager = AlertManager(alerts_config)
@@ -95,6 +102,8 @@ class BabyWatcher:
         self.start_time = time.time()
         self.last_event_log_time = 0
         self.event_log_cooldown = 1.0  # Log events max once per second
+        self.last_danger_clip_time = 0
+        self.danger_clip_cooldown = 2.0  # Save danger clips max once per 2 seconds
         
         # Display settings
         self.show_skeleton = self.config.get("display.show_skeleton", True)
@@ -151,10 +160,12 @@ class BabyWatcher:
         hand_holding_obj = False
         detected_objects = []
         detected_boxes = []
-        object_candidate_boxes = []
+        object_candidate_boxes = [] 
         
         d_hand_mouth = 999.0
         d_hand_obj = 999.0
+        hand_mouth_thresh = self.hand_mouth_thresh
+        hand_obj_thresh = self.hand_obj_thresh
         
         # ====== POSE DETECTION ======
         if pose_results.keypoints is not None:
@@ -220,8 +231,9 @@ class BabyWatcher:
             classes = obj_results.boxes.cls.cpu().numpy()
             
             for box, conf, cls in zip(boxes, confs, classes):
+                x1, y1, x2, y2 = box
                 # Use lower threshold for small objects that might be in hand
-                box_area = (box[2] - box[0]) * (box[3] - box[1])
+                box_area = (x2 - x1) * (y2 - y1)
                 threshold = self.small_object_conf_thresh if box_area < 5000 else self.conf_thresh
                 
                 if conf < threshold:
@@ -232,7 +244,6 @@ class BabyWatcher:
                 if int(cls) == 0:  # Skip person class
                     continue
                 
-                x1, y1, x2, y2 = box
                 center = utils.box_center((x1, y1, x2, y2))
                 detected_objects.append(center)
                 detected_boxes.append((x1, y1, x2, y2))
@@ -315,6 +326,20 @@ class BabyWatcher:
                     hand_object_distance=d_hand_obj
                 )
             self.last_event_log_time = current_log_time
+        
+        # ====== SAVE DANGER CLIPS ======
+        current_clip_time = time.time()
+        if self.save_danger_clips and status != "SAFE":
+            if current_clip_time - self.last_danger_clip_time > self.danger_clip_cooldown:
+                try:
+                    timestamp = time.strftime("%Y%m%d_%H%M%S")
+                    clip_filename = f"{status}_{timestamp}.jpg"
+                    clip_path = os.path.join(self.danger_clips_dir, clip_filename)
+                    cv2.imwrite(clip_path, frame)
+                    self.logger.log_info(f"💾 Saved danger clip: {clip_path}")
+                    self.last_danger_clip_time = current_clip_time
+                except Exception as e:
+                    self.logger.log_error(f"Failed to save danger clip: {e}")
         
         # ====== DRAW INFO PANEL ======
         if self.show_info_panel:
@@ -416,6 +441,57 @@ class BabyWatcher:
             cv2.destroyAllWindows()
             self.logger.log_info("✅ Video processing completed")
     
+    def process_camera(self, camera_index: Union[int, str] = 0, output_path: Optional[str] = None):
+        """
+        Process live camera feed.
+        
+        Args:
+            camera_index: Camera index or device string
+            output_path: Optional path to save output video
+        """
+        try:
+            if isinstance(camera_index, str) and camera_index.isdigit():
+                cap = cv2.VideoCapture(int(camera_index))
+            else:
+                cap = cv2.VideoCapture(camera_index)
+        except Exception:
+            cap = cv2.VideoCapture(camera_index)
+        
+        if not cap.isOpened():
+            self.logger.log_error(f"Cannot open camera: {camera_index}")
+            return
+        
+        fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
+        
+        out = None
+        if output_path:
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(output_path, fourcc, fps, (self.img_size, self.img_size))
+        
+        self.logger.log_info(f"Processing camera: {camera_index}")
+        
+        try:
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                
+                output_frame, info = self.process_frame(frame)
+                
+                cv2.imshow("BabyWatcher", output_frame)
+                
+                if out:
+                    out.write(output_frame)
+                
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+        finally:
+            cap.release()
+            if out:
+                out.release()
+            cv2.destroyAllWindows()
+            self.logger.log_info("✅ Camera processing completed")
+    
     def process_image(self, image_path: str, output_path: Optional[str] = None):
         """
         Process single image
@@ -450,7 +526,17 @@ class BabyWatcher:
         """
         ext = os.path.splitext(file_path)[1].lower()
         
-        if ext in [".jpg", ".jpeg", ".png", ".bmp"]:
+        if file_path.isdigit() or file_path.lower() in ["camera", "cam", "webcam"] or file_path.lower().startswith("camera") or file_path.lower().startswith("cam"):
+            # Support local camera by index or alias
+            camera_index = 0
+            if file_path.isdigit():
+                camera_index = int(file_path)
+            elif file_path.lower().startswith("camera") and file_path[6:].isdigit():
+                camera_index = int(file_path[6:])
+            elif file_path.lower().startswith("cam") and file_path[3:].isdigit():
+                camera_index = int(file_path[3:])
+            self.process_camera(camera_index, output_path)
+        elif ext in [".jpg", ".jpeg", ".png", ".bmp"]:
             self.process_image(file_path, output_path)
         else:
             self.process_video(file_path, output_path)

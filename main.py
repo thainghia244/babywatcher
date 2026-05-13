@@ -13,7 +13,7 @@ def main():
     
     parser.add_argument(
         "input",
-        help="Input file path (image or video)"
+        help="Input file path (image/video) or camera index (0, 1) or alias (camera, cam, webcam)"
     )
     
     parser.add_argument(
