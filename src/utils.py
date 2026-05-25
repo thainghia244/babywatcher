@@ -281,3 +281,149 @@ def get_status_color(status: str) -> Tuple[int, int, int]:
         'OBJECT_TO_MOUTH': (0, 0, 255),  # Red
     }
     return color_map.get(status, (128, 128, 128))  # Gray as default
+
+
+def get_hand_keypoints(hand_data: np.ndarray) -> dict:
+    """
+    Extract hand keypoints from YOLO hand pose data (21 points)
+    
+    YOLO Hand keypoints (21 points):
+        0-4:   Thumb (0: wrist, 1: IP, 2: PIP, 3: MCP, 4: tip)
+        5-9:   Index (5: wrist, 6: IP, 7: PIP, 8: MCP, 9: tip)
+        10-14: Middle
+        15-19: Ring
+        20:    Pinky
+    
+    Args:
+        hand_data: Hand keypoint array (21, 2)
+    
+    Returns:
+        Dictionary with named hand keypoints
+    """
+    if len(hand_data) < 21:
+        return {}
+    
+    return {
+        'thumb_tip': hand_data[4],
+        'index_mcp': hand_data[8],      # Index Middle Carpal (knuckle)
+        'index_pip': hand_data[7],      # Index Proximal Interphalangeal
+        'index_tip': hand_data[9],      # Index finger tip - QUAN TRỌNG
+        'middle_tip': hand_data[14],
+        'ring_tip': hand_data[19],
+        'pinky_tip': hand_data[20],
+    }
+
+
+def extract_index_fingers(hands_data, frame_shape: Tuple[int, int, int]) -> dict:
+    """
+    Extract both index fingers (left and right) from hand detection results
+    Supports both YOLO and MediaPipe hand detection formats
+    
+    Args:
+        hands_data: Hand detection results (YOLO Results object or MediaPipe list)
+        frame_shape: Frame shape (height, width, channels)
+    
+    Returns:
+        Dictionary with left_index_tip and right_index_tip (or None if not found)
+    """
+    result = {
+        'left_index_tip': None,
+        'right_index_tip': None,
+    }
+    
+    if hands_data is None:
+        return result
+    
+    try:
+        # Handle MediaPipe format (list of dicts with 'keypoints' and 'handedness')
+        if isinstance(hands_data, list) and len(hands_data) > 0 and isinstance(hands_data[0], dict):
+            for hand_data in hands_data:
+                if 'keypoints' in hand_data and 'handedness' in hand_data:
+                    keypoints = hand_data['keypoints']
+                    handedness = hand_data['handedness']
+                    
+                    # MediaPipe keypoint 8 is index finger tip
+                    if keypoints.shape[0] > 8:
+                        index_tip = keypoints[8]
+                        if handedness == 'Right':
+                            result['right_index_tip'] = index_tip
+                        elif handedness == 'Left':
+                            result['left_index_tip'] = index_tip
+            return result
+        
+        # Handle YOLO format (Results object with keypoints)
+        if hasattr(hands_data, 'keypoints'):
+            if hands_data.keypoints is not None and hands_data.keypoints.xy is not None:
+                keypoints_array = hands_data.keypoints.xy.cpu().numpy()
+                
+                if len(keypoints_array) > 0:
+                    for idx, keypoints in enumerate(keypoints_array):
+                        hand_keypoints = get_hand_keypoints(keypoints)
+                        
+                        # Simple heuristic: if center x is < frame_width/2, it's likely left hand
+                        hand_center_x = np.mean(keypoints[:, 0]) if keypoints.shape[0] > 0 else 0
+                        if hand_center_x < frame_shape[1] / 2:
+                            result['left_index_tip'] = hand_keypoints.get('index_tip')
+                        else:
+                            result['right_index_tip'] = hand_keypoints.get('index_tip')
+            return result
+        
+        # Handle list of hand objects (YOLO format)
+        if isinstance(hands_data, list):
+            for hand in hands_data:
+                try:
+                    if hasattr(hand, 'keypoints'):
+                        keypoints = hand.keypoints.xy.cpu().numpy()
+                        hand_keypoints = get_hand_keypoints(keypoints)
+                        
+                        if hasattr(hand, 'handedness') and hand.handedness is not None:
+                            if 'Right' in str(hand.handedness):
+                                result['right_index_tip'] = hand_keypoints.get('index_tip')
+                            elif 'Left' in str(hand.handedness):
+                                result['left_index_tip'] = hand_keypoints.get('index_tip')
+                except Exception as e:
+                    continue
+    
+    except Exception as e:
+        pass  # Return empty result on error
+    
+    return result
+
+
+def get_mouth_from_face(face_box: Tuple[float, float, float, float]) -> np.ndarray:
+    """
+    Extract mouth position from face bounding box
+    
+    Args:
+        face_box: Face bounding box (x1, y1, x2, y2)
+    
+    Returns:
+        Mouth position as (x, y) - center bottom of face box
+    """
+    x1, y1, x2, y2 = face_box
+    mouth_x = (x1 + x2) / 2  # Center horizontally
+    mouth_y = y1 + (y2 - y1) * 0.75  # 75% down vertically (mouth area)
+    
+    return np.array([mouth_x, mouth_y])
+
+
+def get_face_mouth_keypoint(face_results) -> np.ndarray:
+    """
+    Extract mouth keypoint from face detection results
+    
+    Args:
+        face_results: Face detection results from YOLO face model
+    
+    Returns:
+        Mouth position as numpy array or None if no face detected
+    """
+    if not face_results or face_results.boxes is None or len(face_results.boxes) == 0:
+        return None
+    
+    try:
+        # Get first (most confident) face box
+        face_box = face_results.boxes.xyxy[0].cpu().numpy()
+        mouth = get_mouth_from_face(face_box)
+        return mouth
+    except Exception as e:
+        return None

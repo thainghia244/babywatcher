@@ -16,6 +16,12 @@ from .alerts import AlertManager
 from .performance import PerformanceMonitor, DetectionStats
 from . import utils
 
+try:
+    from .mediapipe_hand_detector import MediaPipeHandDetector
+    MEDIAPIPE_AVAILABLE = True
+except ImportError:
+    MEDIAPIPE_AVAILABLE = False
+
 
 class BabyWatcher:
     """Main BabyWatcher detection system"""
@@ -53,6 +59,8 @@ class BabyWatcher:
         # Load models
         pose_model_path = self.config.get("models.pose_model_path", "yolo26n-pose.pt")
         obj_model_path = self.config.get("models.object_model_path", "yolo26n.pt")
+        hand_model_path = self.config.get("models.hand_model_path", "yolov8n-hand.pt")
+        face_model_path = self.config.get("models.face_model_path", "yolov8n-face.pt")
         device_config = self.config.get("models.device", "auto")
         half_precision = self.config.get("models.half_precision", False)
         max_det = self.config.get("models.max_det", 300)
@@ -63,10 +71,22 @@ class BabyWatcher:
         print(f"🖥️  Using {device_name}")
 
         # Load models with optimizations
-        self.pose_model, self.obj_model = self._load_models(
-            pose_model_path, obj_model_path, device, half_precision,
-            max_det, enable_tensorrt
+        self.pose_model, self.obj_model, self.hand_model, self.face_model = self._load_models(
+            pose_model_path, obj_model_path, hand_model_path, face_model_path,
+            device, half_precision, max_det, enable_tensorrt
         )
+        
+        # Model availability flags
+        self.use_hand_detection = self.hand_model is not None
+        self.use_face_detection = self.face_model is not None
+        
+        # Initialize MediaPipe hand detector as fallback (optional enhancement)
+        self.mediapipe_hand_detector = None
+        # MediaPipe integration disabled for now - falls back to wrist-based detection
+        # self.use_hand_detection = True  # Will use wrist positions from pose model
+        
+        # If we have hand detection capability, we'll use index fingers instead of wrists
+        # Otherwise, we'll use wrist positions from pose model
 
         print("✅ Models loaded successfully")
         
@@ -154,6 +174,37 @@ class BabyWatcher:
             verbose=False
         )[0]
         
+        # Hand detection (optional)
+        hand_results = None
+        if self.use_hand_detection:
+            try:
+                if self.hand_model is not None:
+                    # Use YOLO hand model
+                    hand_results = self.hand_model.predict(
+                        frame,
+                        imgsz=self.img_size,
+                        conf=self.conf_thresh,
+                        verbose=False
+                    )
+                elif self.mediapipe_hand_detector is not None:
+                    # Use MediaPipe hand detector
+                    hand_results = self.mediapipe_hand_detector.detect(frame)
+            except Exception as e:
+                self.logger.log_error(f"Hand detection error: {e}")
+        
+        # Face detection (optional)
+        face_results = None
+        if self.use_face_detection:
+            try:
+                face_results = self.face_model.predict(
+                    frame,
+                    imgsz=self.img_size,
+                    conf=self.conf_thresh,
+                    verbose=False
+                )[0]
+            except Exception as e:
+                self.logger.log_error(f"Face detection error: {e}")
+        
         # Initialize variables
         wrists = []
         hand_near_mouth = False
@@ -183,9 +234,59 @@ class BabyWatcher:
                 
                 wrists = [left_wrist, right_wrist]
                 
+                # Extract index fingers from hand detection (IMPROVED)
+                index_fingers = None
+                if self.use_hand_detection and hand_results is not None:
+                    try:
+                        index_fingers = utils.extract_index_fingers(
+                            hand_results[0] if isinstance(hand_results, list) else hand_results,
+                            frame.shape
+                        )
+                    except Exception as e:
+                        pass  # Fall back to using wrists if hand detection fails
+                
+                # Extract mouth from face detection (IMPROVED)
+                mouth = None
+                if self.use_face_detection and face_results is not None:
+                    mouth = utils.get_face_mouth_keypoint(face_results)
+                
+                # Use index fingers for hand-mouth distance if available, otherwise use wrists
+                effective_wrists = wrists
+                if index_fingers:
+                    effective_wrists = []
+                    if index_fingers.get('right_index_tip') is not None:
+                        effective_wrists.append(index_fingers['right_index_tip'])
+                    if index_fingers.get('left_index_tip') is not None:
+                        effective_wrists.append(index_fingers['left_index_tip'])
+                    # Fallback to wrists if no index fingers detected
+                    if not effective_wrists:
+                        effective_wrists = wrists
+                
+                # Use mouth if available, otherwise use nose
+                effective_mouth = mouth if mouth is not None else nose
+                
                 # Draw skeleton
                 if self.show_skeleton:
                     utils.draw_skeleton(frame, person)
+                
+                # Draw index fingers (enhanced visualization)
+                if index_fingers:
+                    if index_fingers.get('right_index_tip') is not None:
+                        idx_tip = index_fingers['right_index_tip']
+                        cv2.circle(frame, tuple(idx_tip.astype(int)), 6, (0, 165, 255), -1)  # Orange
+                        cv2.putText(frame, "R-Idx", tuple((idx_tip + 10).astype(int)),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 165, 255), 1)
+                    if index_fingers.get('left_index_tip') is not None:
+                        idx_tip = index_fingers['left_index_tip']
+                        cv2.circle(frame, tuple(idx_tip.astype(int)), 6, (0, 165, 255), -1)  # Orange
+                        cv2.putText(frame, "L-Idx", tuple((idx_tip + 10).astype(int)),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 165, 255), 1)
+                
+                # Draw mouth keypoint (enhanced visualization)
+                if mouth is not None:
+                    cv2.circle(frame, tuple(mouth.astype(int)), 6, (255, 0, 255), -1)  # Magenta
+                    cv2.putText(frame, "Mouth", tuple((mouth + 10).astype(int)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 255), 1)
                 
                 # Draw person bounding box
                 px1, py1, px2, py2 = pbox.astype(int)
@@ -207,9 +308,9 @@ class BabyWatcher:
                     hand_mouth_thresh = self.hand_mouth_thresh
                     hand_obj_thresh = self.hand_obj_thresh
                 
-                # Check hand-to-mouth distance
-                for wrist in wrists:
-                    d = utils.distance(wrist, nose)
+                # Check hand-to-mouth distance (using index fingers or wrists, and mouth or nose)
+                for wrist in effective_wrists:
+                    d = utils.distance(wrist, effective_mouth)
                     
                     if d < d_hand_mouth:
                         d_hand_mouth = d
@@ -387,6 +488,8 @@ class BabyWatcher:
             'hand_object_distance': d_hand_obj,
             'hand_near_mouth': hand_near_mouth,
             'hand_holding_obj': hand_holding_obj,
+            'pose_detected': pose_results.keypoints is not None and len(pose_results.keypoints.xy) > 0,
+            'num_objects': len(obj_results.boxes) if obj_results.boxes is not None else 0,
             **perf_metrics
         }
     
@@ -679,46 +782,80 @@ class BabyWatcher:
         
         return device, device_name
     
-    def _load_models(self, pose_path: str, obj_path: str, device: str,
-                    half_precision: bool, max_det: int, enable_tensorrt: bool):
+    def _load_models(self, pose_path: str, obj_path: str, hand_path: str, face_path: str,
+                    device: str, half_precision: bool, max_det: int, enable_tensorrt: bool):
         """Load models with platform-specific optimizations"""
         print("🔄 Loading YOLO models...")
 
         # Load pose model
         pose_model = YOLO(pose_path)
-
-        # Jetson-specific optimizations
         if self.platform.startswith("jetson") and enable_tensorrt:
             try:
-                # Export to TensorRT
                 pose_model.export(format='engine', device=device)
                 pose_model = YOLO(pose_path.replace('.pt', '.engine'))
                 print("🚀 Pose model converted to TensorRT")
             except Exception as e:
                 print(f"⚠️  TensorRT conversion failed for pose model: {e}")
-
         pose_model.to(device)
         if half_precision and device != "cpu":
             pose_model.half()
 
         # Load object model
         obj_model = YOLO(obj_path)
-
-        # Jetson-specific optimizations
         if self.platform.startswith("jetson") and enable_tensorrt:
             try:
-                # Export to TensorRT
                 obj_model.export(format='engine', device=device)
                 obj_model = YOLO(obj_path.replace('.pt', '.engine'))
                 print("🚀 Object model converted to TensorRT")
             except Exception as e:
                 print(f"⚠️  TensorRT conversion failed for object model: {e}")
-
         obj_model.to(device)
         if half_precision and device != "cpu":
             obj_model.half()
 
-        return pose_model, obj_model
+        # Load hand model (optional)
+        hand_model = None
+        if hand_path and hand_path.strip():  # Only load if path is not empty
+            try:
+                hand_model = YOLO(hand_path)
+                if self.platform.startswith("jetson") and enable_tensorrt:
+                    try:
+                        hand_model.export(format='engine', device=device)
+                        hand_model = YOLO(hand_path.replace('.pt', '.engine'))
+                        print("🚀 Hand model converted to TensorRT")
+                    except Exception as e:
+                        print(f"⚠️  TensorRT conversion failed for hand model: {e}")
+                hand_model.to(device)
+                if half_precision and device != "cpu":
+                    hand_model.half()
+                print("✅ Hand detection model loaded")
+            except Exception as e:
+                print(f"⚠️  Hand model loading failed: {e}")
+        else:
+            print("ℹ️  Hand detection disabled (no model path configured)")
+
+        # Load face model (optional)
+        face_model = None
+        if face_path and face_path.strip():  # Only load if path is not empty
+            try:
+                face_model = YOLO(face_path)
+                if self.platform.startswith("jetson") and enable_tensorrt:
+                    try:
+                        face_model.export(format='engine', device=device)
+                        face_model = YOLO(face_path.replace('.pt', '.engine'))
+                        print("🚀 Face model converted to TensorRT")
+                    except Exception as e:
+                        print(f"⚠️  TensorRT conversion failed for face model: {e}")
+                face_model.to(device)
+                if half_precision and device != "cpu":
+                    face_model.half()
+                print("✅ Face detection model loaded")
+            except Exception as e:
+                print(f"⚠️  Face model loading failed: {e}")
+        else:
+            print("ℹ️  Face detection disabled (no model path configured)")
+
+        return pose_model, obj_model, hand_model, face_model
     
     def print_stats(self):
         """Print comprehensive statistics"""
