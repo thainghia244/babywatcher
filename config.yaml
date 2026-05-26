@@ -24,6 +24,7 @@ detection:
 alerts:
   enable_sound: true
   enable_email: false
+  enable_webhook: false
   enable_logs: true
   danger_duration_threshold: 3.0  # Cảnh báo sau 3 giây liên tục
   danger_level:
@@ -51,13 +52,6 @@ performance:
   batch_size: 1  # Batch processing (1 = xử lý từng frame)
   jetson_optimization: true  # Tối ưu cho Jetson Nano
 
-# Performance Settings
-performance:
-  skip_frames: 0  # Bỏ qua N frames để tăng FPS (0 = process all)
-  track_fps: true  # Theo dõi FPS
-  enable_profiling: false  # Bật profiling để debug
-  batch_size: 1  # Batch processing (1 = xử lý từng frame)
-
 # Logging Settings
 logging:
   log_dir: "logs"
@@ -66,15 +60,20 @@ logging:
   clips_dir: "danger_clips"
   log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
 
-# Email Notifications (nếu enable_email=true)
+# Email Notifications Configuration
+# For Gmail:
+#   1. Enable 2-Step Verification in Google Account
+#   2. Create App Password: https://myaccount.google.com/apppasswords
+#   3. Copy the 16-character password and paste as sender_password
+# For other providers: Use your email password or app-specific password
 email:
   enabled: false
-  smtp_server: "smtp.gmail.com"
-  smtp_port: 587
-  sender_email: "your_email@gmail.com"
-  sender_password: "your_app_password"
-  recipient_email: "parent@example.com"
-  alert_threshold: 5.0  # Gửi email khi nguy hiểm > 5 giây
+  smtp_server: "smtp.gmail.com"  # Gmail SMTP server
+  smtp_port: 587  # TLS port (Gmail: 587, Outlook: 587, Yahoo: 587)
+  sender_email: "your_email@gmail.com"  # Your email address
+  sender_password: "your_app_password"  # Gmail App Password (16 characters)
+  recipient_email: "parent@example.com"  # Where to send alerts
+  alert_threshold: 5.0  # Send email when danger > 5 seconds
 
 # Sound Alerts
 sound:
@@ -82,11 +81,11 @@ sound:
   warning_sound_path: "sounds/warning.mp3"
   volume: 0.8  # 0-1
 
-# Webhook (để gửi thông báo tới service khác)
+# Webhook Configuration (để gửi thông báo tới service khác)
 webhook:
   enabled: false
-  url: "https://your-webhook-url.com/alert"
-  retry_count: 3
+  url: "https://your-webhook-url.com/alert"  # Your webhook URL
+  retry_count: 3  # Number of retries on failure
 
 # Display Settings
 display:

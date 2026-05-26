@@ -254,31 +254,51 @@ class WebhookAlert(BaseAlert):
 class AlertManager:
     """Manage all alert types"""
     
-    def __init__(self, config_dict: dict = None):
+    def __init__(self, alerts_config: dict = None, email_config: dict = None, webhook_config: dict = None):
         """
         Initialize alert manager with all alert types
         
         Args:
-            config_dict: Configuration dictionary from config.yaml
+            alerts_config: Configuration dictionary from alerts section in config.yaml
+            email_config: Configuration dictionary from email section in config.yaml
+            webhook_config: Configuration dictionary from webhook section in config.yaml
         """
-        if config_dict is None:
-            config_dict = {}
+        if alerts_config is None:
+            alerts_config = {}
+        if email_config is None:
+            email_config = {}
+        if webhook_config is None:
+            webhook_config = {}
         
         # Initialize alerts based on config
         self.sound_alert = SoundAlert(
-            enabled=config_dict.get('enable_sound', True),
-            alert_sound=config_dict.get('alert_sound_path', 'sounds/alarm.wav')
+            enabled=alerts_config.get('enable_sound', True),
+            alert_sound=alerts_config.get('alert_sound_path', 'sounds/alarm.wav')
         )
         
-        self.email_alert = EmailAlert(
-            enabled=config_dict.get('enable_email', False),
-            **config_dict.get('email', {})
-        )
+        # Email config handling: merge from both alerts and email sections
+        email_enabled = alerts_config.get('enable_email', False) or email_config.get('enabled', False)
+        email_init_config = {
+            'enabled': email_enabled,
+            'smtp_server': email_config.get('smtp_server', 'smtp.gmail.com'),
+            'smtp_port': email_config.get('smtp_port', 587),
+            'sender_email': email_config.get('sender_email', ''),
+            'sender_password': email_config.get('sender_password', ''),
+            'recipient_email': email_config.get('recipient_email', ''),
+            'alert_threshold': email_config.get('alert_threshold', 5.0)
+        }
         
-        self.webhook_alert = WebhookAlert(
-            enabled=config_dict.get('enabled', False),
-            **config_dict.get('webhook', {})
-        )
+        self.email_alert = EmailAlert(**email_init_config)
+        
+        # Webhook config handling
+        webhook_enabled = alerts_config.get('enable_webhook', False) or webhook_config.get('enabled', False)
+        webhook_init_config = {
+            'enabled': webhook_enabled,
+            'webhook_url': webhook_config.get('url', ''),
+            'retry_count': webhook_config.get('retry_count', 3)
+        }
+        
+        self.webhook_alert = WebhookAlert(**webhook_init_config)
     
     def trigger_alert(self, status: str, duration: float, **kwargs):
         """

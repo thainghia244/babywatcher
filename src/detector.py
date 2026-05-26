@@ -114,7 +114,9 @@ class BabyWatcher:
         
         # Initialize alert manager
         alerts_config = self.config.get_dict("alerts")
-        self.alert_manager = AlertManager(alerts_config)
+        email_config = self.config.get_dict("email")
+        webhook_config = self.config.get_dict("webhook")
+        self.alert_manager = AlertManager(alerts_config, email_config, webhook_config)
         
         # State variables
         self.danger_start_time = None
