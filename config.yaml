@@ -11,14 +11,18 @@ hardware:
 # Detection Settings
 detection:
   img_size: 640
-  conf_thresh: 0.4
+  conf_thresh: 0.25  # Reduced from 0.4 for better object detection
   hand_mouth_thresh: 45
   hand_obj_thresh: 60
   dynamic_threshold: true  # Tính threshold động dựa trên shoulder width
   
+  # Threshold multipliers for dynamic calculation
+  hand_mouth_multiplier: 1.2  # shoulder_width × 1.2 (increased from 0.9)
+  hand_object_multiplier: 1.0  # shoulder_width × 1.0 (increased from 0.8)
+  
   # Enhanced object detection for occluded/small objects
-  small_object_conf_thresh: 0.2  # Lower confidence threshold for small objects in hand
-  inferred_object_distance_thresh: 25  # If hand-mouth < 25px, infer object is held even if not detected
+  small_object_conf_thresh: 0.15  # Reduced from 0.2
+  inferred_object_distance_thresh: 25  # If hand-mouth < 25px, infer object is held
 
 # Alert Settings
 alerts:
@@ -95,3 +99,31 @@ display:
   show_fps: true
   frame_width: 640
   frame_height: 640
+
+# Roboflow Integration for Custom Object Detection
+roboflow:
+  enabled: false  # Set to true after setting up Roboflow
+  api_key: ""  # Get from https://roboflow.com/settings/api
+  workspace: ""  # Your Roboflow workspace name
+  project: "baby-safety-objects"  # Your project name
+  version: 1  # Dataset version
+  model_format: "yolov8"  # YOLO format for training
+  
+  # Local paths
+  dataset_dir: "datasets/roboflow"  # Where to download/store dataset
+  trained_models_dir: "models/custom"  # Where custom trained models are saved
+  
+  # Training settings
+  training:
+    epochs: 50  # Number of training epochs
+    batch_size: 16  # Batch size (adjust based on GPU memory)
+    img_size: 640  # Image size for training
+    patience: 20  # Early stopping patience
+    device: "auto"  # GPU device ("0" or "cpu" or "auto")
+    
+  # Dataset upload settings
+  upload:
+    enabled: false
+    local_dataset_path: ""  # Path to local dataset to upload
+    dataset_name: "BabyWatcher-Custom"
+    license: "CC BY 4.0"  # License for uploaded dataset

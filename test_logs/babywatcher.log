@@ -1,0 +1,3 @@
+2026-05-26 09:12:56 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.50s | H-M: 40.00 | H-O: 999.00
+2026-05-26 09:12:56 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 5.00s | H-M: 35.00 | H-O: 55.00
+2026-05-26 09:12:57 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully

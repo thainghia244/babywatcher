@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['baby', 'blanket', 'other', 'toy']
+
+roboflow:
+  workspace: this-workspace-ecyl4
+  project: babymonitor2-c7by6
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/this-workspace-ecyl4/babymonitor2-c7by6/dataset/1

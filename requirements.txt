@@ -4,6 +4,7 @@ numpy>=1.24.0
 PyYAML>=6.0
 pydub>=0.25.1
 python-dotenv>=1.0.0
+roboflow>=0.2.30  # Roboflow for dataset management and training
 
 # Jetson Nano specific dependencies
 torch>=1.10.0  # PyTorch for Jetson

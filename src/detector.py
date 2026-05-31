@@ -46,13 +46,17 @@ class BabyWatcher:
 
         # Extract configuration values
         self.img_size = self.config.get("detection.img_size", 640)
-        self.conf_thresh = self.config.get("detection.conf_thresh", 0.4)
+        self.conf_thresh = self.config.get("detection.conf_thresh", 0.25)  # Reduced from 0.4
         self.hand_mouth_thresh = self.config.get("detection.hand_mouth_thresh", 45)
         self.hand_obj_thresh = self.config.get("detection.hand_obj_thresh", 60)
         self.dynamic_threshold = self.config.get("detection.dynamic_threshold", True)
         
+        # Dynamic threshold multipliers
+        self.hand_mouth_multiplier = self.config.get("detection.hand_mouth_multiplier", 1.2)
+        self.hand_object_multiplier = self.config.get("detection.hand_object_multiplier", 1.0)
+        
         # Enhanced object detection for small/occluded objects
-        self.small_object_conf_thresh = 0.2  # Lower threshold for small objects
+        self.small_object_conf_thresh = self.config.get("detection.small_object_conf_thresh", 0.15)
         self.hand_closing_thresh = 0.5  # Hand confidence threshold
         self.inferred_object_distance_thresh = 25  # If hand-mouth < 25px, infer object
 
@@ -156,13 +160,10 @@ class BabyWatcher:
         
         self.frames_skipped = 0
         
-        # Resize frame
-        frame = cv2.resize(frame, (self.img_size, self.img_size))
-        
         # Run YOLO predictions with optimized settings
+        # Note: Let YOLO use its default input size for better object detection
         pose_results = self.pose_model.predict(
             frame, 
-            imgsz=self.img_size, 
             conf=self.conf_thresh,
             max_det=self.max_det,
             verbose=False
@@ -170,7 +171,6 @@ class BabyWatcher:
         
         obj_results = self.obj_model.predict(
             frame, 
-            imgsz=self.img_size, 
             conf=self.conf_thresh,
             max_det=self.max_det,
             verbose=False
@@ -304,8 +304,8 @@ class BabyWatcher:
                     shoulder_width = utils.calculate_shoulder_width(
                         left_shoulder, right_shoulder
                     )
-                    hand_mouth_thresh = shoulder_width * 0.9
-                    hand_obj_thresh = shoulder_width * 0.8
+                    hand_mouth_thresh = shoulder_width * self.hand_mouth_multiplier  # Use config multiplier
+                    hand_obj_thresh = shoulder_width * self.hand_object_multiplier  # Use config multiplier
                 else:
                     hand_mouth_thresh = self.hand_mouth_thresh
                     hand_obj_thresh = self.hand_obj_thresh
