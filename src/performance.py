@@ -105,6 +105,12 @@ class DetectionStats:
             self.danger_frames += 1
         else:
             self.safe_frames += 1
+
+    def increment(self, key: str, value: int = 1):
+        """Increment a named counter for custom detection stats."""
+        if not hasattr(self, key):
+            setattr(self, key, 0)
+        setattr(self, key, getattr(self, key) + value)
     
     def get_summary(self) -> Dict:
         """Get statistics summary"""

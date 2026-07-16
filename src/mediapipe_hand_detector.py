@@ -5,20 +5,40 @@ import numpy as np
 from typing import Tuple, Optional, Dict, List
 
 MEDIAPIPE_AVAILABLE = False
+mp_hands = None
+mp_drawing = None
+
 try:
-    from mediapipe.python.solutions import hands as mp_hands
-    from mediapipe.python.solutions import drawing_utils as mp_drawing
-    MEDIAPIPE_AVAILABLE = True
+    import mediapipe
+    if hasattr(mediapipe, 'solutions'):
+        try:
+            from mediapipe import solutions as mp_solutions
+            mp_hands = mp_solutions.hands
+            mp_drawing = mp_solutions.drawing_utils
+            MEDIAPIPE_AVAILABLE = True
+        except Exception:
+            try:
+                import mediapipe.python.solutions.hands as mp_hands_module
+                import mediapipe.python.solutions.drawing_utils as mp_drawing_module
+                mp_hands = mp_hands_module
+                mp_drawing = mp_drawing_module
+                MEDIAPIPE_AVAILABLE = True
+            except Exception:
+                print("⚠️  MediaPipe hand modules not available in this environment")
+    else:
+        try:
+            from mediapipe.python.solutions import hands as mp_hands
+            from mediapipe.python.solutions import drawing_utils as mp_drawing
+            MEDIAPIPE_AVAILABLE = True
+        except ImportError:
+            try:
+                from mediapipe import hands as mp_hands
+                from mediapipe import drawing_utils as mp_drawing
+                MEDIAPIPE_AVAILABLE = True
+            except ImportError:
+                print("⚠️  MediaPipe hand modules not available in this environment")
 except ImportError:
-    try:
-        # Alternative import path
-        from mediapipe import solutions as mp_solutions
-        from mediapipe.framework.formats import landmark_pb2
-        mp_hands = mp_solutions.hands
-        mp_drawing = mp_solutions.drawing_utils
-        MEDIAPIPE_AVAILABLE = True
-    except ImportError:
-        print("⚠️  MediaPipe not installed. Install with: pip install mediapipe")
+    print("⚠️  MediaPipe not installed. Install with: pip install mediapipe")
 
 
 class MediaPipeHandDetector:

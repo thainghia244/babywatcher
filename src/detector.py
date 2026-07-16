@@ -16,12 +16,6 @@ from .alerts import AlertManager
 from .performance import PerformanceMonitor, DetectionStats
 from . import utils
 
-try:
-    from .mediapipe_hand_detector import MediaPipeHandDetector
-    MEDIAPIPE_AVAILABLE = True
-except ImportError:
-    MEDIAPIPE_AVAILABLE = False
-
 
 class BabyWatcher:
     """Main BabyWatcher detection system"""
@@ -52,18 +46,18 @@ class BabyWatcher:
         self.dynamic_threshold = self.config.get("detection.dynamic_threshold", True)
         
         # Dynamic threshold multipliers
-        self.hand_mouth_multiplier = self.config.get("detection.hand_mouth_multiplier", 1.2)
-        self.hand_object_multiplier = self.config.get("detection.hand_object_multiplier", 1.0)
+        self.hand_mouth_multiplier = self.config.get("detection.hand_mouth_multiplier", 0.5)
+        self.hand_object_multiplier = self.config.get("detection.hand_object_multiplier", 0.5)
         
         # Enhanced object detection for small/occluded objects
         self.small_object_conf_thresh = self.config.get("detection.small_object_conf_thresh", 0.15)
-        self.hand_closing_thresh = 0.5  # Hand confidence threshold
-        self.inferred_object_distance_thresh = 25  # If hand-mouth < 25px, infer object
+        self.hand_closing_thresh = self.config.get("detection.hand_conf_thresh", 0.4)  # Hand confidence threshold
+        self.inferred_object_distance_thresh = self.config.get("detection.inferred_object_distance_thresh", 25)  # If hand-mouth < 25px, infer object
 
         # Load models
         pose_model_path = self.config.get("models.pose_model_path", "yolo26n-pose.pt")
         obj_model_path = self.config.get("models.object_model_path", "yolo26n.pt")
-        hand_model_path = self.config.get("models.hand_model_path", "yolov8n-hand.pt")
+        hand_model_path = self.config.get("models.hand_model_path", "")
         face_model_path = self.config.get("models.face_model_path", "yolov8n-face.pt")
         device_config = self.config.get("models.device", "auto")
         half_precision = self.config.get("models.half_precision", False)
@@ -81,16 +75,9 @@ class BabyWatcher:
         )
         
         # Model availability flags
-        self.use_hand_detection = self.hand_model is not None
-        self.use_face_detection = self.face_model is not None
-        
-        # Initialize MediaPipe hand detector as fallback (optional enhancement)
-        self.mediapipe_hand_detector = None
-        # MediaPipe integration disabled for now - falls back to wrist-based detection
-        # self.use_hand_detection = True  # Will use wrist positions from pose model
-        
-        # If we have hand detection capability, we'll use index fingers instead of wrists
-        # Otherwise, we'll use wrist positions from pose model
+        self.use_hand_detection = False
+        self.use_face_detection = False
+        print("ℹ️  Hand and face detection are disabled; using pose + object logic only")
 
         print("✅ Models loaded successfully")
         
@@ -176,36 +163,11 @@ class BabyWatcher:
             verbose=False
         )[0]
         
-        # Hand detection (optional)
+        # Hand and face detection are disabled in this configuration.
         hand_results = None
-        if self.use_hand_detection:
-            try:
-                if self.hand_model is not None:
-                    # Use YOLO hand model
-                    hand_results = self.hand_model.predict(
-                        frame,
-                        imgsz=self.img_size,
-                        conf=self.conf_thresh,
-                        verbose=False
-                    )
-                elif self.mediapipe_hand_detector is not None:
-                    # Use MediaPipe hand detector
-                    hand_results = self.mediapipe_hand_detector.detect(frame)
-            except Exception as e:
-                self.logger.log_error(f"Hand detection error: {e}")
-        
-        # Face detection (optional)
         face_results = None
-        if self.use_face_detection:
-            try:
-                face_results = self.face_model.predict(
-                    frame,
-                    imgsz=self.img_size,
-                    conf=self.conf_thresh,
-                    verbose=False
-                )[0]
-            except Exception as e:
-                self.logger.log_error(f"Face detection error: {e}")
+        hand_boxes = []
+        hand_confs = []
         
         # Initialize variables
         wrists = []
@@ -213,7 +175,9 @@ class BabyWatcher:
         hand_holding_obj = False
         detected_objects = []
         detected_boxes = []
-        object_candidate_boxes = [] 
+        object_candidate_boxes = []
+        hand_boxes = []
+        hand_confs = []
         
         d_hand_mouth = 999.0
         d_hand_obj = 999.0
@@ -236,55 +200,19 @@ class BabyWatcher:
                 
                 wrists = [left_wrist, right_wrist]
                 
-                # Extract index fingers from hand detection (IMPROVED)
+                # Use the palm-center as the hand proxy. This is more representative of the hand
+                # position than the raw wrist and is less sensitive to pose noise than a forearm point.
                 index_fingers = None
-                if self.use_hand_detection and hand_results is not None:
-                    try:
-                        index_fingers = utils.extract_index_fingers(
-                            hand_results[0] if isinstance(hand_results, list) else hand_results,
-                            frame.shape
-                        )
-                    except Exception as e:
-                        pass  # Fall back to using wrists if hand detection fails
-                
-                # Extract mouth from face detection (IMPROVED)
+                hand_landmarks = None
                 mouth = None
-                if self.use_face_detection and face_results is not None:
-                    mouth = utils.get_face_mouth_keypoint(face_results)
-                
-                # Use index fingers for hand-mouth distance if available, otherwise use wrists
-                effective_wrists = wrists
-                if index_fingers:
-                    effective_wrists = []
-                    if index_fingers.get('right_index_tip') is not None:
-                        effective_wrists.append(index_fingers['right_index_tip'])
-                    if index_fingers.get('left_index_tip') is not None:
-                        effective_wrists.append(index_fingers['left_index_tip'])
-                    # Fallback to wrists if no index fingers detected
-                    if not effective_wrists:
-                        effective_wrists = wrists
-                
-                # Use mouth if available, otherwise use nose
-                effective_mouth = mouth if mouth is not None else nose
+                effective_wrists = self._get_palm_center_proxies(keypoints, wrists)
+                effective_mouth = nose
                 
                 # Draw skeleton
                 if self.show_skeleton:
                     utils.draw_skeleton(frame, person)
                 
-                # Draw index fingers (enhanced visualization)
-                if index_fingers:
-                    if index_fingers.get('right_index_tip') is not None:
-                        idx_tip = index_fingers['right_index_tip']
-                        cv2.circle(frame, tuple(idx_tip.astype(int)), 6, (0, 165, 255), -1)  # Orange
-                        cv2.putText(frame, "R-Idx", tuple((idx_tip + 10).astype(int)),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 165, 255), 1)
-                    if index_fingers.get('left_index_tip') is not None:
-                        idx_tip = index_fingers['left_index_tip']
-                        cv2.circle(frame, tuple(idx_tip.astype(int)), 6, (0, 165, 255), -1)  # Orange
-                        cv2.putText(frame, "L-Idx", tuple((idx_tip + 10).astype(int)),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 165, 255), 1)
-                
-                # Draw mouth keypoint (enhanced visualization)
+                # No hand landmarks are drawn because the hand detector is disabled.
                 if mouth is not None:
                     cv2.circle(frame, tuple(mouth.astype(int)), 6, (255, 0, 255), -1)  # Magenta
                     cv2.putText(frame, "Mouth", tuple((mouth + 10).astype(int)),
@@ -310,7 +238,7 @@ class BabyWatcher:
                     hand_mouth_thresh = self.hand_mouth_thresh
                     hand_obj_thresh = self.hand_obj_thresh
                 
-                # Check hand-to-mouth distance (using index fingers or wrists, and mouth or nose)
+                # Check hand-to-mouth distance using the more stable hand proxy.
                 for wrist in effective_wrists:
                     d = utils.distance(wrist, effective_mouth)
                     
@@ -323,7 +251,18 @@ class BabyWatcher:
                         label=f"H-M: {d:.1f}",
                         color=(0, 0, 255)
                     )
+
+                    # Draw a visual link from wrist to palm-center proxy for easier interpretation.
+                    if len(effective_wrists) > 0:
+                        try:
+                            proxy_point = self._get_palm_center_proxies(keypoints, [wrist])[0]
+                            cv2.line(frame, tuple(np.round(wrist).astype(int)), tuple(np.round(proxy_point).astype(int)), (255, 255, 0), 1)
+                            cv2.circle(frame, tuple(np.round(proxy_point).astype(int)), 4, (255, 255, 0), -1)
+                        except Exception:
+                            pass
                     
+                    # Require the palm-center proxy to be close to the mouth; this is less sensitive
+                    # than using the wrist point directly and better reflects the hand's actual location.
                     if d < hand_mouth_thresh:
                         hand_near_mouth = True
         
@@ -374,6 +313,20 @@ class BabyWatcher:
                 
                 if nearest_dist < hand_obj_thresh:
                     hand_holding_obj = True
+
+        if hand_boxes and hand_confs.size > 0:
+            combined_object_boxes = detected_boxes + object_candidate_boxes
+            hand_grasp_signal = self._detect_hand_grasp_signal(
+                hand_boxes,
+                hand_confs,
+                combined_object_boxes,
+                nose,
+                wrists,
+                hand_obj_thresh
+            )
+            if hand_grasp_signal:
+                hand_holding_obj = True
+                d_hand_obj = min(d_hand_obj, hand_obj_thresh * 0.6)
 
         # Determine if there is a nearby low-confidence object candidate
         candidate_nearby = False
@@ -662,6 +615,68 @@ class BabyWatcher:
             stats['performance'] = self.perf_monitor.get_summary()
         return stats
     
+    def _detect_hand_grasp_signal(self, hand_boxes: np.ndarray, hand_confs: np.ndarray,
+                                  object_boxes: List[Tuple[float, float, float, float]],
+                                  mouth: np.ndarray, wrists: List[np.ndarray],
+                                  proximity_thresh: float) -> bool:
+        """Use hand-box detections to infer a grasping action near the mouth or object."""
+        if hand_boxes is None or len(hand_boxes) == 0:
+            return False
+
+        if not object_boxes:
+            return False
+
+        for box, conf in zip(hand_boxes, hand_confs):
+            if conf < self.hand_closing_thresh:
+                continue
+
+            x1, y1, x2, y2 = box
+            hand_center = np.array([(x1 + x2) / 2, (y1 + y2) / 2])
+
+            mouth_dist = utils.distance(hand_center, mouth)
+            wrist_dist = min(
+                [utils.distance(hand_center, wrist) for wrist in wrists] if wrists else [float('inf')]
+            )
+
+            if mouth_dist < proximity_thresh or wrist_dist < proximity_thresh * 0.8:
+                nearest_dist, _, _ = utils.get_nearest_object_box(hand_center, object_boxes)
+                if nearest_dist < proximity_thresh * 0.9:
+                    return True
+
+        return False
+
+    def _get_palm_center_proxies(self, keypoints: Dict, wrists: List) -> List[np.ndarray]:
+        """Return a palm-center proxy for each hand using elbow and wrist information."""
+        proxies = []
+        if not wrists:
+            return proxies
+
+        try:
+            left_wrist = keypoints.get('left_wrist', None)
+            right_wrist = keypoints.get('right_wrist', None)
+            left_elbow = keypoints.get('left_elbow', None)
+            right_elbow = keypoints.get('right_elbow', None)
+
+            for wrist in wrists:
+                if wrist is None:
+                    continue
+
+                if left_wrist is not None and left_elbow is not None and np.allclose(wrist, left_wrist):
+                    # Estimate palm center as a point halfway between wrist and elbow, shifted slightly outward.
+                    direction = left_wrist - left_elbow
+                    palm_center = left_wrist + 0.45 * direction
+                    proxies.append(palm_center)
+                elif right_wrist is not None and right_elbow is not None and np.allclose(wrist, right_wrist):
+                    direction = right_wrist - right_elbow
+                    palm_center = right_wrist + 0.45 * direction
+                    proxies.append(palm_center)
+                else:
+                    proxies.append(wrist)
+        except Exception:
+            proxies = wrists
+
+        return proxies
+
     def _detect_hand_closing(self, keypoints: Dict, nose: np.ndarray, wrists: List) -> bool:
         """
         Detect if hand is closed (holding object) based on hand region size.
@@ -787,7 +802,7 @@ class BabyWatcher:
     def _load_models(self, pose_path: str, obj_path: str, hand_path: str, face_path: str,
                     device: str, half_precision: bool, max_det: int, enable_tensorrt: bool):
         """Load models with platform-specific optimizations"""
-        print("🔄 Loading YOLO models...")
+        print("🔄 Loading YOLO pose and object models...")
 
         # Load pose model
         pose_model = YOLO(pose_path)
@@ -815,47 +830,9 @@ class BabyWatcher:
         if half_precision and device != "cpu":
             obj_model.half()
 
-        # Load hand model (optional)
         hand_model = None
-        if hand_path and hand_path.strip():  # Only load if path is not empty
-            try:
-                hand_model = YOLO(hand_path)
-                if self.platform.startswith("jetson") and enable_tensorrt:
-                    try:
-                        hand_model.export(format='engine', device=device)
-                        hand_model = YOLO(hand_path.replace('.pt', '.engine'))
-                        print("🚀 Hand model converted to TensorRT")
-                    except Exception as e:
-                        print(f"⚠️  TensorRT conversion failed for hand model: {e}")
-                hand_model.to(device)
-                if half_precision and device != "cpu":
-                    hand_model.half()
-                print("✅ Hand detection model loaded")
-            except Exception as e:
-                print(f"⚠️  Hand model loading failed: {e}")
-        else:
-            print("ℹ️  Hand detection disabled (no model path configured)")
-
-        # Load face model (optional)
         face_model = None
-        if face_path and face_path.strip():  # Only load if path is not empty
-            try:
-                face_model = YOLO(face_path)
-                if self.platform.startswith("jetson") and enable_tensorrt:
-                    try:
-                        face_model.export(format='engine', device=device)
-                        face_model = YOLO(face_path.replace('.pt', '.engine'))
-                        print("🚀 Face model converted to TensorRT")
-                    except Exception as e:
-                        print(f"⚠️  TensorRT conversion failed for face model: {e}")
-                face_model.to(device)
-                if half_precision and device != "cpu":
-                    face_model.half()
-                print("✅ Face detection model loaded")
-            except Exception as e:
-                print(f"⚠️  Face model loading failed: {e}")
-        else:
-            print("ℹ️  Face detection disabled (no model path configured)")
+        print("ℹ️  Hand and face models are disabled; using pose + object logic only")
 
         return pose_model, obj_model, hand_model, face_model
     

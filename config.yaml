@@ -17,12 +17,14 @@ detection:
   dynamic_threshold: true  # Tính threshold động dựa trên shoulder width
   
   # Threshold multipliers for dynamic calculation
-  hand_mouth_multiplier: 1.2  # shoulder_width × 1.2 (increased from 0.9)
-  hand_object_multiplier: 1.0  # shoulder_width × 1.0 (increased from 0.8)
+  hand_mouth_multiplier: 0.5  # shoulder_width × 0.5
+  hand_object_multiplier: 0.5  # shoulder_width × 0.5
   
   # Enhanced object detection for occluded/small objects
   small_object_conf_thresh: 0.15  # Reduced from 0.2
   inferred_object_distance_thresh: 25  # If hand-mouth < 25px, infer object is held
+  hand_conf_thresh: 0.4  # Lower threshold for hand boxes to improve detection
+  mediapipe_confidence: 0.45  # MediaPipe detection sensitivity
 
 # Alert Settings
 alerts:
@@ -39,7 +41,7 @@ alerts:
 models:
   pose_model_path: "yolo26n-pose.pt"
   object_model_path: "yolo26n.pt"
-  # Optional: Hand pose detection (21 keypoints) - set to "" to disable
+  # Optional: hand detection with YOLO hand model - set to "" to disable
   hand_model_path: ""
   # Optional: Face detection - set to "" to disable
   face_model_path: ""

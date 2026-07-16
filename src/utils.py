@@ -314,21 +314,76 @@ def get_hand_keypoints(hand_data: np.ndarray) -> dict:
     }
 
 
-def extract_index_fingers(hands_data, frame_shape: Tuple[int, int, int]) -> dict:
-    """
-    Extract both index fingers (left and right) from hand detection results
-    Supports both YOLO and MediaPipe hand detection formats
-    
-    Args:
-        hands_data: Hand detection results (YOLO Results object or MediaPipe list)
-        frame_shape: Frame shape (height, width, channels)
-    
-    Returns:
-        Dictionary with left_index_tip and right_index_tip (or None if not found)
-    """
+def extract_hand_keypoints(hands_data, frame_shape: Tuple[int, int, int]) -> dict:
+    """Extract hand landmarks and index finger tips from YOLO/MediaPipe hand results."""
     result = {
         'left_index_tip': None,
         'right_index_tip': None,
+        'left_hand_keypoints': None,
+        'right_hand_keypoints': None,
+    }
+
+    if hands_data is None:
+        return result
+
+    try:
+        if isinstance(hands_data, list) and len(hands_data) > 0 and isinstance(hands_data[0], dict):
+            for hand_data in hands_data:
+                if 'keypoints' in hand_data and 'handedness' in hand_data:
+                    keypoints = hand_data['keypoints']
+                    handedness = hand_data['handedness']
+                    if keypoints.shape[0] > 8:
+                        index_tip = keypoints[8]
+                        if handedness == 'Right':
+                            result['right_index_tip'] = index_tip
+                            result['right_hand_keypoints'] = keypoints
+                        elif handedness == 'Left':
+                            result['left_index_tip'] = index_tip
+                            result['left_hand_keypoints'] = keypoints
+            return result
+
+        if hasattr(hands_data, 'keypoints'):
+            if hands_data.keypoints is not None and hands_data.keypoints.xy is not None:
+                keypoints_array = hands_data.keypoints.xy.cpu().numpy()
+                if len(keypoints_array) > 0:
+                    for keypoints in keypoints_array:
+                        hand_center_x = np.mean(keypoints[:, 0]) if keypoints.shape[0] > 0 else 0
+                        if hand_center_x < frame_shape[1] / 2:
+                            result['left_hand_keypoints'] = keypoints
+                            result['left_index_tip'] = keypoints[9] if len(keypoints) > 9 else None
+                        else:
+                            result['right_hand_keypoints'] = keypoints
+                            result['right_index_tip'] = keypoints[9] if len(keypoints) > 9 else None
+            return result
+
+        if isinstance(hands_data, list):
+            for hand in hands_data:
+                try:
+                    if hasattr(hand, 'keypoints'):
+                        keypoints = hand.keypoints.xy.cpu().numpy()
+                        if len(keypoints) > 0:
+                            hand_points = keypoints[0]
+                            if hasattr(hand, 'handedness') and hand.handedness is not None:
+                                if 'Right' in str(hand.handedness):
+                                    result['right_hand_keypoints'] = hand_points
+                                    result['right_index_tip'] = hand_points[9] if len(hand_points) > 9 else None
+                                elif 'Left' in str(hand.handedness):
+                                    result['left_hand_keypoints'] = hand_points
+                                    result['left_index_tip'] = hand_points[9] if len(hand_points) > 9 else None
+                except Exception:
+                    continue
+    except Exception:
+        pass
+
+    return result
+
+
+def extract_index_fingers(hands_data, frame_shape: Tuple[int, int, int]) -> dict:
+    """Backward-compatible wrapper that returns only fingertip positions."""
+    hand_keypoints = extract_hand_keypoints(hands_data, frame_shape)
+    return {
+        'left_index_tip': hand_keypoints.get('left_index_tip'),
+        'right_index_tip': hand_keypoints.get('right_index_tip'),
     }
     
     if hands_data is None:
