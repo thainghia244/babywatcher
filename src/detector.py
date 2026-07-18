@@ -48,6 +48,8 @@ class BabyWatcher:
         # Dynamic threshold multipliers
         self.hand_mouth_multiplier = self.config.get("detection.hand_mouth_multiplier", 0.5)
         self.hand_object_multiplier = self.config.get("detection.hand_object_multiplier", 0.5)
+        self.object_mouth_multiplier = self.config.get("detection.object_mouth_multiplier", 0.6)
+        self.object_region_multiplier = self.config.get("detection.object_region_multiplier", 1.2)
         
         # Enhanced object detection for small/occluded objects
         self.small_object_conf_thresh = self.config.get("detection.small_object_conf_thresh", 0.15)
@@ -117,12 +119,22 @@ class BabyWatcher:
         self.event_log_cooldown = 1.0  # Log events max once per second
         self.last_danger_clip_time = 0
         self.danger_clip_cooldown = 2.0  # Save danger clips max once per 2 seconds
+        self.confirmation_frames = self.config.get("detection.confirmation_frames", 3)
+        self._confirmation_counter = 0
+        self._confirmed_status = "SAFE"
+        self.proximity_history_window = self.config.get("detection.proximity_history_window", 3)
+        self.proximity_history = []
+        self.object_mouth_history_window = self.config.get("detection.object_mouth_history_window", 3)
+        self.object_mouth_history = []
+        self.sustained_danger_duration = self.config.get("detection.sustained_danger_duration", 0.6)
+        self._danger_state_since = None
         
         # Display settings
         self.show_skeleton = self.config.get("display.show_skeleton", True)
         self.show_keypoints = self.config.get("display.show_keypoints", True)
         self.show_info_panel = self.config.get("display.show_info_panel", True)
         self.show_fps = self.config.get("display.show_fps", True)
+        self._last_click_button = None
         
         self.logger.log_info("✅ BabyWatcher initialized successfully")
     
@@ -168,6 +180,7 @@ class BabyWatcher:
         face_results = None
         hand_boxes = []
         hand_confs = []
+        person_hand_state = []
         
         # Initialize variables
         wrists = []
@@ -183,6 +196,7 @@ class BabyWatcher:
         d_hand_obj = 999.0
         hand_mouth_thresh = self.hand_mouth_thresh
         hand_obj_thresh = self.hand_obj_thresh
+        object_scan_threshold = max(20.0, self.hand_obj_thresh)
         
         # ====== POSE DETECTION ======
         if pose_results.keypoints is not None:
@@ -206,11 +220,30 @@ class BabyWatcher:
                 hand_landmarks = None
                 mouth = None
                 effective_wrists = self._get_palm_center_proxies(keypoints, wrists)
-                effective_mouth = nose
+                shoulder_width = utils.calculate_shoulder_width(left_shoulder, right_shoulder)
+                mouth_point = None
+                if mouth is not None:
+                    mouth_point = mouth
+                if mouth_point is None:
+                    mouth_point = utils.get_estimated_mouth_point(nose, shoulder_width)
+                if mouth_point is None:
+                    mouth_point = nose
+                effective_mouth = utils.get_nose_to_mouth_midpoint(nose, mouth_point)
+                if effective_mouth is None:
+                    effective_mouth = nose
                 
                 # Draw skeleton
                 if self.show_skeleton:
                     utils.draw_skeleton(frame, person)
+                
+                # Draw the nose-to-mouth reference line so it is visible on-screen.
+                nose_pt = np.round(nose).astype(int)
+                mouth_pt = np.round(mouth_point).astype(int)
+                mid_pt = np.round(effective_mouth).astype(int)
+                cv2.line(frame, tuple(nose_pt), tuple(mouth_pt), (255, 255, 0), 2)
+                cv2.circle(frame, tuple(nose_pt), 5, (255, 0, 0), -1)
+                cv2.circle(frame, tuple(mouth_pt), 5, (0, 255, 255), -1)
+                cv2.circle(frame, tuple(mid_pt), 5, (255, 0, 255), -1)
                 
                 # No hand landmarks are drawn because the hand detector is disabled.
                 if mouth is not None:
@@ -234,37 +267,41 @@ class BabyWatcher:
                     )
                     hand_mouth_thresh = shoulder_width * self.hand_mouth_multiplier  # Use config multiplier
                     hand_obj_thresh = shoulder_width * self.hand_object_multiplier  # Use config multiplier
+                    object_scan_threshold = self._get_object_proximity_threshold(shoulder_width)
                 else:
                     hand_mouth_thresh = self.hand_mouth_thresh
                     hand_obj_thresh = self.hand_obj_thresh
                 
                 # Check hand-to-mouth distance using the more stable hand proxy.
-                for wrist in effective_wrists:
-                    d = utils.distance(wrist, effective_mouth)
+                person_min_hand_distance = float('inf')
+                for wrist, proxy_point in zip(wrists, effective_wrists):
+                    d = utils.distance(proxy_point, effective_mouth)
+                    person_min_hand_distance = min(person_min_hand_distance, d)
                     
-                    if d < d_hand_mouth:
-                        d_hand_mouth = d
-                    
-                    # Draw distance line
+                    # Draw the main distance line to the mouth using the palm-center proxy.
                     utils.draw_distance_line(
-                        frame, wrist, nose,
+                        frame, proxy_point, effective_mouth,
                         label=f"H-M: {d:.1f}",
                         color=(0, 0, 255)
                     )
 
-                    # Draw a visual link from wrist to palm-center proxy for easier interpretation.
-                    if len(effective_wrists) > 0:
-                        try:
-                            proxy_point = self._get_palm_center_proxies(keypoints, [wrist])[0]
-                            cv2.line(frame, tuple(np.round(wrist).astype(int)), tuple(np.round(proxy_point).astype(int)), (255, 255, 0), 1)
-                            cv2.circle(frame, tuple(np.round(proxy_point).astype(int)), 4, (255, 255, 0), -1)
-                        except Exception:
-                            pass
-                    
-                    # Require the palm-center proxy to be close to the mouth; this is less sensitive
-                    # than using the wrist point directly and better reflects the hand's actual location.
-                    if d < hand_mouth_thresh:
-                        hand_near_mouth = True
+                    # Draw a visual link from the real wrist to the palm-center proxy.
+                    try:
+                        wrist_pt = np.round(wrist).astype(int)
+                        proxy_pt = np.round(proxy_point).astype(int)
+                        cv2.line(frame, tuple(wrist_pt), tuple(proxy_pt), (255, 255, 0), 1)
+                        cv2.circle(frame, tuple(wrist_pt), 4, (0, 255, 255), -1)
+                        cv2.circle(frame, tuple(proxy_pt), 4, (255, 255, 0), -1)
+                    except Exception:
+                        pass
+
+                if person_min_hand_distance < float('inf'):
+                    d_hand_mouth = min(d_hand_mouth, person_min_hand_distance)
+
+                # Only mark as near-mouth when the minimum hand distance is clearly small.
+                if self._evaluate_proximity_signal(person_min_hand_distance, hand_mouth_thresh):
+                    hand_near_mouth = True
+                    person_hand_state.append((person_min_hand_distance, hand_mouth_thresh))
         
         # ====== OBJECT DETECTION ======
         if obj_results.boxes is not None:
@@ -300,8 +337,7 @@ class BabyWatcher:
                 wrist, detected_boxes
             )
             
-            if nearest_idx >= 0:
-                nearest_obj = detected_boxes[nearest_idx]
+            if nearest_idx >= 0 and nearest_dist <= object_scan_threshold:
                 d_hand_obj = min(d_hand_obj, nearest_dist)
                 
                 # Draw distance line to nearest object edge
@@ -311,8 +347,44 @@ class BabyWatcher:
                     color=(255, 255, 0)
                 )
                 
-                if nearest_dist < hand_obj_thresh:
+                if nearest_dist <= object_scan_threshold:
                     hand_holding_obj = True
+
+        # Evaluate object-to-mouth using a dynamic threshold scaled to body size.
+        object_to_mouth_signal = False
+        if hand_near_mouth and detected_boxes:
+            # Use the nearest object to the mouth and compare it to a dynamic threshold.
+            mouth_reference = effective_mouth if 'effective_mouth' in locals() else nose
+            relevant_boxes = self._filter_objects_for_person(
+                detected_boxes,
+                mouth_reference,
+                wrists,
+                [left_shoulder, right_shoulder] if 'left_shoulder' in locals() else [],
+                hand_obj_thresh
+            )
+            if relevant_boxes:
+                nearest_object_distance = 999.0
+                nearest_object_point = np.array([0.0, 0.0])
+                for box in relevant_boxes:
+                    x1, y1, x2, y2 = box
+                    closest_x = min(max(mouth_reference[0], x1), x2)
+                    closest_y = min(max(mouth_reference[1], y1), y2)
+                    object_point = np.array([closest_x, closest_y])
+                    dist = utils.distance(mouth_reference, object_point)
+                    if dist < nearest_object_distance:
+                        nearest_object_distance = dist
+                        nearest_object_point = object_point
+
+                if self._evaluate_object_to_mouth_signal(
+                    nearest_object_distance,
+                    person_min_hand_distance if 'person_min_hand_distance' in locals() else 999.0,
+                    hand_near_mouth,
+                    d_hand_obj,
+                    hand_obj_thresh
+                ):
+                    object_to_mouth_signal = True
+                    hand_holding_obj = True
+                    d_hand_obj = min(d_hand_obj, nearest_object_distance)
 
         if hand_boxes and hand_confs.size > 0:
             combined_object_boxes = detected_boxes + object_candidate_boxes
@@ -342,29 +414,44 @@ class BabyWatcher:
         # ====== INFERRED OBJECT DETECTION (per person) ======
         # Only infer object hold if there is a strong grasping signal
         # AND a nearby candidate object or extremely close hand-to-mouth distance.
-        if not hand_holding_obj and hand_near_mouth and d_hand_mouth < self.inferred_object_distance_thresh:
+        if not hand_holding_obj and hand_near_mouth and d_hand_mouth < self.inferred_object_distance_thresh * 0.85:
             hand_closing = self._detect_hand_closing(keypoints, nose, wrists)
-            if hand_closing and (candidate_nearby or d_hand_mouth < self.inferred_object_distance_thresh * 0.4):
+            if hand_closing and (candidate_nearby or d_hand_mouth < self.inferred_object_distance_thresh * 0.35):
                 hand_holding_obj = True
                 d_hand_obj = d_hand_mouth
         
+        if object_to_mouth_signal:
+            hand_holding_obj = True
+
         # ====== DETERMINE STATUS ======
         current_time = time.time()
         
         if not hand_near_mouth:
             self.danger_start_time = None
+            self._danger_state_since = None
             danger_duration = 0.0
+            self._confirmation_counter = 0
+            self._confirmed_status = "SAFE"
             status = "SAFE"
         elif hand_near_mouth and not hand_holding_obj:
             if self.danger_start_time is None:
                 self.danger_start_time = current_time
             danger_duration = current_time - self.danger_start_time
-            status = "HAND_TO_MOUTH"
+            status = self._resolve_confirmed_status("HAND_TO_MOUTH")
         else:  # hand_near_mouth and hand_holding_obj
             if self.danger_start_time is None:
                 self.danger_start_time = current_time
             danger_duration = current_time - self.danger_start_time
-            status = "OBJECT_TO_MOUTH"
+            status = self._resolve_confirmed_status("OBJECT_TO_MOUTH")
+
+        if status != "SAFE":
+            if self._danger_state_since is None:
+                self._danger_state_since = current_time
+            if current_time - self._danger_state_since < self.sustained_danger_duration:
+                status = "SAFE"
+                danger_duration = 0.0
+        else:
+            self._danger_state_since = None
         
         # ====== TRIGGER ALERTS ======
         danger_threshold = self.config.get("alerts.danger_duration_threshold", 3.0)
@@ -397,21 +484,23 @@ class BabyWatcher:
                 except Exception as e:
                     self.logger.log_error(f"Failed to save danger clip: {e}")
         
-        # ====== DRAW INFO PANEL ======
-        if self.show_info_panel:
-            info_dict = {
-                'h_m_dist': d_hand_mouth,
-                'h_m_thresh': hand_mouth_thresh,
-                'h_o_dist': d_hand_obj,
-                'h_o_thresh': hand_obj_thresh,
-                'duration': danger_duration,
-                'status': status,
-                'status_color': utils.get_status_color(status)
-            }
-            utils.draw_info_panel(frame, info_dict)
-        
-        # ====== DRAW WARNING BANNER ======
-        utils.draw_warning_banner(frame, status)
+        # ====== DRAW COMPOSED DISPLAY ======
+        info_dict = {
+            'h_m_dist': d_hand_mouth,
+            'h_m_thresh': hand_mouth_thresh,
+            'h_o_dist': d_hand_obj,
+            'h_o_thresh': hand_obj_thresh,
+            'duration': danger_duration,
+            'status': status,
+            'status_color': utils.get_status_color(status)
+        }
+        frame, skeleton_button = utils.compose_display_frame(
+            frame,
+            info_dict,
+            status,
+            show_info_panel=self.show_info_panel,
+            skeleton_enabled=self.show_skeleton
+        )
         
         # ====== DRAW FPS ======
         perf_metrics = {}
@@ -439,6 +528,7 @@ class BabyWatcher:
         return frame, {
             'status': status,
             'duration': danger_duration,
+            'skeleton_button': skeleton_button,
             'hand_mouth_distance': d_hand_mouth,
             'hand_object_distance': d_hand_obj,
             'hand_near_mouth': hand_near_mouth,
@@ -448,6 +538,99 @@ class BabyWatcher:
             **perf_metrics
         }
     
+    def _get_object_proximity_threshold(self, shoulder_width: float) -> float:
+        """Return the object-scanning threshold as half of the shoulder width, with a floor."""
+        if shoulder_width is None:
+            return max(20.0, self.hand_obj_thresh)
+        return max(20.0, float(shoulder_width) * 0.5)
+
+    def _evaluate_proximity_signal(self, distance: float, threshold: float) -> bool:
+        """Smooth the near-mouth signal over a short history window to reduce false positives."""
+        self.proximity_history.append(distance < threshold * 0.9)
+        if len(self.proximity_history) > self.proximity_history_window:
+            self.proximity_history.pop(0)
+
+        if len(self.proximity_history) < self.proximity_history_window:
+            return False
+
+        return sum(self.proximity_history) >= max(2, int(self.proximity_history_window * 0.7))
+
+    def _filter_objects_for_person(self, boxes: List[Tuple[float, float, float, float]], mouth_reference: np.ndarray,
+                                   wrists: List[np.ndarray], shoulders: List[np.ndarray],
+                                   reference_distance: float) -> List[Tuple[float, float, float, float]]:
+        """Keep only objects in the upper-body chest-to-mouth region to reduce false positives."""
+        if not boxes:
+            return []
+
+        region_radius = max(reference_distance, 80.0) * self.object_region_multiplier
+        filtered = []
+        for box in boxes:
+            x1, y1, x2, y2 = box
+            center = np.array([(x1 + x2) / 2.0, (y1 + y2) / 2.0])
+
+            if shoulders and len(shoulders) >= 2:
+                left_shoulder, right_shoulder = shoulders[0], shoulders[1]
+                shoulder_mid = (left_shoulder + right_shoulder) / 2.0
+                chest_y = shoulder_mid[1]
+                mouth_y = mouth_reference[1]
+                region_top = min(chest_y, mouth_y) - region_radius * 0.35
+                region_bottom = max(chest_y, mouth_y) + region_radius * 0.35
+                region_left = min(left_shoulder[0], mouth_reference[0], shoulder_mid[0]) - region_radius * 0.8
+                region_right = max(right_shoulder[0], mouth_reference[0], shoulder_mid[0]) + region_radius * 0.8
+
+                in_region = (
+                    region_left <= center[0] <= region_right and
+                    region_top <= center[1] <= region_bottom
+                )
+            else:
+                in_region = False
+
+            if not in_region and wrists:
+                wrist_distances = [np.linalg.norm(center - wrist) for wrist in wrists]
+                in_region = np.linalg.norm(center - mouth_reference) <= region_radius * 0.9 or min(wrist_distances) <= region_radius * 0.7
+
+            if in_region:
+                filtered.append(box)
+        return filtered
+
+    def _evaluate_object_to_mouth_signal(self, object_mouth_distance: float, hand_mouth_distance: float,
+                                         hand_near_mouth: bool, hand_object_distance: float,
+                                         threshold: float) -> bool:
+        """Use a conservative dynamic threshold and require repeated evidence before triggering."""
+        if not hand_near_mouth:
+            return False
+
+        body_scale = max(threshold, 1.0)
+        object_threshold = body_scale * self.object_mouth_multiplier * 0.9
+        hand_threshold = body_scale * 0.7
+        object_hand_threshold = body_scale * 0.65
+
+        object_close = object_mouth_distance <= object_threshold
+        hand_close = hand_mouth_distance <= hand_threshold
+        object_in_hand = hand_object_distance <= object_hand_threshold
+
+        signal = object_close and hand_close and object_in_hand
+        self.object_mouth_history.append(signal)
+        if len(self.object_mouth_history) > self.object_mouth_history_window:
+            self.object_mouth_history.pop(0)
+
+        if len(self.object_mouth_history) < self.object_mouth_history_window:
+            return False
+
+        return sum(self.object_mouth_history) >= max(2, int(self.object_mouth_history_window * 0.7))
+
+    def _resolve_confirmed_status(self, candidate_status: str) -> str:
+        """Require the same danger signal to persist across several frames before reporting it."""
+        if candidate_status == self._confirmed_status:
+            self._confirmation_counter += 1
+        else:
+            self._confirmation_counter = 1
+            self._confirmed_status = candidate_status
+
+        if self._confirmation_counter >= self.confirmation_frames:
+            return candidate_status
+        return "SAFE"
+
     def process_video(self, video_path: str, output_path: Optional[str] = None):
         """
         Process video file
@@ -474,6 +657,8 @@ class BabyWatcher:
             out = cv2.VideoWriter(output_path, fourcc, fps, (self.img_size, self.img_size))
         
         self.logger.log_info(f"Processing video: {video_path}")
+        cv2.namedWindow("BabyWatcher", cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback("BabyWatcher", self._handle_mouse_toggle)
         
         try:
             while True:
@@ -482,6 +667,7 @@ class BabyWatcher:
                     break
                 
                 output_frame, info = self.process_frame(frame)
+                self._last_click_button = info.get('skeleton_button')
                 
                 cv2.imshow("BabyWatcher", output_frame)
                 
@@ -527,6 +713,8 @@ class BabyWatcher:
             out = cv2.VideoWriter(output_path, fourcc, fps, (self.img_size, self.img_size))
         
         self.logger.log_info(f"Processing camera: {camera_index}")
+        cv2.namedWindow("BabyWatcher", cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback("BabyWatcher", self._handle_mouse_toggle)
         
         try:
             while True:
@@ -535,6 +723,7 @@ class BabyWatcher:
                     break
                 
                 output_frame, info = self.process_frame(frame)
+                self._last_click_button = info.get('skeleton_button')
                 
                 cv2.imshow("BabyWatcher", output_frame)
                 
@@ -565,7 +754,9 @@ class BabyWatcher:
             return
         
         output_frame, info = self.process_frame(frame)
-        
+        self._last_click_button = info.get('skeleton_button')
+        cv2.namedWindow("BabyWatcher", cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback("BabyWatcher", self._handle_mouse_toggle)
         cv2.imshow("BabyWatcher", output_frame)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -644,6 +835,15 @@ class BabyWatcher:
                     return True
 
         return False
+
+    def _handle_mouse_toggle(self, event, x, y, flags, param):
+        """Toggle skeleton visibility when the skeleton button is clicked."""
+        if event != cv2.EVENT_LBUTTONDOWN or self._last_click_button is None:
+            return
+
+        x1, y1, x2, y2 = self._last_click_button
+        if x1 <= x <= x2 and y1 <= y <= y2:
+            self.show_skeleton = not self.show_skeleton
 
     def _get_palm_center_proxies(self, keypoints: Dict, wrists: List) -> List[np.ndarray]:
         """Return a palm-center proxy for each hand using elbow and wrist information."""

@@ -15,10 +15,16 @@ detection:
   hand_mouth_thresh: 45
   hand_obj_thresh: 60
   dynamic_threshold: true  # Tính threshold động dựa trên shoulder width
+  confirmation_frames: 3  # Chỉ báo cảnh báo sau khi cùng một tín hiệu lặp lại 3 frame
+  proximity_history_window: 3  # Dùng trung bình lịch sử 3 frame cho tín hiệu gần miệng
+  sustained_danger_duration: 0.6  # Chỉ báo cảnh báo sau khi tín hiệu nguy hiểm kéo dài ít nhất 0.6s
   
   # Threshold multipliers for dynamic calculation
   hand_mouth_multiplier: 0.5  # shoulder_width × 0.5
   hand_object_multiplier: 0.5  # shoulder_width × 0.5
+  object_mouth_multiplier: 0.6  # object-to-mouth threshold factor
+  object_region_multiplier: 1.2  # region size for object filtering
+  object_mouth_history_window: 3  # require repeated evidence before object-to-mouth alert
   
   # Enhanced object detection for occluded/small objects
   small_object_conf_thresh: 0.15  # Reduced from 0.2

@@ -265,6 +265,71 @@ def draw_warning_banner(frame: np.ndarray, status: str) -> None:
                     (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
 
+def compose_display_frame(frame: np.ndarray,
+                          info_dict: dict,
+                          status: str,
+                          show_info_panel: bool = True,
+                          skeleton_enabled: bool = True) -> Tuple[np.ndarray, Tuple[int, int, int, int]]:
+    """Compose a display canvas with a top warning banner, a right-side info panel, and a skeleton toggle button."""
+    frame_h, frame_w = frame.shape[:2]
+    banner_height = 58 if status != "SAFE" else 0
+    panel_width = 260 if show_info_panel else 0
+    panel_height = 170 if show_info_panel else 0
+    canvas_h = frame_h + banner_height + 20
+    canvas_w = frame_w + (panel_width + 20 if show_info_panel else 0)
+
+    canvas = np.full((canvas_h, canvas_w, 3), (20, 20, 20), dtype=np.uint8)
+
+    if status != "SAFE":
+        banner_y = 10
+        banner_x = 10
+        if status == "HAND_TO_MOUTH":
+            cv2.rectangle(canvas, (5, 5), (canvas_w - 5, banner_height - 5), (0, 255, 255), 2)
+            cv2.putText(canvas, "WARNING: HAND TO MOUTH!", (banner_x, 35),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+        elif status == "OBJECT_TO_MOUTH":
+            cv2.rectangle(canvas, (5, 5), (canvas_w - 5, banner_height - 5), (0, 0, 255), 2)
+            cv2.putText(canvas, "DANGER: OBJECT TO MOUTH!", (banner_x, 35),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+    img_y = banner_height + 10
+    img_x = 10
+    canvas[img_y:img_y + frame_h, img_x:img_x + frame_w] = frame
+
+    button_x1 = 10
+    button_y1 = 10
+    button_x2 = 125
+    button_y2 = 40
+    button_rect = (button_x1, button_y1, button_x2, button_y2)
+    button_color = (0, 255, 0) if skeleton_enabled else (80, 80, 80)
+    cv2.rectangle(canvas, (button_x1, button_y1), (button_x2, button_y2), button_color, 2)
+    cv2.rectangle(canvas, (button_x1 + 2, button_y1 + 2), (button_x2 - 2, button_y2 - 2), button_color, -1)
+    cv2.putText(canvas, "Skeleton: ON" if skeleton_enabled else "Skeleton: OFF",
+                (button_x1 + 8, button_y1 + 25), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+
+    if show_info_panel:
+        panel_x1 = frame_w + 20
+        panel_y1 = banner_height + 10
+        panel_x2 = canvas_w - 10
+        panel_y2 = panel_y1 + panel_height
+        cv2.rectangle(canvas, (panel_x1, panel_y1), (panel_x2, panel_y2), (60, 60, 60), 2)
+        cv2.rectangle(canvas, (panel_x1 + 4, panel_y1 + 4), (panel_x2 - 4, panel_y2 - 4), (80, 80, 80), -1)
+
+        tx = panel_x1 + 12
+        ty = panel_y1 + 20
+        line_gap = 20
+        cv2.putText(canvas, "Parameters", (tx, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1)
+        cv2.putText(canvas, f"H-M Dist: {info_dict.get('h_m_dist', 0.0):.1f}", (tx, ty + line_gap), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+        cv2.putText(canvas, f"H-M Thr : {info_dict.get('h_m_thresh', 0.0):.1f}", (tx, ty + line_gap * 2), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+        cv2.putText(canvas, f"H-O Dist: {info_dict.get('h_o_dist', 0.0):.1f}", (tx, ty + line_gap * 3), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 0), 1)
+        cv2.putText(canvas, f"H-O Thr : {info_dict.get('h_o_thresh', 0.0):.1f}", (tx, ty + line_gap * 4), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 0), 1)
+        cv2.putText(canvas, f"Time: {info_dict.get('duration', 0.0):.2f}s", (tx, ty + line_gap * 5), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+        cv2.putText(canvas, f"Status: {status}", (tx, ty + line_gap * 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, get_status_color(status), 1)
+        cv2.putText(canvas, f"Skeleton: {'ON' if skeleton_enabled else 'OFF'}", (tx, ty + line_gap * 7), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+
+    return canvas, button_rect
+
+
 def get_status_color(status: str) -> Tuple[int, int, int]:
     """
     Get color for status
@@ -482,3 +547,19 @@ def get_face_mouth_keypoint(face_results) -> np.ndarray:
         return mouth
     except Exception as e:
         return None
+
+
+def get_nose_to_mouth_midpoint(nose: np.ndarray, mouth: np.ndarray) -> np.ndarray:
+    """Compute a point halfway between the nose and the mouth."""
+    if nose is None or mouth is None:
+        return None
+    return (np.array(nose) + np.array(mouth)) / 2.0
+
+
+def get_estimated_mouth_point(nose: np.ndarray, shoulder_width: float) -> np.ndarray:
+    """Estimate a mouth point from pose data when no face detector is available."""
+    if nose is None:
+        return None
+
+    base_offset = max(12.0, shoulder_width * 0.28 if shoulder_width else 20.0)
+    return np.array([nose[0], nose[1] + base_offset])
