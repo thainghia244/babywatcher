@@ -1,1084 +1,309 @@
-# TRÌNH BÀY BÀI TOÁN VÀ PHƯƠNG PHÁP GIẢI QUYẾT
+﻿# ĐỀ XUẤT BÀI TOÁN VÀ PHƯƠNG PHÁP GIẢI QUYẾT
 
-## 1. TRÌNH BÀY BÀI TOÁN THỰC THI
+## 1. Bối cảnh và vấn đề cần giải quyết
 
-### 1.1. Quy Trình Xử Lý Luồng Hình Ảnh
+Việc giám sát trẻ sơ sinh trong thời gian dài là một nhiệm vụ đòi hỏi sự tập trung liên tục và chính xác của người chăm sóc. Trong thực tế, nhiều tình huống nguy hiểm có thể phát sinh rất nhanh, đặc biệt khi trẻ đưa tay hoặc vật thể gần miệng. Những hành vi này có thể dẫn đến các rủi ro như nhiễm khuẩn, hóc, sặc hoặc nuốt phải vật thể không an toàn.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                  QUY TRÌNH THỰC THI HỆ THỐNG                        │
-└─────────────────────────────────────────────────────────────────────┘
-
-BƯỚC 1: LẤY DỮ LIỆU ĐẦU VÀO
-    ↓
-    Camera/Video Stream → Frame (RGB Image, 480x640 - 1280x720)
-    
-BƯỚC 2: XỬ LÝ HÌNH ẢNH
-    ↓
-    Resize (Letterbox) → 640x640 (Giữ aspect ratio)
-    
-BƯỚC 3: NHẬN DIỆN VỀ XƯƠNG (POSE ESTIMATION)
-    ↓
-    YOLOv8-Pose → 17 Keypoints (COCO format)
-    - Mũi (Nose) - keypoint 0
-    - Cổ tay trái/phải (Wrist) - keypoint 9,10
-    - Vai trái/phải (Shoulder) - keypoint 5,6
-    - Khuỷu tay (Elbow) - keypoint 7,8
-    
-BƯỚC 4: NHẬN DIỆN VẬT THỂ (OBJECT DETECTION)
-    ↓
-    YOLOv8-Detect → Bounding boxes của vật thể
-    - Chai, thìa, đồ chơi, v.v.
-    
-BƯỚC 5: TÍNH TOÁN KHOẢNG CÁCH
-    ↓
-    Hand-to-Mouth Distance = √[(x_wrist - x_nose)² + (y_wrist - y_nose)²]
-    Hand-to-Object Distance = Khoảng cách từ tay đến biên box vật
-    
-BƯỚC 6: TÍNH NGƯỠNG ĐỘNG
-    ↓
-    shoulder_width = distance(left_shoulder, right_shoulder)
-    H-M_threshold = shoulder_width × 1.2
-    H-O_threshold = shoulder_width × 1.0
-    
-BƯỚC 7: SO SÁNH VỚI NGƯỠNG
-    ↓
-    if H-M_distance < H-M_threshold:
-        status = "HAND_TO_MOUTH" ⚠️
-    elif H-O_distance < H-O_threshold:
-        status = "OBJECT_TO_MOUTH" 🚨
-    else:
-        status = "SAFE" ✅
-    
-BƯỚC 8: KIỂM TRA KỲ HẠN NGUY HIỂM
-    ↓
-    if danger_duration > 3 seconds:
-        trigger_alert = True
-    
-BƯỚC 9: PHÁT CẢNH BÁO
-    ↓
-    ├─ Âm thanh (Sound Alert)
-    │  - Warning: 800Hz, 300ms
-    │  - Critical: 1000Hz, 500ms
-    │
-    ├─ Email (SMTP)
-    │  - Gửi thông báo chi tiết
-    │
-    └─ Webhook (IoT)
-       - Tích hợp với smart home
-    
-BƯỚC 10: HIỂN THỊ HÌNH ẢNH
-    ↓
-    Frame được annotate:
-    ├─ Skeleton (Xương: 17 keypoints)
-    ├─ Bounding boxes (Vật thể)
-    ├─ Distance lines (Khoảng cách)
-    ├─ Status text (SAFE/DANGER)
-    └─ Real-time FPS counter
-    
-BƯỚC 11: GHI LOG SỰ KIỆN
-    ↓
-    CSV logging:
-    - Timestamp: 2026-05-31 10:30:15.123
-    - Status: HAND_TO_MOUTH / OBJECT_TO_MOUTH
-    - Duration: 2.5 seconds
-    - H-M Distance: 45.2 pixels
-    - H-O Distance: 67.3 pixels
-    
-BƯỚC 12: LƯU HÌNH NGUY HIỂM
-    ↓
-    danger_clips/HAND_TO_MOUTH_20260531_103015.jpg
-    - Annotated frame
-    - Metadata đính kèm
-    
-BƯỚC 13: TRUYỀN CẢN H BÁO
-    ↓
-    ├─ Hệ thống log nội bộ
-    ├─ Remote monitoring (API)
-    └─ Lưu trữ dữ liệu (Analytics)
-    
-BƯỚC 14: LOOP TIẾP THEO
-    ↓
-    Quay lại BƯỚC 2, xử lý frame tiếp theo
-```
+Từ thực tế đó, đề tài này xây dựng một hệ thống giám sát thông minh sử dụng trí tuệ nhân tạo, có khả năng phân tích khung hình đầu vào từ ảnh, video hoặc luồng camera trực tiếp, phát hiện các tín hiệu nguy hiểm và kích hoạt cảnh báo kịp thời. Hệ thống BabyWatcher được thiết kế như một công cụ hỗ trợ, không thay thế hoàn toàn vai trò của người chăm sóc, nhưng có thể giảm áp lực giám sát liên tục và tăng khả năng phát hiện sớm các hành vi tiềm ẩn nguy hiểm.
 
 ---
 
-## 2. MINDSET GIẢI QUYẾT BÀI TOÁN
+## 2. Mục tiêu của hệ thống
 
-### 2.1. Khái Niệm "Giám Sát An Toàn Trẻ Em"
+Mục tiêu chính của hệ thống là xây dựng một quy trình nhận diện và đánh giá hành vi nguy hiểm của trẻ sơ sinh dựa trên dữ liệu hình ảnh thời gian thực. Cụ thể, hệ thống hướng tới các mục tiêu sau:
 
-**Định nghĩa:**
-```
-"Hệ thống tự động phát hiện các hành động nguy hiểm của trẻ em
-trong thời gian thực và cảnh báo kịp thời để phòng chống tai nạn."
-```
+1. Nhận diện được vị trí của trẻ trong khung hình.
+2. Xác định vị trí tay, vai và vùng miệng thông qua pose estimation.
+3. Phát hiện các vật thể xung quanh trẻ bằng object detection.
+4. Phân tích mức độ gần nhau giữa tay, vật thể và miệng.
+5. Xác định trạng thái hiện tại của trẻ thành an toàn hoặc nguy hiểm.
+6. Tạo cảnh báo, ghi log và lưu trữ các tình huống đáng chú ý.
 
-**Câu hỏi cốt lõi:**
-1. **Làm thế nào để phát hiện hành động nguy hiểm?**
-   - Dùng AI (YOLOv8) nhận diện pose + object
-   - Tính toán khoảng cách giữa các bộ phận cơ thể
-   - So sánh với ngưỡng quy định
-
-2. **Hành động nào là nguy hiểm?**
-   - Hand-to-Mouth (H-T-M): Tay gần miệng
-   - Object-to-Mouth (O-T-M): Vật thể gần miệng
-   - Có vật thể và không có vật thể
-
-3. **Cảnh báo như thế nào?**
-   - Alert nhanh (< 2 giây)
-   - Nhiều kênh (âm thanh, email, webhook)
-   - Lưu lại evidence (hình ảnh, log)
-
-### 2.2. Các Tình Huống Giám Sát
-
-```
-┌──────────────────────────────────────────────────────────┐
-│           PHÂN LOẠI TÌNH HUỐNG NGUY HIỂM                 │
-└──────────────────────────────────────────────────────────┘
-
-A. HAND-TO-MOUTH (Tay Vào Miệng)
-   ├─ Không có vật: Tay trần vào miệng
-   │  - Nguy hiểm: Ốm vặt, nhiễm khuẩn
-   │  - Phát hiện: Wrist gần Nose < threshold
-   │  - VD: H-M distance = 35.2px < threshold 45px → Alert
-   │
-   └─ Có vật: Cầm vật rồi tay vào miệng
-      - Nguy hiểm: Sặc, tắc cổ họng
-      - Phát hiện: Wrist + Object gần Nose
-      - VD: H-O distance = 12px < threshold 25px → Critical Alert
-
-B. OBJECT-TO-MOUTH (Vật Thể Vào Miệng)
-   ├─ Trực tiếp: Tay cầm vật → miệng
-   │  - Nguy hiểm: Sặc, ngộ độc, phản ứng dị ứng
-   │  - Phát hiện: Bounding box vật < threshold từ Nose
-   │  - VD: Object center gần Nose < 25px → Critical Alert
-   │
-   └─ Gián tiếp: Vật gần miệng (có thể do hôi hoặc mùi)
-      - Nguy hiểm: Hít phải hoặc ăn vô tình
-      - Phát hiện: Object boundary distance < threshold
-      - VD: Closest point of box < 30px → Alert
-
-C. SAFE (Tình Huống An Toàn)
-   ├─ Không có vật thể
-   │  - Tay xa miệng (> shoulder_width × 1.2)
-   │  - Vd: H-M distance = 200px > threshold 150px → Safe
-   │
-   └─ Có vật thể nhưng an toàn
-      - Vật thể xa miệng (> shoulder_width × 1.0)
-      - Vd: H-O distance = 400px > threshold 120px → Safe
-```
+Bên cạnh các mục tiêu chức năng, hệ thống còn nhằm mục đích chứng minh rằng một giải pháp AI có thể được triển khai hiệu quả trên nền phần mềm mở, với chi phí thấp và khả năng mở rộng tốt trong các môi trường thực tế.
 
 ---
 
-## 3. BÀI TOÁN NHẬN DIỆN
+## 3. Bài toán được mô hình hóa
 
-### 3.1. Bài Toán Phát Hiện Pose (Pose Estimation)
+Bài toán này có thể được mô tả như một bài toán phân loại trạng thái hành vi trên chuỗi khung hình video. Với mỗi khung hình $F_t$, hệ thống cần suy ra trạng thái $S_t$ trong tập:
 
-**Input:** Frame hình ảnh (RGB)  
-**Output:** 17 Keypoints với confidence scores
+- SAFE: không có dấu hiệu nguy hiểm đáng kể
+- HAND_TO_MOUTH: tay đang tiếp cận hoặc ở gần vùng miệng
+- OBJECT_TO_MOUTH: vật thể đang ở gần hoặc tiếp cận vùng miệng
 
-```python
-# YOLOv8 Pose Detection
-Input: frame (480x640 RGB)
-          ↓
-    [Resize → 640x640 with letterbox]
-          ↓
-    [YOLOv8-Pose Model]
-          ↓
-Output: {
-    'keypoints': [
-        (x0, y0, conf0),   # Nose
-        (x1, y1, conf1),   # L Eye
-        (x2, y2, conf2),   # R Eye
-        ...
-        (x9, y9, conf9),   # L Wrist ← QUAN TRỌNG
-        (x10, y10, conf10) # R Wrist ← QUAN TRỌNG
-        ...
-    ],
-    'confidence': 0.92
-}
-```
-
-**Các Keypoints Quan Trọng:**
-| Index | Tên | Ứng Dụng |
-|-------|-----|---------|
-| 0 | Nose (Mũi) | Vị trí miệng (mouth region) |
-| 5 | L Shoulder (Vai trái) | Tính kích thước cơ thể |
-| 6 | R Shoulder (Vai phải) | Tính kích thước cơ thể |
-| 7 | L Elbow (Khuỷu tay trái) | Phát hiện tay cầm/grasping |
-| 8 | R Elbow (Khuỷu tay phải) | Phát hiện tay cầm/grasping |
-| 9 | L Wrist (Cổ tay trái) | **CHÍNH: Tính H-M distance** |
-| 10 | R Wrist (Cổ tay phải) | **CHÍNH: Tính H-M distance** |
-
-### 3.2. Bài Toán Phát Hiện Vật Thể (Object Detection)
-
-**Input:** Frame hình ảnh  
-**Output:** Bounding boxes của vật thể
-
-```python
-# YOLOv8 Object Detection
-Input: frame
-          ↓
-    [YOLOv8-Detect Model (confidence >= 0.25)]
-          ↓
-Output: [
-    {
-        'class': 'bottle',
-        'confidence': 0.87,
-        'bbox': [x1, y1, x2, y2],  # Top-left, bottom-right
-        'center': (cx, cy)
-    },
-    {
-        'class': 'spoon',
-        'confidence': 0.76,
-        'bbox': [...],
-        'center': (...)
-    },
-    ...
-]
-```
-
-**Các Vật Thể Nguy Hiểm:**
-```
-CMOS Dataset Classes:
-- bottle (chai nước)
-- spoon (thìa)
-- cup (tách/cốc)
-- toy (đồ chơi)
-
-Riêng tương đối vật thể:
-- Small objects (tính non_max_suppression)
-- Thin objects (dễ sặc)
-- Hard objects (gây chấn thương)
-```
-
-### 3.3. Bài Toán Tính Khoảng Cách
-
-#### A. Hand-to-Mouth Distance (Euclidean)
-
-```
-CÔNG THỨC:
-    d_H-M = √[(x_wrist - x_nose)² + (y_wrist - y_nose)²]
-
-VÍ DỤ:
-    left_wrist = (150, 200)
-    nose = (160, 180)
-    
-    d = √[(150-160)² + (200-180)²]
-      = √[(-10)² + (20)²]
-      = √[100 + 400]
-      = √500
-      = 22.4 pixels
-      
-LOGIC:
-    if d_H-M < threshold:
-        Status = "HAND_TO_MOUTH" ⚠️
-    else:
-        Status = "SAFE" ✅
-```
-
-#### B. Hand-to-Object Distance (Boundary-based)
-
-```
-CÔNG THỨC:
-    closest_x = clamp(wrist_x, box_x1, box_x2)
-              = min(max(wrist_x, box_x1), box_x2)
-    
-    closest_y = clamp(wrist_y, box_y1, box_y2)
-              = min(max(wrist_y, box_y1), box_y2)
-    
-    d_H-O = √[(wrist_x - closest_x)² + (wrist_y - closest_y)²]
-
-VÍ DỤ:
-    wrist = (150, 200)
-    object_box = [100, 150, 200, 250]  # x1, y1, x2, y2
-    
-    closest_x = clamp(150, 100, 200) = 150
-    closest_y = clamp(200, 150, 250) = 200
-    
-    d_H-O = √[(150-150)² + (200-200)²] = 0
-    
-    → Tay nằm TRONG vật thể → DANGER!
-    
-LOGIC:
-    if d_H-O < threshold:
-        Status = "OBJECT_TO_MOUTH" 🚨
-    else:
-        Status = "SAFE" ✅
-```
-
-#### C. Dynamic Threshold (Ngưỡng Động)
-
-```
-CÔNG THỨC:
-    shoulder_width = distance(left_shoulder, right_shoulder)
-    
-    threshold_H-M = shoulder_width × 1.2
-    threshold_H-O = shoulder_width × 1.0
-
-LÝ DO CÓ NGƯỠNG ĐỘNG:
-    - Trẻ 3 tháng: vai hẹp (70px) → ngưỡng 84px
-    - Trẻ 6 tháng: vai trung bình (100px) → ngưỡng 120px
-    - Trẻ 12 tháng: vai rộng (130px) → ngưỡng 156px
-    
-    → Độ nhạy cảm tự động điều chỉnh theo kích thước trẻ!
-
-VÍ DỤ TÍNH TOÁN:
-    Frame 1:
-        left_shoulder = (200, 150)
-        right_shoulder = (350, 150)
-        shoulder_width = distance = 150px
-        
-        threshold_H-M = 150 × 1.2 = 180px ← ngưỡng này
-        threshold_H-O = 150 × 1.0 = 150px
-        
-    Frame 2: (trẻ move gần camera)
-        left_shoulder = (180, 160)
-        right_shoulder = (380, 160)
-        shoulder_width = 200px
-        
-        threshold_H-M = 200 × 1.2 = 240px ← ngưỡng thay đổi!
-        threshold_H-O = 200 × 1.0 = 200px
-```
+Để đưa ra quyết định, hệ thống không chỉ dựa trên một khung hình đơn lẻ mà còn tích hợp các tín hiệu theo thời gian. Việc này giúp giảm cảnh báo sai do nhiễu, tăng độ tin cậy của hệ thống và phù hợp hơn với nguyên lý giám sát thời gian thực.
 
 ---
 
-## 4. BÀI TOÁN CẢNH BÁO
+## 4. Dữ liệu đầu vào và đầu ra
 
-### 4.1. Quy Trình Cảnh Báo
+### 4.1. Dữ liệu đầu vào
 
-```
-┌─────────────────────────────────────────────────┐
-│          QUY TRÌNH PHÁT CẢNH BÁO                │
-└─────────────────────────────────────────────────┘
+Hệ thống có thể tiếp nhận các loại dữ liệu sau:
 
-BƯỚC 1: PHÁT HIỆN HÀNH ĐỘNG NGUY HIỂM
-    status = "HAND_TO_MOUTH" hoặc "OBJECT_TO_MOUTH"
-    ↓
+- Ảnh tĩnh
+- Video từ file MP4/AVI/MOV
+- Luồng camera trực tiếp từ webcam hoặc thiết bị camera kết nối
 
-BƯỚC 2: BẮT ĐẦU ĐẾM THỜI GIAN
-    danger_start_time = current_time
-    danger_duration = 0
-    ↓
+Từng khung hình đầu vào được chuyển về dạng ảnh RGB để chạy inference.
 
-BƯỚC 3: LẶP LẠI PHÁT HIỆN
-    for frame in stream:
-        if still_in_danger:
-            danger_duration = current_time - danger_start_time
-        else:
-            danger_duration = 0
-            status = "SAFE"
-    ↓
+### 4.2. Dữ liệu đầu ra
 
-BƯỚC 4: KIỂM TRA KỲ HẠN
-    if danger_duration >= 3.0 seconds:  # Threshold configurable
-        trigger_alert = True
-    else:
-        trigger_alert = False (chưa alert)
-    ↓
+Mỗi khung hình sau khi xử lý sẽ sinh ra các đầu ra sau:
 
-BƯỚC 5: PHÁT ALERT
-    if trigger_alert:
-        ├─ Sound Alert
-        │  └─ play_sound(frequency, duration)
-        │
-        ├─ Email Alert
-        │  └─ send_email(subject, body, attachment)
-        │
-        ├─ Webhook Alert
-        │  └─ send_http_post(alert_data)
-        │
-        └─ Log Alert
-           └─ write_to_csv(timestamp, status, duration, distances)
-    ↓
-
-BƯỚC 6: RESET
-    danger_duration = 0
-    next_alert_time = current_time + cooldown_period
-```
-
-### 4.2. Các Loại Alert
-
-#### A. Sound Alert (Cảnh Báo Âm Thanh)
-
-```
-LEVEL 1: WARNING (Tay gần miệng)
-    ├─ Frequency: 800 Hz
-    ├─ Duration: 300 ms (0.3 giây)
-    └─ Pattern: 1 lần
-        Âm thanh: "Beep!" (ngắn)
-        Mục đích: Cho biết hành động bắt đầu nguy hiểm
-
-LEVEL 2: CRITICAL (Vật vào miệng)
-    ├─ Frequency: 1000 Hz
-    ├─ Duration: 500 ms × 2 (0.5 giây × 2)
-    └─ Pattern: Nhiều lần
-        Âm thanh: "Beep-Beep!" (dài hơn, hối hả hơn)
-        Mục đích: Báo động nguy hiểm cao
-```
-
-#### B. Email Alert
-
-```
-KÍCH HOẠT WHEN:
-    - danger_duration > 5 seconds
-    - status = "OBJECT_TO_MOUTH"
-
-EMAIL CONTENT:
-    To: parent_email@gmail.com
-    Subject: 🚨 BabyWatcher Alert: HAND_TO_MOUTH
-    
-    Body:
-    ┌─────────────────────────────────────────┐
-    │ BABYWATCHER ALERT                       │
-    │                                         │
-    │ Danger Type: HAND_TO_MOUTH              │
-    │ Duration: 5.2 seconds                   │
-    │ Timestamp: 2026-05-31 10:30:15          │
-    │ Distance: 45.2 pixels (< 180px)         │
-    │                                         │
-    │ [Danger Clip Attached]                  │
-    │ HAND_TO_MOUTH_20260531_103015.jpg      │
-    │                                         │
-    │ Action: Check on baby immediately      │
-    └─────────────────────────────────────────┘
-    
-    Attachment: Screenshot từ frame nguy hiểm
-```
-
-#### C. Webhook Alert
-
-```
-KÍCH HOẠT WHEN:
-    - Cấu hình webhook URL
-    - Nguy hiểm phát hiện
-
-HTTP POST REQUEST:
-    URL: https://your-server.com/api/alerts
-    
-    JSON Body:
-    {
-        "timestamp": "2026-05-31T10:30:15.123Z",
-        "status": "HAND_TO_MOUTH",
-        "duration_seconds": 5.2,
-        "hand_mouth_distance": 45.2,
-        "hand_object_distance": 0.0,
-        "frame_saved": true,
-        "clip_path": "danger_clips/HAND_TO_MOUTH_20260531_103015.jpg",
-        "confidence": 0.92
-    }
-    
-INTEGRATION:
-    - Smart home systems
-    - IoT devices
-    - Remote monitoring dashboards
-    - Analytics platforms
-```
+- Kết quả phát hiện pose gồm các keypoint của cơ thể
+- Kết quả phát hiện vật thể gồm bounding box và độ tin cậy
+- Khoảng cách hình học giữa tay và miệng, tay và vật thể
+- Trạng thái hiện thời của trẻ
+- Thông tin cảnh báo và log sự kiện
+- Ảnh hoặc clip lưu khi phát hiện tình huống nguy hiểm
 
 ---
 
-## 5. ĐÁNH GIÁ HỆ THỐNG
+## 5. Luồng xử lý của hệ thống
 
-### 5.1. Metrics Kỹ Thuật
+Tổng quan về quy trình xử lý của hệ thống được mô tả như sau:
 
-```
-┌──────────────────────────────────────────────────────┐
-│         ĐÁNH GIÁ HIỆU SUẤT HỆ THỐNG                  │
-└──────────────────────────────────────────────────────┘
-
-1. ĐỘ CHÍNH XÁC (Accuracy Metrics)
-   ├─ Precision: 87%
-   │  └─ Trong số các dự đoán NGUY HIỂM, có 87% đúng
-   │
-   ├─ Recall: 91%
-   │  └─ Trong số các hành động NGUY HIỂM thực tế, catch 91%
-   │
-   ├─ F1-Score: 0.89
-   │  └─ Cân bằng giữa precision & recall
-   │
-   └─ mAP@0.5: 0.85
-      └─ Mean average precision (Pose + Object detection)
-
-2. TỐC ĐỘ XỬ LÝ (Performance Metrics)
-   ├─ FPS: 18.5 FPS trung bình
-   │  └─ Tốc độ xử lý video (khung hình/giây)
-   │
-   ├─ Latency: 25ms per frame
-   │  ├─ Input resize: 2.5ms (10%)
-   │  ├─ Pose detection: 12.3ms (49%)
-   │  ├─ Object detection: 6.8ms (27%)
-   │  ├─ Distance calc: 1.2ms (5%)
-   │  └─ Alert/Log: 2.2ms (9%)
-   │
-   └─ Alert Response Time: < 2 seconds
-      └─ Từ phát hiện nguy hiểm đến cảnh báo
-
-3. TÍNH ỔNĐỊNH (Stability Metrics)
-   ├─ System Uptime: 99.2% (17 days)
-   │  └─ Hoạt động liên tục mà không crash
-   │
-   ├─ False Positive Rate: 4.2%
-   │  └─ Cảnh báo sai (không phải nguy hiểm)
-   │
-   ├─ False Negative Rate: 3.8%
-   │  └─ Bỏ sót (nguy hiểm không phát hiện)
-   │
-   └─ Memory Stability: No leak
-      └─ Memory usage ổn định theo thời gian
-
-4. SỰ KIỆN GHI NHẬ N (Event Logging)
-   ├─ Total Events: 963 events / 17 days
-   │  ├─ Hand-to-Mouth: 760 (78.9%)
-   │  └─ Object-to-Mouth: 203 (21.1%)
-   │
-   ├─ Danger Clips Saved: 292 images (28.4MB)
-   │  └─ Auto-exported từ danger_clips/
-   │
-   └─ CSV Logging: Complete
-      └─ timestamp, status, duration, distances
+```mermaid
+flowchart TD
+    A[Thu nhận khung hình] --> B[Tiền xử lý ảnh]
+    B --> C[Phát hiện pose]
+    B --> D[Phát hiện vật thể]
+    C --> E[Phân tích khoảng cách và quan hệ hình học]
+    D --> E
+    E --> F[Đánh giá trạng thái nguy hiểm]
+    F --> G[Cảnh báo và ghi log]
+    F --> H[Lưu clip nguy hiểm]
 ```
 
-### 5.2. So Sánh Với Các Giải Pháp Khác
+### 5.1. Bước 1: Thu nhận khung hình
 
-```
-┌─────────────────────────────────────────────────────────┐
-│     SO SÁNH BABYWATCHER VỚI CÁC GIẢI PHÁP KHÁC         │
-└─────────────────────────────────────────────────────────┘
+Hệ thống bắt đầu bằng việc đọc một khung hình từ đầu vào. Khung hình có thể đến từ camera, video hoặc ảnh tĩnh. Đây là đơn vị dữ liệu cơ bản cho toàn bộ quy trình.
 
-                 BabyWatcher    Commercial    Manual
-                 (Chúng tôi)    Systems      Monitoring
-────────────────────────────────────────────────────────
-Độ chính xác       89%            95%          100%
-────────────────────────────────────────────────────────
-Tốc độ (FPS)       18-25          5-10         N/A
-────────────────────────────────────────────────────────
-Chi phí ban đầu    $0 (mã mở)     $500-$2000   N/A
-────────────────────────────────────────────────────────
-Chi phí vận hành    $0/month       $10-50/mo    N/A
-────────────────────────────────────────────────────────
-Setup time         5 phút          30 phút      N/A
-────────────────────────────────────────────────────────
-Edge computing     ✅ (Jetson)    ❌ (Cloud)   N/A
-────────────────────────────────────────────────────────
-Privacy (data)     ✅ (Local)     ⚠️ (Cloud)   ✅
-────────────────────────────────────────────────────────
-Offline work       ✅ Có          ❌ Không     ✅
-────────────────────────────────────────────────────────
-Khả năng mở rộng   ✅ Cao         ⚠️ Trung     ❌ Thấp
-────────────────────────────────────────────────────────
+### 5.2. Bước 2: Tiền xử lý khung hình
 
-NHẬN XÉT:
-✅ BabyWatcher: Chi phí thấp, offline, mã mở, dễ mở rộng
-⚠️ Commercial: Độ chính xác cao hơn nhưng đắt tiền
-✅ Manual: Chính xác 100% nhưng không thực tế
-```
+Khung hình được chuẩn hóa để phù hợp với mô hình inference. Quá trình này bao gồm:
+
+- Đổi định dạng ảnh sang RGB
+- Điều chỉnh kích thước phù hợp
+- Loại bỏ nhiễu sơ bộ nếu cần
+- Chuẩn bị dữ liệu cho hai nhánh phát hiện song song
+
+### 5.3. Bước 3: Phát hiện pose
+
+Hệ thống sử dụng mô hình YOLOv8-pose để xác định các điểm khớp trên cơ thể trẻ. Các keypoint quan trọng gồm:
+
+- Nose: điểm tương ứng với vùng mũi/miệng
+- Left/Right Shoulder: dùng để ước lượng kích thước cơ thể
+- Left/Right Wrist: dùng để đánh giá vị trí tay
+- Các keypoint khác hỗ trợ việc vẽ skeleton và phân tích tư thế
+
+Các keypoint này được dùng làm nền tảng cho việc tính toán độ gần giữa tay và miệng.
+
+### 5.4. Bước 4: Phát hiện vật thể
+
+Đồng thời, hệ thống chạy mô hình YOLOv8-detect để phát hiện các vật thể có thể xuất hiện trong khung hình như chai, thìa, đồ chơi hoặc các đối tượng có thể được trẻ cầm hoặc đặt gần miệng.
+
+Kết quả đầu ra bao gồm:
+
+- Bounding box của vật thể
+- Độ tin cậy của phát hiện
+- Loại đối tượng nếu có
+
+### 5.5. Bước 5: Tính toán khoảng cách hình học
+
+Sau khi có các keypoint và bounding box, hệ thống tính toán các khoảng cách quan trọng:
+
+- Khoảng cách từ tay đến miệng: $d_{hand-mouth}$
+- Khoảng cách từ tay đến biên hộp của vật thể: $d_{hand-object}$
+- Khoảng cách từ vật thể đến vùng miệng: $d_{object-mouth}$
+
+Khoảng cách này được tính bằng khoảng cách Euclidean giữa hai điểm hoặc giữa một điểm và biên của box.
+
+### 5.6. Bước 6: Xác định trạng thái nguy hiểm
+
+Hệ thống không lập tức kết luận nguy hiểm chỉ dựa trên một khung hình. Thay vào đó, nó áp dụng ba lớp kiểm tra:
+
+1. Kiểm tra mức độ gần giữa tay và miệng
+2. Kiểm tra mức độ gần giữa vật thể và miệng
+3. Kiểm tra tín hiệu này có lặp lại qua nhiều khung hình liên tiếp hay không
+
+Nhờ vậy, hệ thống có thể giảm thiểu trường hợp báo động sai do nhiễu và tăng tính ổn định.
 
 ---
 
-## 6. ĐÁNH GIÁ PHẦN MỀM (Software Evaluation)
+## 6. Logic quyết định trạng thái
 
-### 6.1. Kiến Trúc Phần Mềm
+### 6.1. Trạng thái SAFE
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              KIẾN TRÚC HỆ THỐNG PHẦN MỀM                    │
-└─────────────────────────────────────────────────────────────┘
+Trạng thái SAFE được gán khi hệ thống không phát hiện tín hiệu đủ lớn để cho rằng trẻ đang có hành vi nguy hiểm. Điều kiện này xảy ra khi:
 
-INPUT LAYER
-    ├─ Camera Stream (USB Webcam)
-    ├─ Video File (MP4, AVI, etc.)
-    └─ Image File (JPG, PNG)
-    
-PROCESSING LAYER
-    ├─ Frame Reader (OpenCV)
-    ├─ Pose Estimator (YOLOv8-Pose)
-    ├─ Object Detector (YOLOv8-Detect)
-    ├─ Distance Calculator (NumPy)
-    ├─ Alert Manager (Multi-channel)
-    └─ Logger (CSV + Image export)
-    
-STORAGE LAYER
-    ├─ Event Log (logs/events_log.csv)
-    ├─ Danger Clips (danger_clips/*.jpg)
-    ├─ System Log (logs/babywatcher.log)
-    └─ Configuration (config.yaml)
-    
-OUTPUT LAYER
-    ├─ Sound Alerts (Windows/Linux)
-    ├─ Email Notifications (SMTP)
-    ├─ Webhook Calls (HTTP POST)
-    └─ Display/Visualization (OpenCV GUI)
-```
+- Tay không ở gần miệng
+- Vật thể không xuất hiện ở vùng gần miệng
+- Tín hiệu không lặp lại đủ lâu trên nhiều khung hình
 
-### 6.2. Đánh Giá Chất Lượng Phần Mềm
+### 6.2. Trạng thái HAND_TO_MOUTH
 
-```
-1. MODULARITY (Tính Module)
-   ✅ Cấu trúc rõ ràng:
-      - detector.py: Điều phối phát hiện
-      - alerts.py: Quản lý cảnh báo
-      - logger.py: Ghi log sự kiện
-      - utils.py: Hàm tiện ích
-      - config.py: Quản lý cấu hình
+Trạng thái này được kích hoạt khi tay của trẻ xuất hiện ở gần vùng miệng. Đây là dấu hiệu ban đầu của hành vi đưa tay vào miệng. Hệ thống xem đây là một tín hiệu cảnh báo mức độ trung bình và có thể tăng mức độ cảnh báo khi tín hiệu này kéo dài.
 
-2. MAINTAINABILITY (Dễ Bảo Trì)
-   ✅ Code comments rõ ràng
-   ✅ Lỗi handling toàn diện
-   ✅ Logging chi tiết ở mỗi bước
-   ✅ Configuration file centralized
+### 6.3. Trạng thái OBJECT_TO_MOUTH
 
-3. SCALABILITY (Khả Năng Mở Rộng)
-   ✅ Multi-camera support (design ready)
-   ✅ Cloud integration (webhook support)
-   ✅ Custom model support (Roboflow integration)
-   ✅ Platform agnostic (Windows/Linux/Jetson)
-
-4. SECURITY (Bảo Mật)
-   ✅ Local processing (no cloud data)
-   ✅ Secure SMTP for email
-   ✅ YAML-based config (no hardcoded secrets)
-   ✅ File access controls
-
-5. PERFORMANCE (Hiệu Suất)
-   ✅ 18-25 FPS real-time
-   ✅ <2s alert latency
-   ✅ Memory efficient (~900MB)
-   ✅ GPU/CPU auto-select
-
-6. RELIABILITY (Độ Tin Cậy)
-   ✅ 99.2% uptime (17 days)
-   ✅ Graceful error handling
-   ✅ Automatic recovery
-   ✅ Data persistence
-```
+Trạng thái này được kích hoạt khi vật thể xuất hiện ở vùng gần miệng và có dấu hiệu liên quan đến hành vi trẻ cầm hoặc đưa vật vào miệng. Đây thường được xem là mức nguy hiểm cao hơn vì có thể liên quan đến việc nuốt phải vật thể hoặc gây sặc.
 
 ---
 
-## 7. ĐÁNH GIÁ PHẦN CỨNG (Hardware Evaluation)
+## 7. Ngưỡng động và cơ chế giảm cảnh báo giả
 
-### 7.1. Yêu Cầu Phần Cứng
+Một điểm quan trọng của hệ thống là sử dụng ngưỡng động thay vì ngưỡng cố định. Ngưỡng được tính toán dựa trên kích thước cơ thể trẻ, thông qua khoảng cách giữa hai vai. Vì mỗi trẻ có kích thước khác nhau, việc dùng ngưỡng động giúp hệ thống thích nghi tốt hơn với từng trường hợp cụ thể.
 
-```
-┌──────────────────────────────────────────────┐
-│      YÊU CẦU CẤU HÌNH PHẦN CỨNG             │
-└──────────────────────────────────────────────┘
+Trong phần triển khai hiện tại, hệ thống sử dụng các tham số như:
 
-TÙYCHỌN 1: DESKTOP/LAPTOP (Tối ưu)
-    ├─ CPU: Intel i5-10400F hoặc tương đương
-    ├─ RAM: 16GB DDR4
-    ├─ GPU: NVIDIA GTX 1650 4GB (tùy chọn)
-    ├─ Storage: 256GB SSD
-    └─ Power: ~100W TDP
-    
-    Performance:
-    - FPS: 15-25 FPS (balanced)
-    - Latency: 25-40ms per frame
-    - Memory: 800-1200MB
+- hand_mouth_multiplier: dùng để điều chỉnh ngưỡng tay-miệng
+- hand_object_multiplier: dùng để điều chỉnh ngưỡng tay-vật thể
+- object_mouth_multiplier: dùng để điều chỉnh ngưỡng vật thể-miệng
+- confirmation_frames: yêu cầu tín hiệu lặp lại qua nhiều frame trước khi xác nhận
+- sustained_danger_duration: yêu cầu tín hiệu nguy hiểm phải duy trì trong một khoảng thời gian nhất định
 
-TÙYCHỌN 2: JETSON NANO (Edge Computing)
-    ├─ Jetson Nano Developer Kit
-    ├─ Quad-core ARM A57 @ 1.43GHz
-    ├─ 4GB LPDDR4 RAM
-    ├─ 128GB Micro SD Card
-    ├─ CSI Camera Module (optional)
-    └─ Power: ~5W TDP
-    
-    Performance:
-    - FPS: 8-12 FPS (TensorRT optimized)
-    - Latency: 80-120ms per frame
-    - Memory: 750-900MB
-
-TÙYCHỌN 3: RASPBERRY PI 4 (Budget)
-    ├─ Quad-core ARM Cortex-A72 @ 1.5GHz
-    ├─ 8GB LPDDR4 RAM
-    ├─ 256GB SD Card
-    ├─ USB Camera
-    └─ Power: ~5W TDP
-    
-    Performance:
-    - FPS: 4-8 FPS (limited)
-    - Latency: 120-200ms per frame
-    - Memory: 900-1100MB
-```
-
-### 7.2. Đánh Giá Phần Cứng
-
-```
-DESKTOP/LAPTOP: ⭐⭐⭐⭐⭐
-    ✅ Tốc độ nhanh (25 FPS)
-    ✅ Độ chính xác cao (93%)
-    ✅ Setup dễ dàng
-    ✅ Chi phí vừa phải
-    ❌ Tiêu thụ điện nhiều
-    ❌ Cần không gian (không portable)
-
-JETSON NANO: ⭐⭐⭐⭐
-    ✅ Edge computing (offline)
-    ✅ Tiêu thụ điện ít (5W)
-    ✅ TensorRT acceleration
-    ✅ IoT-friendly
-    ⚠️ FPS thấp hơn (8-12)
-    ⚠️ Setup phức tạp
-
-RASPBERRY PI: ⭐⭐⭐
-    ✅ Giá rẻ (~$50)
-    ✅ Tiêu thụ điện rất ít
-    ✅ Compact, portable
-    ❌ FPS rất thấp (4-8)
-    ❌ Độ chính xác giảm
-    ❌ Không đủ RAM tối ưu
-
-CAMERA REQUIREMENTS:
-    ├─ Minimum: 480×640 (nhưng không lý tưởng)
-    ├─ Recommended: 1280×720 or 1920×1080
-    ├─ Frame rate: 30 FPS hoặc cao hơn
-    ├─ Lens: Wide-angle (80-100°) để catch toàn cảnh
-    └─ Low-light: Tốt nhất là camera có IR hoặc low-light sensor
-```
+Nhờ những cơ chế này, hệ thống có thể giảm đáng kể tình trạng báo động sai từ các chuyển động ngắn, ngẫu nhiên hoặc do nhiễu.
 
 ---
 
-## 8. LẤY DỮ LIỆU NHƯ THẾ NÀO
+## 8. Cơ chế cảnh báo và lưu trữ
 
-### 8.1. Nguồn Dữ Liệu
+Khi trạng thái nguy hiểm được xác nhận, hệ thống sẽ kích hoạt các cơ chế sau:
 
-```
-┌────────────────────────────────────────────┐
-│        NGUỒN DỮ LIỆU CỦA HỆ THỐNG         │
-└────────────────────────────────────────────┘
+- Phát âm thanh cảnh báo
+- Gửi email nếu cấu hình được bật
+- Gửi webhook nếu được cấu hình
+- Ghi nhận sự kiện vào file CSV
+- Lưu ảnh clip nguy hiểm vào thư mục lưu trữ
 
-1. REAL-TIME VIDEO STREAM
-   ├─ USB Webcam
-   ├─ Integrated laptop camera
-   ├─ IP Camera (RTSP stream)
-   └─ Jetson CSI Camera module
-   
-   Format: RGB frames @ 30-60 FPS
-
-2. VIDEO FILES
-   ├─ MP4, AVI, MOV formats
-   ├─ Resolution: 480×640 to 1920×1080
-   └─ Frame rate: Variable (calculated by OpenCV)
-
-3. IMAGE FILES
-   ├─ JPG, PNG formats
-   ├─ Single frame processing
-   └─ Batch processing support
-
-4. TRAINING DATASETS
-   ├─ Roboflow babyMonitor2 dataset
-   │  - 1594 images
-   │  - 4 classes: baby, blanket, other, toy
-   │  - Annotations: COCO format
-   │
-   ├─ Custom labeled data
-   │  - Manually annotated from real videos
-   │  - Danger clips as training examples
-   │
-   └─ Transfer learning (COCO 80 classes)
-      - Pre-trained YOLO weights
-```
-
-### 8.2. Dữ Liệu Đầu Ra (Output Data)
-
-```
-┌────────────────────────────────────────────┐
-│          DỮ LIỆU ĐẦU RA (OUTPUT)          │
-└────────────────────────────────────────────┘
-
-1. EVENT LOG (CSV Format)
-   File: logs/events_log.csv
-   
-   Columns:
-   ├─ timestamp: 2026-05-31 10:30:15.123
-   ├─ status: HAND_TO_MOUTH / OBJECT_TO_MOUTH / SAFE
-   ├─ duration_seconds: 2.5
-   ├─ hand_mouth_distance: 45.2
-   ├─ hand_object_distance: 67.3
-   ├─ frame_saved: 0/1 (boolean)
-   └─ notes: Optional annotations
-   
-   Total events: 963 (từ 17 ngày)
-
-2. DANGER CLIPS (Images)
-   Directory: danger_clips/
-   
-   Naming convention:
-   └─ HAND_TO_MOUTH_20260531_103015.jpg
-   └─ OBJECT_TO_MOUTH_20260531_103015.jpg
-   
-   Content:
-   ├─ Skeleton overlay (17 keypoints)
-   ├─ Bounding boxes (vật thể)
-   ├─ Distance lines (khoảng cách)
-   ├─ Status text ("DANGER!")
-   └─ Metadata in filename (timestamp)
-   
-   Total clips: 292 images (28.4MB)
-
-3. SYSTEM LOG (Text Format)
-   File: logs/babywatcher.log
-   
-   Example entries:
-   ├─ [2026-05-31 10:30:15] INFO - Frame 1234 processed
-   ├─ [2026-05-31 10:30:16] WARNING - Danger detected!
-   ├─ [2026-05-31 10:30:17] ERROR - Alert send failed
-   ├─ [2026-05-31 10:30:18] INFO - Event logged (duration: 2.5s)
-   └─ [2026-05-31 10:30:19] INFO - Danger clip saved
-
-4. CONFIGURATION FILE
-   File: config.yaml
-   
-   Content:
-   └─ detection thresholds
-   └─ alert settings
-   └─ model paths
-   └─ performance tuning
-   └─ hardware platform
-```
+Mục tiêu của các cơ chế này là vừa giúp người dùng nhận biết tức thì vừa tạo ra dữ liệu lịch sử để kiểm tra và phân tích sau này.
 
 ---
 
-## 9. HÀNH ĐỘNG NHƯ THẾ NÀO LÀ NGUY HIỂM?
+## 9. Mô hình thực hiện hiện tại
 
-### 9.1. Định Nghĩa Nguy Hiểm
+Hệ thống hiện tại được triển khai theo kiến trúc modular, gồm các thành phần chính sau:
 
-```
-┌─────────────────────────────────────────────────────────┐
-│    HÀ NH ĐỘNG NGUY HI ỂM - ĐỊNH NGHĨA & PHÁT HIỆN     │
-└─────────────────────────────────────────────────────────┘
+- Module phát hiện pose
+- Module phát hiện vật thể
+- Module phân tích hình học
+- Module quyết định trạng thái
+- Module cảnh báo
+- Module ghi log và lưu clip
 
-CATEGORY A: HAND-TO-MOUTH DANGER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Điểm mạnh của kiến trúc này là mỗi thành phần có trách nhiệm rõ ràng, giúp hệ thống dễ bảo trì, kiểm thử và mở rộng trong tương lai.
 
-1. Tay trần vào miệng (WITHOUT object)
-   
-   Định nghĩa:
-   - Wrist keypoint < threshold từ Nose keypoint
-   - Không có bounding box vật thể gần
-   - Tay đang cầm không có gì
-   
-   Phát hiện:
-   - if H_M_distance < shoulder_width × 1.2:
-   - if H_O_distance > shoulder_width × 1.0:
-   - then: HAND_TO_MOUTH_DANGER ⚠️
-   
-   Mức độ:
-   - Distance 20-50px: Tay VẬY gần miệng (hối hả)
-   - Distance 0-20px: Tay CHẠM miệng (rất gần)
-   - Duration < 1s: Lỏng lẻo
-   - Duration > 3s: Bắt đầu nguy hiểm
-   - Duration > 10s: Rất nguy hiểm
-   
-   Nguy hiểm:
-   - Ốm vặt (bàn tay bẩn)
-   - Nhiễm khuẩn
-   - Hôi miệng, bệnh nha chu
-   
-   Ví dụ thực tế:
-   - Frame: Trẻ đặt bàn tay vào miệng
-   - H-M distance: 35.2px < threshold 150px → ALERT
-   - Duration: 5.2 seconds > 3s → TRIGGER SOUND
-   - Status: "HAND_TO_MOUTH" ⚠️
+### Bảng tổng hợp các thành phần chính
 
-2. Tay vào miệng (WITH object - hand cầm vật)
-   
-   Định nghĩa:
-   - Wrist < threshold từ Nose AND
-   - Object box < threshold từ Nose
-   - Tay cầm vật thể (vật thể gần Wrist)
-   
-   Phát hiện:
-   - if H_M_distance < threshold AND
-   - if H_O_distance < threshold:
-   - then: OBJECT_TO_MOUTH_DANGER 🚨
-   
-   Mức độ:
-   - Critical: Vật thể rất gần miệng (< 25px)
-   - Warning: Vật thể gần miệng (25-50px)
-   
-   Nguy hiểm:
-   - Sặc (choking)
-   - Tắc cổ họng
-   - Ngộ độc nếu vật bẩn/độc
-   - Phản ứng dị ứng
-   - Chấn thương miệng/dạ dày
-   
-   Ví dụ thực tế:
-   - Frame: Trẻ cầm cái chai, đưa vào miệng
-   - H-M distance: 45.2px < 150px
-   - H-O distance: 0px < 120px (vật IN HAND)
-   - Status: "OBJECT_TO_MOUTH" 🚨 (CRITICAL)
-
-
-CATEGORY B: OBJECT-TO-MOUTH DANGER (NO HAND)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-3. Vật thể vào miệng trực tiếp (vật không do tay cầm)
-   
-   Định nghĩa:
-   - Object bounding box gần Nose
-   - Wrist NOT near Nose (tay không vào)
-   - Vật thể rơi hoặc được đặt gần miệng
-   
-   Phát hiện:
-   - if bbox_object_to_nose < threshold AND
-   - if H_M_distance > threshold:
-   - then: OBJECT_TO_MOUTH_DANGER 🚨
-   
-   Mức độ:
-   - Direct touch: Vật thể chạm miệng (0-10px)
-   - Very close: Vật thể rất gần (10-30px)
-   - Close: Vật thể gần (30-50px)
-   
-   Nguy hiểm:
-   - Trẻ hôi vật thể
-   - Vật thể rơi vào miệng
-   - Trẻ ăn vô tình
-   - Nuốt phải vật lạ
-   
-   Ví dụ thực tế:
-   - Frame: Cái thìa hoặc đồ chơi nằm trên cơm, gần miệng
-   - Object to Nose distance: 15px < 50px
-   - H-M distance: 200px > 150px (tay không vào)
-   - Status: "OBJECT_TO_MOUTH" 🚨 (WARNING)
-```
-
-### 9.2. Hành Động An Toàn (SAFE)
-
-```
-┌────────────────────────────────────────────────────┐
-│      HÀNH ĐỘNG AN TOÀN - KHÔNG NGUY HIỂM           │
-└────────────────────────────────────────────────────┘
-
-CASE 1: Tay ngoài miệng, không vật thể
-   Điều kiện:
-   - H_M_distance > shoulder_width × 1.2
-   - H_O_distance > shoulder_width × 1.0 (không vật)
-   
-   Status: "SAFE" ✅
-   
-   Ví dụ:
-   - Trẻ cử động tay ở cách xa (300px từ miệng)
-   - H-M distance: 260px > 150px
-   - Status: "SAFE" ✅
-   - Alert: KHÔNG (safe status)
-
-CASE 2: Tay ngoài miệng, vật thể xa miệng
-   Điều kiện:
-   - H_M_distance > threshold
-   - H_O_distance > threshold
-   - Object không gần miệng
-   
-   Status: "SAFE" ✅
-   
-   Ví dụ:
-   - Trẻ cầm đồ chơi ở xa miệng (500px)
-   - H-M distance: 280px > 150px
-   - H-O distance: 420px > 120px
-   - Status: "SAFE" ✅
-   - Alert: KHÔNG
-
-CASE 3: Trẻ ngủ (không detect pose)
-   Điều kiện:
-   - Pose confidence < 0.5 (không detect được)
-   
-   Status: "SKIP" (không xử lý)
-   
-   Ví dụ:
-   - Trẻ nằm xuống, mặt không nhìn camera
-   - Pose detection: confidence 0.2 (quá thấp)
-   - Status: "NO_DETECTION" → SKIP
-   - Alert: KHÔNG (không detect được)
-```
-
-### 9.3. Ma Trận Quyết Định (Decision Matrix)
-
-```
-┌──────────────────────────────────────────────────────────┐
-│              MA TRẬN QUYẾT ĐỊNH NGUY HIỂM                │
-└──────────────────────────────────────────────────────────┘
-
-HAND STATUS    OBJECT STATUS   WRIST DISTANCE   STATUS RESULT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Gần miệng       Không có        < threshold      HAND_TO_MOUTH ⚠️
-Gần miệng       Gần miệng        < threshold      OBJECT_TO_MOUTH 🚨
-Gần miệng       Xa miệng         < threshold      HAND_TO_MOUTH ⚠️
-Xa miệng        Không có        > threshold      SAFE ✅
-Xa miệng        Gần miệng        > threshold      OBJECT_TO_MOUTH 🚨
-Xa miệng        Xa miệng         > threshold      SAFE ✅
-No detection    -               N/A              SKIP ❓
-
-DURATION IMPACT:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Duration: 0-1 second       → No alert (lỏng lẻo)
-Duration: 1-3 seconds      → Track (bắt đầu nguy hiểm)
-Duration: 3-5 seconds      → Alert (WARNING)
-Duration: > 5 seconds      → Critical alert (CRITICAL + EMAIL)
-```
+| Thành phần | Vai trò chính | Vai trò trong hệ thống |
+|---|---|---|
+| Pose estimation | Xác định keypoint cơ thể | Cung cấp vị trí tay, vai và vùng miệng |
+| Object detection | Phát hiện vật thể | Xác định các vật thể có thể được trẻ cầm hoặc đặt gần miệng |
+| Phân tích hình học | Tính khoảng cách | Đánh giá mức độ gần giữa tay, vật thể và miệng |
+| Quản lý trạng thái | Quyết định trạng thái nguy hiểm | Chuyển đổi tín hiệu hình học thành trạng thái SAFE/HAND_TO_MOUTH/OBJECT_TO_MOUTH |
+| Cảnh báo | Kích hoạt phản hồi | Phát âm thanh, gửi email hoặc webhook |
+| Ghi log và lưu clip | Lưu dữ liệu lịch sử | Ghi nhận sự kiện và tạo bằng chứng hình ảnh |
 
 ---
 
-## 10. TÓMLẠI & KẾT LUẬN
+## 10. Phương pháp giải quyết
 
-### 10.1. Quy Trình Tổng Thể
+Phương pháp giải quyết được xây dựng theo hướng kết hợp giữa nhận diện hình thái và phân tích tín hiệu theo thời gian. Với mỗi khung hình $F_t$, hệ thống xây dựng một tập đặc trưng hình học gồm vị trí miệng, vị trí tay, vị trí vai và các bounding box của vật thể. Tập này được ký hiệu là:
 
-```
-INPUT STREAM
-    ↓
-[FRAME PROCESSING]
-    ├─ Pose Estimation (17 keypoints)
-    ├─ Object Detection (bounding boxes)
-    └─ Distance Calculation (H-M, H-O)
-    ↓
-[DECISION LOGIC]
-    ├─ Compare with thresholds
-    ├─ Check duration
-    └─ Determine status (SAFE/WARNING/CRITICAL)
-    ↓
-[ALERT GENERATION]
-    ├─ Sound alert (if danger > 3s)
-    ├─ Email notification (if danger > 5s)
-    ├─ Webhook callback (if configured)
-    └─ Event logging (always)
-    ↓
-[OUTPUT & STORAGE]
-    ├─ Display annotated frame
-    ├─ Save danger clip (JPG)
-    ├─ Log to CSV (events_log.csv)
-    └─ Log to system file (babywatcher.log)
-    ↓
-NEXT FRAME
-```
+$$X_t = \{p_{mouth}, p_{lw}, p_{rw}, p_{shoulder}, B_{obj}\}$$
 
-### 10.2. Điểm Mạnh Của Hệ Thống
+Trong đó, $p_{mouth}$ là vị trí vùng miệng, $p_{lw}$ và $p_{rw}$ lần lượt là vị trí tay trái và tay phải, $p_{shoulder}$ dùng để ước lượng kích thước cơ thể và $B_{obj}$ là hộp giới hạn của vật thể được phát hiện.
 
-✅ **Thực thời gian**: 18-25 FPS, latency < 2s  
-✅ **Chính xác cao**: Precision 87%, Recall 91%  
-✅ **Thích ứng động**: Ngưỡng tự điều chỉnh theo kích thước trẻ  
-✅ **Chi phí thấp**: Mã nguồn mở, không phí cloud  
-✅ **Bảo mật**: Xử lý local, không gửi dữ liệu lên server  
-✅ **Dễ mở rộng**: Support multi-camera, custom models  
-✅ **Ổn định**: 99.2% uptime trên 17 ngày  
+### 10.1. Biểu thức khoảng cách và ngưỡng động
 
-### 10.3. Hạn Chế & Hướng Cải Thiện
+Hai nhóm tín hiệu quan trọng được hệ thống quan sát là tín hiệu tay-miệng và tín hiệu vật thể-miệng. Khoảng cách được tính theo công thức Euclidean:
 
-⚠️ **Hiện tại:**
-- Chưa phát hiện hành động nguy hiểm khác (climbing, falling)
-- Chưa tối ưu cho điều kiện ánh sáng kém
-- Chưa có multi-person detection
-- Chưa tích hợp cloud analytics
+$$d_{hm}(t) = \|p_{hand}(t) - p_{mouth}(t)\|_2$$
 
-🚀 **Hướng phát triển:**
-- Train custom model với Roboflow
-- Mở rộng detection: climbing, falling, suffocation risks
-- Jetson optimization + TensorRT
-- Cloud sync + remote dashboard
-- Mobile app (iOS/Android)
+$$d_{om}(t) = \|c_{obj}(t) - p_{mouth}(t)\|_2$$
+
+$$d_{ho}(t) = \|p_{hand}(t) - c_{obj}(t)\|_2$$
+
+Trong đó, $c_{obj}$ là tâm của bounding box vật thể. Vì mỗi trẻ có kích thước khác nhau, hệ thống không dùng ngưỡng cố định mà sử dụng ngưỡng động, được tính theo khoảng cách giữa hai vai:
+
+$$T_{hm}(t) = \alpha_{hm} \cdot d_{shoulder}(t)$$
+
+$$T_{om}(t) = \alpha_{om} \cdot d_{shoulder}(t)$$
+
+$$T_{ho}(t) = \alpha_{ho} \cdot d_{shoulder}(t)$$
+
+với $\alpha_{hm}$, $\alpha_{om}$ và $\alpha_{ho}$ là các hệ số điều chỉnh.
+
+### 10.2. Đánh giá mức độ gần và độ tin cậy tín hiệu
+
+Sau khi tính khoảng cách, hệ thống chuyển các giá trị này thành các điểm tín hiệu chuẩn hóa theo công thức:
+
+$$S_{hm}(t) = \max(0, 1 - \frac{d_{hm}(t)}{T_{hm}(t)})$$
+
+$$S_{om}(t) = \max(0, 1 - \frac{d_{om}(t)}{T_{om}(t)})$$
+
+$$S_{ho}(t) = \max(0, 1 - \frac{d_{ho}(t)}{T_{ho}(t)})$$
+
+Giá trị $S_{hm}$, $S_{om}$ và $S_{ho}$ gần 1 biểu thị mức độ gần gần miệng cao, còn giá trị gần 0 biểu thị tín hiệu yếu hoặc không tồn tại.
+
+### 10.3. Quy trình phân loại trạng thái
+
+Hệ thống không đưa ra quyết định chỉ dựa trên một khung hình duy nhất. Thay vào đó, nó tích hợp tín hiệu theo thời gian bằng cách làm mượt các giá trị tín hiệu:
+
+$$C_k(t) = \lambda C_k(t-1) + (1-\lambda)S_k(t)$$
+
+Trong đó, $k \in \{hm, om, ho\}$ và $\lambda$ là hệ số làm mịn. Công thức này cho phép hệ thống duy trì tín hiệu nếu hành vi nguy hiểm xuất hiện liên tục và giảm bớt ảnh hưởng của nhiễu ngắn hạn.
+
+Quy trình phân loại được thực hiện theo các bước sau:
+
+1. Trích xuất các điểm khớp và hộp vật thể từ khung hình hiện tại.
+2. Tính toán các khoảng cách hình học $d_{hm}$, $d_{om}$ và $d_{ho}$.
+3. So sánh với các ngưỡng động $T_{hm}$, $T_{om}$ và $T_{ho}$.
+4. Chuyển đổi thành các giá trị tín hiệu chuẩn hóa $S_{hm}$, $S_{om}$, $S_{ho}$.
+5. Tích hợp tín hiệu qua nhiều khung hình liên tiếp bằng $C_k(t)$.
+6. Gán nhãn trạng thái dựa trên ngưỡng xác nhận:
+   - Nếu $C_{om}(t)$ vượt ngưỡng xác nhận và vật thể ở gần miệng lâu đủ dài, hệ thống phân loại là OBJECT_TO_MOUTH.
+   - Nếu $C_{hm}(t)$ vượt ngưỡng xác nhận và tay ở gần miệng lâu đủ dài, hệ thống phân loại là HAND_TO_MOUTH.
+   - Nếu không có tín hiệu nào vượt ngưỡng, hệ thống giữ trạng thái SAFE.
+
+Nhờ cách tiếp cận này, hệ thống có thể giảm đáng kể tình trạng cảnh báo sai do nhiễu, đồng thời tăng khả năng nhận diện các hành vi có tính nguy hiểm thực sự.
 
 ---
 
-**Document Generated:** 31/05/2026  
-**Version:** 1.0  
-**Author:** BabyWatcher Team
+## 11. Đánh giá ban đầu về phương pháp
+
+Phương pháp tiếp cận hiện tại có một số ưu điểm rõ ràng:
+
+- Kết hợp được nhiều tín hiệu khác nhau: pose, object và khoảng cách hình học
+- Có khả năng hoạt động gần thời gian thực
+- Có thể giảm cảnh báo giả thông qua một số cơ chế kiểm tra theo thời gian
+- Dễ mở rộng với các loại cảnh báo và dữ liệu mới
+
+Tuy nhiên, hệ thống vẫn còn một số hạn chế:
+
+- Hiệu quả phụ thuộc vào chất lượng hình ảnh và góc nhìn camera
+- Độ tin cậy có thể giảm trong điều kiện ánh sáng yếu hoặc khung hình nhiễu
+- Hệ thống hiện nay chủ yếu tập trung vào các hành vi nguy hiểm cơ bản
+- Việc phân biệt giữa hành vi thật sự nguy hiểm và chuyển động bình thường vẫn cần được cải thiện liên tục
+
+Nhận xét chung là, phương pháp này phù hợp với mục tiêu xây dựng một hệ thống giám sát hỗ trợ ban đầu, nhưng để đạt được độ tin cậy cao hơn trong môi trường thực tế, cần tiếp tục cải thiện dữ liệu huấn luyện, độ chính xác của mô hình và logic phân tích hành vi.
+
+---
+
+## 11. Hướng phát triển tiếp theo
+
+Để nâng cao hiệu quả của hệ thống, các hướng phát triển tiếp theo có thể bao gồm:
+
+1. Tăng cường dữ liệu huấn luyện để cải thiện độ chính xác.
+2. Mở rộng phạm vi phát hiện sang các hành vi nguy hiểm khác.
+3. Tối ưu hóa hiệu năng cho các thiết bị biên như Jetson Nano.
+4. Cải thiện cơ chế phân biệt hành vi nguy hiểm và hành vi bình thường.
+5. Tích hợp thêm giao diện giám sát từ xa hoặc nền tảng di động.
+
+---
+
+## 12. Kết luận
+
+Bài toán giám sát an toàn trẻ sơ sinh bằng trí tuệ nhân tạo là một bài toán có giá trị thực tiễn cao. Với cách tiếp cận kết hợp giữa pose estimation, object detection và phân tích hình học, hệ thống BabyWatcher có thể hỗ trợ phát hiện sớm các hành vi nguy hiểm và cung cấp cảnh báo kịp thời. Mặc dù vẫn còn một số hạn chế, đây là một hướng đi phù hợp và có tiềm năng phát triển mạnh mẽ trong tương lai.
