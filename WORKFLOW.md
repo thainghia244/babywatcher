@@ -1,454 +1,227 @@
-# BabyWatcher Workflow Documentation
+# WORKFLOW HỆ THỐNG BABYWATCHER
 
-## 📋 Tổng Quan Workflow
+## 1. Mục tiêu của workflow
 
-BabyWatcher là hệ thống giám sát an toàn trẻ em sử dụng AI với workflow hoàn chỉnh từ input đến output. Hệ thống xử lý thời gian thực và cung cấp cảnh báo kịp thời.
-
----
-
-## 🎬 Workflow Chính
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   INPUT SOURCE  │───▶│   DETECTOR      │───▶│   ALERT SYSTEM  │
-│                 │    │   ENGINE        │    │                 │
-│ • Camera RTSP   │    │                 │    │ • Sound Alert   │
-│ • Video File    │    │ • YOLO Pose     │    │ • Email Alert   │
-│ • Image File    │    │ • YOLO Object   │    │ • Webhook       │
-│ • CSI Camera    │    │ • Distance Calc │    │ • Log Event     │
-│ • USB Camera    │    │ • Status Logic  │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │                        │
-                              ▼                        ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │   LOGGER        │    │   PERFORMANCE   │
-                       │   SYSTEM        │    │   MONITOR       │
-                       │                 │    │                 │
-                       │ • CSV Logs      │    │ • FPS Counter    │
-                       │ • Event Stats   │    │ • Memory Usage   │
-                       │ • Video Clips   │    │ • CPU Usage      │
-                       └─────────────────┘    └─────────────────┘
-```
+Workflow trong hệ thống BabyWatcher mô tả toàn bộ quy trình xử lý từ khung hình đầu vào cho đến khi hệ thống tạo cảnh báo, ghi log và lưu dữ liệu sự kiện. Mục tiêu của workflow là đảm bảo quá trình vận hành diễn ra liên tục, có cấu trúc rõ ràng, dễ kiểm tra và dễ mở rộng khi cần thêm chức năng mới.
 
 ---
 
-##  Chi Tiết Workflow Theo Thời Gian
+## 2. Tổng quan kiến trúc workflow
 
-### Phase 1: Khởi Tạo Hệ Thống (Initialization)
+Hệ thống hoạt động theo chuỗi xử lý tuần tự nhưng có các nhánh xử lý song song ở mức phát hiện. Cụ thể:
 
-```mermaid
-graph TD
-    A[Start BabyWatcher] --> B[Load Configuration]
-    B --> C[Detect Platform]
-    C --> D{Platform Type}
-    D -->|Jetson Nano| E[Setup Jetson Power Mode]
-    D -->|Desktop| F[Setup CUDA/CPU]
-    E --> G[Load YOLO Models]
-    F --> G
-    G --> H[Initialize Alert System]
-    H --> I[Initialize Logger]
-    I --> J[Initialize Performance Monitor]
-    J --> K[System Ready]
-```
-
-**Các bước chi tiết:**
-1. **Load Config**: Đọc `config.yaml` hoặc `config_jetson.yaml`
-2. **Platform Detection**: Tự động phát hiện Jetson Nano/Desktop
-3. **Device Setup**: Cấu hình CUDA/GPU hoặc CPU
-4. **Model Loading**: Load YOLO pose và object detection models
-5. **TensorRT Conversion** (Jetson): Chuyển model sang TensorRT engine
-6. **System Initialization**: Khởi tạo alert, logger, performance monitor
-
-### Phase 2: Xử Lý Frame (Frame Processing Loop)
+1. Thu nhận khung hình từ camera, video hoặc ảnh.
+2. Chạy mô hình pose estimation để xác định vị trí tay, vai và vùng miệng.
+3. Chạy mô hình object detection để phát hiện các vật thể quanh trẻ.
+4. Tính toán các khoảng cách hình học giữa tay, vật thể và miệng.
+5. Đánh giá tín hiệu nguy hiểm dựa trên ngưỡng động và xác nhận theo thời gian.
+6. Nếu tín hiệu đủ mạnh, kích hoạt cảnh báo, ghi sự kiện và lưu clip nguy hiểm.
 
 ```mermaid
-graph TD
-    A[Get Frame from Source] --> B[Resize Frame 640x640]
-    B --> C[Frame Skipping Check]
-    C --> D{Process Frame?}
-    D -->|Skip| E[Return Skipped]
-    D -->|Process| F[YOLO Pose Detection]
-    F --> G[YOLO Object Detection]
-    G --> H[Extract Keypoints]
-    H --> I[Calculate Distances]
-    I --> J[Determine Danger Status]
-    J --> K[Trigger Alerts if Danger]
-    K --> L[Log Event]
-    L --> M[Draw Annotations]
-    M --> N[Update Performance Stats]
-    N --> O[Output Annotated Frame]
+flowchart TD
+    A[Start system] --> B[Load configuration and models]
+    B --> C{Input available?}
+    C -->|No| C1[Show error / wait for source]
+    C -->|Yes| D[Capture frame from camera or file]
+    D --> E[Preprocess frame]
+    E --> F[Run pose detection]
+    E --> G[Run object detection]
+    F --> H[Extract keypoints: mouth, wrists, shoulders]
+    G --> I[Extract object candidates and bounding boxes]
+    H --> J[Compute geometry distances]
+    I --> J
+    J --> K{Signal strong enough?}
+    K -->|No| L[Set SAFE state]
+    K -->|Yes| M{Confirmed over multiple frames?}
+    M -->|No| N[Keep pending state]
+    M -->|Yes| O{Signal type}
+    O -->|Hand near mouth| P[Classify as HAND_TO_MOUTH]
+    O -->|Object near mouth| Q[Classify as OBJECT_TO_MOUTH]
+    P --> R[Trigger warning alert]
+    Q --> S[Trigger critical alert]
+    R --> T[Log event and save clip]
+    S --> T
+    L --> U[Render annotated frame]
+    N --> U
+    T --> U
+    U --> V[Continue next frame]
 ```
 
-**Luồng xử lý chi tiết:**
+---
 
-#### 2.1 Input Processing
-- **Camera Sources**: RTSP, CSI, USB Webcam
-- **File Sources**: Video files (.mp4, .avi), Image files (.jpg, .png)
-- **Stream Processing**: Continuous frame capture
+## 3. Các giai đoạn chính trong workflow
 
-#### 2.2 YOLO Pose Detection
+### 3.1. Khởi tạo hệ thống
+
+Khi chương trình bắt đầu, hệ thống thực hiện các bước sau:
+
+- Đọc cấu hình từ file YAML.
+- Kiểm tra môi trường chạy: CPU hay GPU.
+- Tải mô hình pose và mô hình object detection.
+- Khởi tạo các module cảnh báo, logger và theo dõi hiệu suất.
+- Chuẩn bị thư mục lưu log, clip và kết quả.
+
+Vai trò của giai đoạn này là đảm bảo toàn bộ pipeline có thể hoạt động ổn định từ đầu.
+
+### 3.2. Thu nhận và tiền xử lý khung hình
+
+Hệ thống nhận khung hình từ một trong các nguồn sau:
+
+- Camera trực tiếp
+- File video
+- File ảnh
+
+Sau khi nhận khung hình, hệ thống chuyển đổi ảnh sang định dạng xử lý phù hợp, điều chỉnh kích thước và chuẩn bị dữ liệu cho mô hình inference.
+
+### 3.3. Phát hiện pose và vật thể
+
+Trong mỗi khung hình, hệ thống chạy hai nhánh phát hiện song song:
+
+- Nhánh pose: xác định các keypoint trên cơ thể trẻ, bao gồm vị trí tay, vai và vùng miệng ước lượng.
+- Nhánh object detection: phát hiện các vật thể có thể nằm gần trẻ hoặc có thể được trẻ cầm.
+
+Các kết quả này là dữ liệu nền cho quá trình phân tích tiếp theo.
+
+### 3.4. Phân tích hình học và khoảng cách
+
+Sau khi có dữ liệu pose và object, hệ thống tính toán các đại lượng quan trọng như:
+
+- Khoảng cách từ tay đến miệng.
+- Khoảng cách từ tay đến vật thể.
+- Khoảng cách từ vật thể đến miệng.
+- Độ rộng vai để làm ngưỡng động theo kích thước cơ thể.
+
+Quá trình này là trung tâm của hệ thống, vì đây là cơ sở để suy luận hành vi nguy hiểm.
+
+### 3.5. Đánh giá trạng thái nguy hiểm
+
+Hệ thống không quyết định trạng thái chỉ dựa trên một khung hình duy nhất. Thay vào đó, nó áp dụng logic theo thời gian:
+
+- Nếu tín hiệu tay gần miệng xuất hiện liên tục, trạng thái được đánh giá là HAND_TO_MOUTH.
+- Nếu vật thể gần miệng và tín hiệu lặp lại, trạng thái được đánh giá là OBJECT_TO_MOUTH.
+- Nếu không có tín hiệu đủ mạnh, trạng thái giữ ở SAFE.
+
+Để giảm cảnh báo giả, hệ thống sử dụng:
+
+- Ngưỡng động theo kích thước cơ thể.
+- Xác nhận qua nhiều frame liên tiếp.
+- Thời gian duy trì tín hiệu trước khi cảnh báo.
+
+### 3.6. Kích hoạt cảnh báo và lưu dữ liệu
+
+Khi trạng thái nguy hiểm được xác nhận, hệ thống sẽ:
+
+- Phát cảnh báo âm thanh.
+- Gửi email hoặc webhook nếu được cấu hình.
+- Ghi sự kiện vào file CSV.
+- Lưu clip hoặc frame nguy hiểm vào thư mục lưu trữ.
+
+Quá trình này giúp hệ thống vừa phản hồi tức thời, vừa tạo dữ liệu lịch sử để kiểm tra sau này.
+
+---
+
+## 4. Luồng xử lý chi tiết theo từng bước
+
+### Bước 1: Nhận đầu vào
+
+Hệ thống có thể nhận dữ liệu từ:
+
+- Camera trực tiếp
+- File video
+- File ảnh
+
+### Bước 2: Tiền xử lý
+
+Các bước tiền xử lý gồm:
+
+- Chuyển đổi ảnh sang định dạng phù hợp.
+- Điều chỉnh kích thước khung hình.
+- Chuẩn bị dữ liệu cho việc inference.
+
+### Bước 3: Chạy mô hình
+
+Hệ thống chạy mô hình pose và object detection trên khung hình hiện tại.
+
+### Bước 4: Trích xuất đặc trưng
+
+Từ kết quả mô hình, hệ thống trích xuất:
+
+- Vị trí các keypoint quan trọng.
+- Bounding box của vật thể.
+- Các thông số hình học cần thiết.
+
+### Bước 5: Xác định tín hiệu nguy hiểm
+
+Hệ thống đánh giá mức độ gần của tay và vật thể với vùng miệng.
+
+### Bước 6: Xác nhận theo thời gian
+
+Nếu tín hiệu tiếp tục xuất hiện qua nhiều khung hình, hệ thống mới xem đây là hành vi đáng cảnh báo.
+
+### Bước 7: Gửi phản hồi
+
+Khi tín hiệu được xác nhận, hệ thống thực hiện:
+
+- Cảnh báo người dùng.
+- Ghi log sự kiện.
+- Lưu clip hoặc frame liên quan.
+
+---
+
+## 5. Mô hình logic quyết định
+
+Logic quyết định của hệ thống có thể được trình bày như sau:
+
 ```python
-# Phát hiện 17 keypoints của người
-pose_results = pose_model.predict(frame, conf=0.4, verbose=False)
-keypoints = pose_results.keypoints.xy.cpu().numpy()
-
-# Extract important points
-nose = keypoints[0]          # Mũi
-left_wrist = keypoints[9]    # Tay trái
-right_wrist = keypoints[10]  # Tay phải
-left_shoulder = keypoints[5] # Vai trái
-right_shoulder = keypoints[6] # Vai phải
-```
-
-#### 2.3 YOLO Object Detection
-```python
-# Phát hiện vật thể xung quanh
-obj_results = obj_model.predict(frame, conf=0.4, verbose=False)
-objects = obj_results.boxes.xyxy.cpu().numpy()
-```
-
-#### 2.4 Distance Calculation
-```python
-# Tính khoảng cách Euclidean
-def distance(p1, p2):
-    return np.linalg.norm(np.array(p1) - np.array(p2))
-
-# Hand-Mouth Distance
-hand_mouth_dist = min(
-    distance(left_wrist, nose),
-    distance(right_wrist, nose)
-)
-
-# Hand-Object Distance
-hand_obj_dists = []
-for obj_center in object_centers:
-    d_left = distance(left_wrist, obj_center)
-    d_right = distance(right_wrist, obj_center)
-    hand_obj_dists.append(min(d_left, d_right))
-
-hand_obj_dist = min(hand_obj_dists) if hand_obj_dists else 999.0
-```
-
-#### 2.5 Danger Status Logic
-```python
-# Threshold values
-hand_mouth_thresh = 45  # pixels
-hand_obj_thresh = 60    # pixels
-danger_duration = 3.0   # seconds
-
-# Status determination
-if not hand_near_mouth:
+if not hand_near_mouth and not object_near_mouth:
     status = "SAFE"
-    danger_start_time = None
-elif hand_near_mouth and not hand_holding_obj:
-    if danger_start_time is None:
-        danger_start_time = current_time
-    duration = current_time - danger_start_time
-    status = "HAND_TO_MOUTH"
-else:  # hand_near_mouth and hand_holding_obj
-    if danger_start_time is None:
-        danger_start_time = current_time
-    duration = current_time - danger_start_time
+elif object_near_mouth and object_signal_confirmed:
     status = "OBJECT_TO_MOUTH"
-
-# Trigger alerts
-if duration > danger_duration:
-    alert_manager.trigger_alert(status, duration)
+elif hand_near_mouth and hand_signal_confirmed:
+    status = "HAND_TO_MOUTH"
+else:
+    status = "SAFE"
 ```
 
-#### 2.6 Alert System
-```python
-class AlertManager:
-    def trigger_alert(self, status, duration):
-        # Sound Alert
-        if status == "OBJECT_TO_MOUTH":
-            self.sound_alert.play_critical()  # Continuous beep
-        elif status == "HAND_TO_MOUTH":
-            self.sound_alert.play_warning()   # Single beep
+Trong thực tế, thuật toán được triển khai trong module xử lý khung hình có thêm các yếu tố như:
 
-        # Email Alert (if enabled)
-        if self.email_enabled and duration > 5.0:
-            self.email_alert.send_alert(status, duration)
-
-        # Webhook Alert (if enabled)
-        if self.webhook_enabled:
-            self.webhook_alert.send_notification(status, duration)
-```
-
-#### 2.7 Event Logging
-```python
-class EventLogger:
-    def log_event(self, status, duration, hand_mouth_dist, hand_obj_dist):
-        # CSV Logging
-        with open('logs/events_log.csv', 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                timestamp, status, duration,
-                hand_mouth_dist, hand_obj_dist,
-                frame_saved, notes
-            ])
-
-        # Video Clip Saving (for danger events)
-        if status != "SAFE" and self.save_clips:
-            self.save_danger_clip(frame, timestamp)
-```
-
-#### 2.8 Performance Monitoring
-```python
-class PerformanceMonitor:
-    def start_frame(self):
-        self.frame_start = time.time()
-        return self.frame_start
-
-    def end_frame(self, frame_start):
-        frame_time = time.time() - frame_start
-        self.fps_history.append(1.0 / frame_time)
-        self.fps = np.mean(self.fps_history[-30:])  # Moving average
-
-        # Memory and CPU monitoring
-        self.update_system_stats()
-
-        return {
-            'fps': self.fps,
-            'frame_time': frame_time,
-            'memory_usage': self.memory_usage,
-            'cpu_usage': self.cpu_usage
-        }
-```
-
-### Phase 3: Output và Hiển Thị (Output Phase)
-
-```mermaid
-graph TD
-    A[Annotated Frame] --> B[Display Window]
-    B --> C[Save Video File]
-    C --> D[Performance Overlay]
-    D --> E[FPS Counter]
-    E --> F[Status Panel]
-    F --> G[Distance Lines]
-    G --> H[Bounding Boxes]
-    H --> I[Final Output]
-```
-
-**Output Components:**
-1. **Visual Annotations**:
-   - Bounding boxes around detected persons/objects
-   - Skeleton keypoints and connections
-   - Distance measurement lines
-   - Status banners (SAFE/HAND_TO_MOUTH/OBJECT_TO_MOUTH)
-
-2. **Information Panel**:
-   - Current status and color coding
-   - Distance measurements
-   - Danger duration timer
-   - FPS and performance metrics
-
-3. **File Outputs**:
-   - Annotated video files (.mp4)
-   - Danger event clips
-   - CSV log files
-   - Performance statistics
+- Ngưỡng động theo kích thước cơ thể.
+- Bộ đếm frame xác nhận.
+- Thời gian duy trì tín hiệu.
+- Cơ chế giảm cảnh báo giả.
 
 ---
 
-##  Workflow Theo Platform
+## 6. Vai trò của các module trong workflow
 
-### Desktop Workflow
-```
-Input → OpenCV Capture → CPU/GPU Processing → Display → File Output
-```
-
-### Jetson Nano Workflow
-```
-CSI Camera → GStreamer Pipeline → TensorRT Engine → Overlay → HDMI Output
-```
-
-**Jetson Specific Optimizations:**
-- **TensorRT**: Model conversion for 2-3x speedup
-- **Power Management**: Dynamic voltage/frequency scaling
-- **CSI Pipeline**: Hardware-accelerated camera input
-- **Memory Optimization**: Reduced precision (FP16/INT8)
+| Module | Vai trò chính |
+|---|---|
+| Input handler | Nhận và chuẩn hóa dữ liệu đầu vào |
+| Pose detector | Xác định keypoint và cấu trúc cơ thể |
+| Object detector | Phát hiện vật thể quanh trẻ |
+| Geometry analyzer | Tính khoảng cách và đánh giá mức độ gần |
+| State evaluator | Quyết định trạng thái SAFE/HAND_TO_MOUTH/OBJECT_TO_MOUTH |
+| Alert manager | Kích hoạt cảnh báo phù hợp |
+| Logger | Ghi sự kiện và lưu lịch sử |
+| Clip saver | Lưu frame hoặc clip nguy hiểm |
 
 ---
 
-##  Workflow Metrics và Monitoring
+## 7. Workflow dành cho người phát triển
 
-### Real-time Metrics
-- **FPS**: Frames per second (target: 10+)
-- **Frame Time**: Processing time per frame (target: <100ms)
-- **Memory Usage**: RAM consumption (target: <1GB)
-- **CPU/GPU Usage**: System resource utilization
-- **Detection Accuracy**: mAP and precision/recall
+Khi phát triển hoặc sửa lỗi, người phát triển nên làm theo trình tự sau:
 
-### Event Metrics
-- **Total Events**: Number of danger events detected
-- **Average Duration**: Mean time of danger states
-- **Response Time**: Time from detection to alert
-- **False Positives**: Incorrect danger detections
+1. Kiểm tra đầu vào từ camera hoặc file.
+2. Xác minh kết quả pose detection.
+3. Xác minh kết quả object detection.
+4. Theo dõi giá trị khoảng cách tính toán được.
+5. Kiểm tra trạng thái đầu ra của module phân loại.
+6. Xác nhận cảnh báo và log được kích hoạt đúng.
 
-### System Health
-- **Uptime**: System availability percentage
-- **Error Rate**: Failed frame processing rate
-- **Temperature**: Hardware temperature monitoring
-- **Power Consumption**: Energy usage tracking
+Quy trình này giúp nhanh chóng xác định nơi lỗi xảy ra nếu hệ thống phát hiện sai hoặc không tạo cảnh báo đúng.
 
 ---
 
-##  Alert Workflow
+## 8. Kết luận
 
-### Alert Trigger Conditions
-```python
-# Alert levels
-WARNING_DURATION = 2.0    # HAND_TO_MOUTH warning
-CRITICAL_DURATION = 3.0   # OBJECT_TO_MOUTH critical
-
-# Alert cooldown
-ALERT_COOLDOWN = 2.0      # Min time between alerts
-
-# Email threshold
-EMAIL_THRESHOLD = 5.0     # Send email after 5s danger
-```
-
-### Multi-Channel Alert System
-1. **Immediate Sound Alert**: Local audio feedback
-2. **Email Notification**: Remote notification for parents
-3. **Webhook Integration**: Integration with smart home systems
-4. **Visual Indicators**: On-screen status display
-
-### Alert Priority Levels
-- **🔴 CRITICAL**: OBJECT_TO_MOUTH (highest priority)
-- **🟡 WARNING**: HAND_TO_MOUTH (medium priority)
-- **🟢 SAFE**: No danger detected (normal state)
-
----
-
-##  Error Handling và Recovery
-
-### Error Types
-- **Camera Errors**: Connection lost, invalid stream
-- **Model Errors**: Failed inference, corrupted models
-- **Memory Errors**: Out of memory, GPU memory full
-- **File System Errors**: Disk full, permission denied
-
-### Recovery Strategies
-```python
-def handle_error(error_type, context):
-    if error_type == "camera_lost":
-        # Attempt reconnection
-        self.reconnect_camera()
-        # Fallback to file input
-        self.switch_to_file_mode()
-
-    elif error_type == "model_failure":
-        # Reload model
-        self.reload_models()
-        # Use backup model if available
-        self.activate_backup_model()
-
-    elif error_type == "memory_full":
-        # Reduce batch size
-        self.reduce_batch_size()
-        # Clear caches
-        self.clear_memory_cache()
-```
-
-### Graceful Degradation
-- **High Load**: Reduce image size, skip frames
-- **Low Memory**: Use CPU instead of GPU
-- **Network Issues**: Disable remote features
-- **Hardware Failure**: Continue with available resources
-
----
-
-##  Performance Optimization Workflow
-
-### Continuous Optimization
-1. **Monitor Performance**: Track FPS, memory, CPU usage
-2. **Identify Bottlenecks**: Profile code execution
-3. **Apply Optimizations**: Adjust parameters, enable features
-4. **Validate Results**: Test with benchmark datasets
-5. **Iterate**: Repeat optimization cycle
-
-### Platform-Specific Tuning
-```yaml
-# Desktop Optimization
-desktop_config:
-  img_size: 640
-  skip_frames: 0
-  device: "cuda:0"
-  half_precision: true
-
-# Jetson Optimization
-jetson_config:
-  img_size: 416
-  skip_frames: 1
-  device: "cuda:0"
-  tensorrt: true
-  power_mode: "maxn"
-```
-
-### Adaptive Configuration
-- **Auto-scaling**: Adjust parameters based on hardware
-- **Dynamic Thresholds**: Adapt to lighting conditions
-- **Load Balancing**: Distribute processing across cores
-
----
-
-##  Security và Privacy Workflow
-
-### Data Protection
-- **Local Processing**: No cloud upload by default
-- **Encrypted Logs**: Sensitive data encryption
-- **Access Control**: User authentication for settings
-- **Privacy Filters**: Blur faces in saved clips
-
-### Network Security
-- **Secure Webhooks**: HTTPS encryption
-- **Email Security**: SMTP with authentication
-- **API Keys**: Encrypted storage of credentials
-- **Firewall Rules**: Restrict network access
-
----
-
-##  Workflow Documentation và Maintenance
-
-### Code Documentation
-- **Inline Comments**: Explain complex logic
-- **Function Docstrings**: API documentation
-- **Workflow Diagrams**: Visual process flows
-- **Configuration Guide**: Parameter explanations
-
-### System Maintenance
-- **Regular Updates**: Model and software updates
-- **Performance Tuning**: Ongoing optimization
-- **Bug Fixes**: Issue tracking and resolution
-- **Feature Additions**: Planned enhancements
-
-### User Training
-- **Setup Guides**: Installation instructions
-- **Configuration Help**: Parameter tuning guide
-- **Troubleshooting**: Common issues and solutions
-- **Best Practices**: Optimal usage recommendations
-
----
-
-## 🎯 Workflow Summary
-
-BabyWatcher workflow là một hệ thống hoàn chỉnh với:
-
-✅ **Multi-input Support**: Camera, video, image files  
-✅ **Real-time Processing**: AI-powered detection  
-✅ **Multi-platform**: Desktop and Jetson Nano  
-✅ **Comprehensive Alerts**: Sound, email, webhook  
-✅ **Detailed Logging**: CSV logs and video clips  
-✅ **Performance Monitoring**: FPS, memory, CPU tracking  
-✅ **Error Recovery**: Graceful handling of failures  
-✅ **Security**: Local processing, encrypted data  
-✅ **Optimization**: TensorRT, power management  
-
-**Core Philosophy**: *Simple, Reliable, Real-time Baby Safety Monitoring*
-
----
-
-**Last Updated**: May 11, 2026  
-**Version**: 1.1 (Jetson Nano Integrated)
+Workflow của BabyWatcher được thiết kế theo hướng modular, liên tục và có thể mở rộng. Từ việc thu nhận khung hình, phân tích pose và object, đến việc đánh giá trạng thái nguy hiểm và kích hoạt cảnh báo, toàn bộ quy trình đều nhằm mục tiêu hỗ trợ giám sát trẻ sơ sinh một cách tự động, hiệu quả và ít sai lệch hơn so với cách giám sát thủ công.
