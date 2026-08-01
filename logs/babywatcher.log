@@ -1352,3 +1352,548 @@
 2026-05-28 22:33:29 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 33.69s | H-M: 226.83 | H-O: 999.00
 2026-05-28 22:33:29 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260528_223329.jpg
 2026-05-28 22:33:30 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 34.89s | H-M: 225.05 | H-O: 999.00
+2026-06-30 20:36:53 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-06-30 20:36:54 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 112.61 | H-O: 0.00
+2026-06-30 20:36:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260630_203654.jpg
+2026-06-30 20:38:25 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-06-30 20:43:10 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-06-30 20:43:10 - BabyWatcher - INFO - Processing video: C:\Users\Th4iNghia\babywatcher\images\danger1.webp
+2026-06-30 20:43:11 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 39.37 | H-O: 120.30
+2026-06-30 20:43:11 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260630_204311.jpg
+2026-06-30 20:43:11 - BabyWatcher - INFO - ✅ Video processing completed
+2026-06-30 22:26:25 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-06-30 22:29:33 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-06-30 22:29:34 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 88.94 | H-O: 47.28
+2026-06-30 22:29:34 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260630_222934.jpg
+2026-07-16 16:17:37 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:17:42 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:17:45 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161745.jpg
+2026-07-16 16:17:47 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_161747.jpg
+2026-07-16 16:17:48 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.19s | H-M: 108.13 | H-O: 71.25
+2026-07-16 16:17:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161749.jpg
+2026-07-16 16:17:49 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 47.76 | H-O: 93.66
+2026-07-16 16:17:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 107.04 | H-O: 999.00
+2026-07-16 16:17:51 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161751.jpg
+2026-07-16 16:17:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.21s | H-M: 21.43 | H-O: 98.22
+2026-07-16 16:17:54 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 128.36 | H-O: 8.28
+2026-07-16 16:17:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_161754.jpg
+2026-07-16 16:17:56 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161756.jpg
+2026-07-16 16:17:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.78s | H-M: 34.24 | H-O: 176.54
+2026-07-16 16:17:58 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161758.jpg
+2026-07-16 16:18:00 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161800.jpg
+2026-07-16 16:18:22 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161822.jpg
+2026-07-16 16:18:24 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161824.jpg
+2026-07-16 16:18:24 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.40s | H-M: 181.84 | H-O: 999.00
+2026-07-16 16:18:34 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161834.jpg
+2026-07-16 16:18:36 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161836.jpg
+2026-07-16 16:18:37 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.21s | H-M: 187.71 | H-O: 999.00
+2026-07-16 16:18:39 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161839.jpg
+2026-07-16 16:18:42 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161842.jpg
+2026-07-16 16:19:14 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 202.25 | H-O: 999.00
+2026-07-16 16:19:14 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_161914.jpg
+2026-07-16 16:19:15 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.23s | H-M: 170.83 | H-O: 999.00
+2026-07-16 16:25:55 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:26:00 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:26:02 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162602.jpg
+2026-07-16 16:26:02 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 142.12 | H-O: 999.00
+2026-07-16 16:26:10 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162610.jpg
+2026-07-16 16:26:17 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162617.jpg
+2026-07-16 16:26:21 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162621.jpg
+2026-07-16 16:26:24 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162624.jpg
+2026-07-16 16:26:37 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162637.jpg
+2026-07-16 16:26:42 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162642.jpg
+2026-07-16 16:26:45 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162645.jpg
+2026-07-16 16:26:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162649.jpg
+2026-07-16 16:27:10 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162710.jpg
+2026-07-16 16:27:11 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 206.06 | H-O: 133.11
+2026-07-16 16:27:12 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162712.jpg
+2026-07-16 16:27:12 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.07s | H-M: 26.15 | H-O: 91.18
+2026-07-16 16:27:20 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162720.jpg
+2026-07-16 16:27:22 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162722.jpg
+2026-07-16 16:27:23 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.34s | H-M: 215.77 | H-O: 209.84
+2026-07-16 16:27:24 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162724.jpg
+2026-07-16 16:27:25 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.58s | H-M: 218.89 | H-O: 999.00
+2026-07-16 16:27:33 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:27:36 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:27:36 - BabyWatcher - INFO - ✅ Camera processing completed
+2026-07-16 16:27:55 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162755.jpg
+2026-07-16 16:27:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 203.88 | H-O: 999.00
+2026-07-16 16:28:02 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162802.jpg
+2026-07-16 16:28:09 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162809.jpg
+2026-07-16 16:28:26 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162826.jpg
+2026-07-16 16:28:29 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 63.24 | H-O: 234.00
+2026-07-16 16:28:29 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162829.jpg
+2026-07-16 16:28:30 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 1.03s | H-M: 34.90 | H-O: 58.79
+2026-07-16 16:28:31 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.12s | H-M: 63.20 | H-O: 71.69
+2026-07-16 16:28:31 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162831.jpg
+2026-07-16 16:28:32 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 41.47 | H-O: 60.12
+2026-07-16 16:28:33 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.01s | H-M: 76.68 | H-O: 999.00
+2026-07-16 16:28:33 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162833.jpg
+2026-07-16 16:28:34 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.31s | H-M: 80.36 | H-O: 69.28
+2026-07-16 16:28:35 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162835.jpg
+2026-07-16 16:28:35 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.54s | H-M: 56.74 | H-O: 999.00
+2026-07-16 16:28:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.55s | H-M: 22.90 | H-O: 999.00
+2026-07-16 16:28:38 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162838.jpg
+2026-07-16 16:28:40 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.25s | H-M: 69.66 | H-O: 999.00
+2026-07-16 16:28:40 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162840.jpg
+2026-07-16 16:28:42 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162842.jpg
+2026-07-16 16:28:43 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 72.98 | H-O: 999.00
+2026-07-16 16:28:44 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162844.jpg
+2026-07-16 16:28:45 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.00s | H-M: 82.05 | H-O: 999.00
+2026-07-16 16:28:47 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162847.jpg
+2026-07-16 16:28:50 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162850.jpg
+2026-07-16 16:29:53 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_162953.jpg
+2026-07-16 16:29:54 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.21s | H-M: 45.92 | H-O: 148.62
+2026-07-16 16:29:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.40s | H-M: 46.76 | H-O: 206.75
+2026-07-16 16:29:55 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162955.jpg
+2026-07-16 16:29:56 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.42s | H-M: 58.62 | H-O: 999.00
+2026-07-16 16:29:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.58s | H-M: 71.37 | H-O: 252.21
+2026-07-16 16:29:57 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162957.jpg
+2026-07-16 16:29:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 45.41 | H-O: 999.00
+2026-07-16 16:29:59 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_162959.jpg
+2026-07-16 16:30:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.22s | H-M: 54.33 | H-O: 219.49
+2026-07-16 16:30:15 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163015.jpg
+2026-07-16 16:30:29 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 42.62 | H-O: 999.00
+2026-07-16 16:30:29 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163029.jpg
+2026-07-16 16:30:33 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163033.jpg
+2026-07-16 16:30:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 207.84 | H-O: 999.00
+2026-07-16 16:30:36 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163036.jpg
+2026-07-16 16:30:40 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163040.jpg
+2026-07-16 16:30:49 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 152.38 | H-O: 999.00
+2026-07-16 16:30:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163049.jpg
+2026-07-16 16:30:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 195.86 | H-O: 999.00
+2026-07-16 16:30:51 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163051.jpg
+2026-07-16 16:30:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.36s | H-M: 202.33 | H-O: 999.00
+2026-07-16 16:30:52 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.43s | H-M: 119.08 | H-O: 999.00
+2026-07-16 16:30:53 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163053.jpg
+2026-07-16 16:30:59 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163059.jpg
+2026-07-16 16:31:02 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163102.jpg
+2026-07-16 16:31:03 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 32.53 | H-O: 999.00
+2026-07-16 16:31:05 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163105.jpg
+2026-07-16 16:31:09 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 171.42 | H-O: 999.00
+2026-07-16 16:31:09 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163109.jpg
+2026-07-16 16:31:11 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 151.33 | H-O: 999.00
+2026-07-16 16:31:13 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163113.jpg
+2026-07-16 16:31:15 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163115.jpg
+2026-07-16 16:31:17 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163117.jpg
+2026-07-16 16:31:20 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 197.05 | H-O: 999.00
+2026-07-16 16:31:20 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163120.jpg
+2026-07-16 16:31:23 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163123.jpg
+2026-07-16 16:31:26 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163126.jpg
+2026-07-16 16:31:28 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.41s | H-M: 56.72 | H-O: 999.00
+2026-07-16 16:31:30 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163130.jpg
+2026-07-16 16:31:32 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 193.33 | H-O: 999.00
+2026-07-16 16:31:32 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163132.jpg
+2026-07-16 16:31:35 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163135.jpg
+2026-07-16 16:31:37 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 188.17 | H-O: 999.00
+2026-07-16 16:31:37 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163137.jpg
+2026-07-16 16:31:38 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 179.68 | H-O: 999.00
+2026-07-16 16:31:41 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163141.jpg
+2026-07-16 16:31:43 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163143.jpg
+2026-07-16 16:31:45 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.38s | H-M: 199.47 | H-O: 999.00
+2026-07-16 16:31:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 188.26 | H-O: 999.00
+2026-07-16 16:31:50 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163150.jpg
+2026-07-16 16:31:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 169.42 | H-O: 999.00
+2026-07-16 16:31:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 191.99 | H-O: 999.00
+2026-07-16 16:31:55 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163155.jpg
+2026-07-16 16:31:58 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163158.jpg
+2026-07-16 16:31:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.77s | H-M: 226.72 | H-O: 999.00
+2026-07-16 16:32:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 195.23 | H-O: 999.00
+2026-07-16 16:32:00 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163200.jpg
+2026-07-16 16:32:01 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.39s | H-M: 207.06 | H-O: 999.00
+2026-07-16 16:32:02 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.49s | H-M: 123.35 | H-O: 999.00
+2026-07-16 16:32:03 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163203.jpg
+2026-07-16 16:32:03 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.77s | H-M: 159.86 | H-O: 999.00
+2026-07-16 16:32:04 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.40s | H-M: 166.72 | H-O: 999.00
+2026-07-16 16:32:05 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163205.jpg
+2026-07-16 16:32:06 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.48s | H-M: 211.07 | H-O: 999.00
+2026-07-16 16:32:07 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.80s | H-M: 175.55 | H-O: 999.00
+2026-07-16 16:32:08 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163208.jpg
+2026-07-16 16:32:09 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.80s | H-M: 108.82 | H-O: 999.00
+2026-07-16 16:32:10 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163210.jpg
+2026-07-16 16:32:12 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 156.53 | H-O: 999.00
+2026-07-16 16:32:13 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163213.jpg
+2026-07-16 16:32:14 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.88s | H-M: 200.25 | H-O: 999.00
+2026-07-16 16:32:16 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163216.jpg
+2026-07-16 16:32:16 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.82s | H-M: 188.60 | H-O: 999.00
+2026-07-16 16:32:18 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 187.23 | H-O: 999.00
+2026-07-16 16:32:18 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163218.jpg
+2026-07-16 16:32:20 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.78s | H-M: 189.99 | H-O: 999.00
+2026-07-16 16:32:20 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163220.jpg
+2026-07-16 16:32:21 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.02s | H-M: 173.27 | H-O: 999.00
+2026-07-16 16:32:23 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.31s | H-M: 176.62 | H-O: 999.00
+2026-07-16 16:32:23 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163223.jpg
+2026-07-16 16:32:24 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.72s | H-M: 199.41 | H-O: 999.00
+2026-07-16 16:32:25 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.61s | H-M: 192.45 | H-O: 999.00
+2026-07-16 16:32:25 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163225.jpg
+2026-07-16 16:32:26 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 7.37s | H-M: 195.60 | H-O: 999.00
+2026-07-16 16:32:27 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163227.jpg
+2026-07-16 16:32:28 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.57s | H-M: 202.74 | H-O: 999.00
+2026-07-16 16:32:29 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.72s | H-M: 184.29 | H-O: 999.00
+2026-07-16 16:32:30 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163230.jpg
+2026-07-16 16:32:32 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163232.jpg
+2026-07-16 16:32:32 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.28s | H-M: 214.31 | H-O: 999.00
+2026-07-16 16:32:35 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163235.jpg
+2026-07-16 16:32:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.89s | H-M: 123.02 | H-O: 999.00
+2026-07-16 16:32:37 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.99s | H-M: 171.48 | H-O: 999.00
+2026-07-16 16:32:37 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163237.jpg
+2026-07-16 16:32:38 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.47s | H-M: 171.53 | H-O: 999.00
+2026-07-16 16:32:39 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.53s | H-M: 175.06 | H-O: 999.00
+2026-07-16 16:32:39 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163239.jpg
+2026-07-16 16:32:40 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 180.66 | H-O: 999.00
+2026-07-16 16:32:41 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.01s | H-M: 176.68 | H-O: 999.00
+2026-07-16 16:32:41 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163241.jpg
+2026-07-16 16:32:42 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.09s | H-M: 156.22 | H-O: 999.00
+2026-07-16 16:32:43 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.03s | H-M: 167.73 | H-O: 999.00
+2026-07-16 16:32:43 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163243.jpg
+2026-07-16 16:32:45 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.62s | H-M: 179.67 | H-O: 999.00
+2026-07-16 16:32:46 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163246.jpg
+2026-07-16 16:32:47 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.27s | H-M: 182.15 | H-O: 999.00
+2026-07-16 16:32:48 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 182.52 | H-O: 999.00
+2026-07-16 16:32:48 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163248.jpg
+2026-07-16 16:32:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 187.40 | H-O: 999.00
+2026-07-16 16:32:50 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163250.jpg
+2026-07-16 16:32:53 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163253.jpg
+2026-07-16 16:32:54 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.26s | H-M: 217.16 | H-O: 999.00
+2026-07-16 16:32:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.50s | H-M: 181.97 | H-O: 999.00
+2026-07-16 16:32:55 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163255.jpg
+2026-07-16 16:32:56 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 200.47 | H-O: 999.00
+2026-07-16 16:32:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 202.09 | H-O: 999.00
+2026-07-16 16:32:57 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163257.jpg
+2026-07-16 16:32:58 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.35s | H-M: 205.04 | H-O: 999.00
+2026-07-16 16:32:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.36s | H-M: 182.97 | H-O: 999.00
+2026-07-16 16:32:59 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163259.jpg
+2026-07-16 16:33:01 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.08s | H-M: 179.18 | H-O: 999.00
+2026-07-16 16:33:04 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163304.jpg
+2026-07-16 16:33:08 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163308.jpg
+2026-07-16 16:33:11 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163311.jpg
+2026-07-16 16:33:17 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163317.jpg
+2026-07-16 16:33:18 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 129.52 | H-O: 999.00
+2026-07-16 16:33:23 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 195.01 | H-O: 999.00
+2026-07-16 16:33:23 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163323.jpg
+2026-07-16 16:33:26 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 140.14 | H-O: 999.00
+2026-07-16 16:33:26 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163326.jpg
+2026-07-16 16:33:31 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163331.jpg
+2026-07-16 16:33:34 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163334.jpg
+2026-07-16 16:33:34 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.70s | H-M: 119.27 | H-O: 999.00
+2026-07-16 16:33:35 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 200.21 | H-O: 999.00
+2026-07-16 16:33:37 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 179.01 | H-O: 999.00
+2026-07-16 16:33:37 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163337.jpg
+2026-07-16 16:34:37 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:34:41 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:34:42 - BabyWatcher - INFO - ✅ Camera processing completed
+2026-07-16 16:35:34 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:35:38 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:35:40 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163540.jpg
+2026-07-16 16:35:42 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 150.44 | H-O: 999.00
+2026-07-16 16:35:43 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 106.41 | H-O: 999.00
+2026-07-16 16:35:43 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163543.jpg
+2026-07-16 16:35:44 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 113.71 | H-O: 999.00
+2026-07-16 16:35:47 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163547.jpg
+2026-07-16 16:35:51 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163551.jpg
+2026-07-16 16:37:24 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:37:28 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:37:30 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163730.jpg
+2026-07-16 16:37:34 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 176.85 | H-O: 999.00
+2026-07-16 16:37:34 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163734.jpg
+2026-07-16 16:37:35 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 163.82 | H-O: 999.00
+2026-07-16 16:37:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 111.81 | H-O: 999.00
+2026-07-16 16:37:36 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_163736.jpg
+2026-07-16 16:38:02 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:38:03 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 88.94 | H-O: 47.28
+2026-07-16 16:38:03 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_163803.jpg
+2026-07-16 16:51:14 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:54:07 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:54:07 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 52.46 | H-O: 47.28
+2026-07-16 16:54:07 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_165407.jpg
+2026-07-16 16:54:44 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:54:48 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 16:54:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_165449.jpg
+2026-07-16 16:54:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.91s | H-M: 89.88 | H-O: 999.00
+2026-07-16 16:54:51 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_165451.jpg
+2026-07-16 16:54:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_165454.jpg
+2026-07-16 16:54:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 37.71 | H-O: 999.00
+2026-07-16 16:54:58 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 154.13 | H-O: 999.00
+2026-07-16 16:54:58 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_165458.jpg
+2026-07-16 16:55:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 13.46 | H-O: 999.00
+2026-07-16 16:55:00 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_165500.jpg
+2026-07-16 16:55:01 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.56s | H-M: 163.69 | H-O: 999.00
+2026-07-16 16:55:02 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.48s | H-M: 145.67 | H-O: 999.00
+2026-07-16 16:55:02 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_165502.jpg
+2026-07-16 16:55:14 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:55:15 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 52.46 | H-O: 47.28
+2026-07-16 16:55:15 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_165515.jpg
+2026-07-16 16:57:23 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 16:57:23 - BabyWatcher - INFO - Processing video: C:\Users\Th4iNghia\babywatcher\images\danger1.webp
+2026-07-16 16:57:24 - BabyWatcher - INFO - ✅ Video processing completed
+2026-07-16 16:57:38 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 17:58:56 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 17:59:02 - BabyWatcher - INFO - Processing camera: 0
+2026-07-16 17:59:06 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_175906.jpg
+2026-07-16 17:59:06 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.43s | H-M: 44.82 | H-O: 999.00
+2026-07-16 17:59:07 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 4.52 | H-O: 999.00
+2026-07-16 17:59:08 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 21.41 | H-O: 999.00
+2026-07-16 17:59:08 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_175908.jpg
+2026-07-16 17:59:14 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 135.51 | H-O: 999.00
+2026-07-16 17:59:14 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_175914.jpg
+2026-07-16 17:59:20 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_175920.jpg
+2026-07-16 17:59:23 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.00s | H-M: 161.89 | H-O: 999.00
+2026-07-16 17:59:23 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_175923.jpg
+2026-07-16 17:59:47 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 17:59:48 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.00s | H-M: 52.46 | H-O: 47.28
+2026-07-16 17:59:48 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_175948.jpg
+2026-07-16 18:00:18 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 18:00:18 - BabyWatcher - INFO - Processing video: C:\Users\Th4iNghia\babywatcher\images\test.mp4
+2026-07-16 18:00:20 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_180020.jpg
+2026-07-16 18:00:22 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_180022.jpg
+2026-07-16 18:00:28 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_180028.jpg
+2026-07-16 18:00:34 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_180034.jpg
+2026-07-16 18:00:36 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_180036.jpg
+2026-07-16 18:00:48 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_180048.jpg
+2026-07-16 18:00:49 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.52s | H-M: 12.13 | H-O: 0.00
+2026-07-16 18:00:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260716_180054.jpg
+2026-07-16 18:00:55 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 0.91s | H-M: 32.54 | H-O: 0.00
+2026-07-16 18:00:56 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260716_180056.jpg
+2026-07-16 18:00:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 0.83s | H-M: 4.04 | H-O: 408.59
+2026-07-16 18:00:59 - BabyWatcher - INFO - ✅ Video processing completed
+2026-07-16 18:07:28 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 18:12:16 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 18:16:31 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-16 18:17:41 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:11:40 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:11:40 - BabyWatcher - INFO - Processing video: C:\Users\Th4iNghia\babywatcher\images\test.mp4
+2026-07-18 15:12:16 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_151216.jpg
+2026-07-18 15:12:26 - BabyWatcher - INFO - ✅ Video processing completed
+2026-07-18 15:17:58 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:18:04 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 15:18:42 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 1.24s | H-M: 70.82 | H-O: 67.39
+2026-07-18 15:18:42 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_151842.jpg
+2026-07-18 15:18:43 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.38s | H-M: 75.00 | H-O: 87.03
+2026-07-18 15:18:45 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 3.15s | H-M: 72.82 | H-O: 59.30
+2026-07-18 15:18:45 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_151845.jpg
+2026-07-18 15:36:06 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:45:08 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:45:14 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 15:50:17 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:50:43 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:50:48 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 15:51:02 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155102.jpg
+2026-07-18 15:51:02 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.52s | H-M: 186.14 | H-O: 210.39
+2026-07-18 15:51:03 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.24s | H-M: 160.62 | H-O: 199.93
+2026-07-18 15:51:05 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.33s | H-M: 172.34 | H-O: 209.57
+2026-07-18 15:51:05 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155105.jpg
+2026-07-18 15:51:07 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.76s | H-M: 170.01 | H-O: 196.61
+2026-07-18 15:51:08 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 7.48s | H-M: 159.85 | H-O: 201.10
+2026-07-18 15:51:08 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155108.jpg
+2026-07-18 15:51:11 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.07s | H-M: 25.30 | H-O: 277.59
+2026-07-18 15:51:11 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155111.jpg
+2026-07-18 15:51:18 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155118.jpg
+2026-07-18 15:51:22 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.38s | H-M: 84.71 | H-O: 999.00
+2026-07-18 15:51:22 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155122.jpg
+2026-07-18 15:51:33 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.28s | H-M: 61.82 | H-O: 999.00
+2026-07-18 15:51:33 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155133.jpg
+2026-07-18 15:51:34 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.28s | H-M: 115.12 | H-O: 999.00
+2026-07-18 15:51:39 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.85s | H-M: 18.03 | H-O: 999.00
+2026-07-18 15:51:39 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155139.jpg
+2026-07-18 15:51:40 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.23s | H-M: 23.19 | H-O: 261.11
+2026-07-18 15:51:41 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.96s | H-M: 22.52 | H-O: 999.00
+2026-07-18 15:51:41 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155141.jpg
+2026-07-18 15:51:44 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155144.jpg
+2026-07-18 15:51:45 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.68s | H-M: 16.07 | H-O: 999.00
+2026-07-18 15:51:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155149.jpg
+2026-07-18 15:51:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 15.03s | H-M: 19.82 | H-O: 999.00
+2026-07-18 15:51:52 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 16.27s | H-M: 21.18 | H-O: 999.00
+2026-07-18 15:51:52 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155152.jpg
+2026-07-18 15:51:53 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 17.72s | H-M: 22.03 | H-O: 999.00
+2026-07-18 15:51:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 19.82s | H-M: 22.36 | H-O: 999.00
+2026-07-18 15:51:55 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155155.jpg
+2026-07-18 15:51:58 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 22.34s | H-M: 25.69 | H-O: 999.00
+2026-07-18 15:51:58 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155158.jpg
+2026-07-18 15:51:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 23.74s | H-M: 28.11 | H-O: 999.00
+2026-07-18 15:52:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 24.49s | H-M: 106.84 | H-O: 999.00
+2026-07-18 15:52:00 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_155200.jpg
+2026-07-18 15:59:08 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 15:59:12 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 15:59:20 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_155920.jpg
+2026-07-18 15:59:21 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.40s | H-M: 55.28 | H-O: 0.00
+2026-07-18 15:59:23 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 3.23s | H-M: 31.41 | H-O: 35.13
+2026-07-18 15:59:23 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_155923.jpg
+2026-07-18 15:59:25 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 5.34s | H-M: 46.62 | H-O: 0.00
+2026-07-18 15:59:25 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_155925.jpg
+2026-07-18 15:59:27 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 7.40s | H-M: 42.55 | H-O: 0.00
+2026-07-18 15:59:27 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_155927.jpg
+2026-07-18 15:59:29 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 9.43s | H-M: 60.64 | H-O: 0.00
+2026-07-18 15:59:29 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_155929.jpg
+2026-07-18 15:59:31 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 11.53s | H-M: 91.52 | H-O: 0.00
+2026-07-18 15:59:31 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_155931.jpg
+2026-07-18 16:00:07 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_160007.jpg
+2026-07-18 16:00:57 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 12.81s | H-M: 43.36 | H-O: 51.94
+2026-07-18 16:00:57 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_160057.jpg
+2026-07-18 16:01:00 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 15.75s | H-M: 48.48 | H-O: 44.24
+2026-07-18 16:01:00 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_160100.jpg
+2026-07-18 16:13:56 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:14:00 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:14:31 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_161431.jpg
+2026-07-18 16:14:31 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.24s | H-M: 128.65 | H-O: 58.19
+2026-07-18 16:14:38 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 8.65s | H-M: 122.85 | H-O: 55.94
+2026-07-18 16:14:38 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_161438.jpg
+2026-07-18 16:14:40 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 10.76s | H-M: 82.76 | H-O: 33.39
+2026-07-18 16:14:40 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_161440.jpg
+2026-07-18 16:14:49 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 5.56s | H-M: 119.29 | H-O: 59.30
+2026-07-18 16:14:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_161449.jpg
+2026-07-18 16:14:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_161454.jpg
+2026-07-18 16:14:54 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.54s | H-M: 79.45 | H-O: 999.00
+2026-07-18 16:15:26 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_161526.jpg
+2026-07-18 16:15:37 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_161537.jpg
+2026-07-18 16:15:38 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.23s | H-M: 12.13 | H-O: 59.16
+2026-07-18 16:15:43 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_161543.jpg
+2026-07-18 16:15:43 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.97s | H-M: 11.72 | H-O: 64.15
+2026-07-18 16:16:04 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_161604.jpg
+2026-07-18 16:16:19 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.29s | H-M: 19.08 | H-O: 999.00
+2026-07-18 16:16:19 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_161619.jpg
+2026-07-18 16:30:34 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:30:40 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:30:48 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_163048.jpg
+2026-07-18 16:30:48 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.36s | H-M: 160.55 | H-O: 999.00
+2026-07-18 16:30:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.55s | H-M: 79.72 | H-O: 999.00
+2026-07-18 16:42:41 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:42:45 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:42:48 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_164248.jpg
+2026-07-18 16:42:49 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.89s | H-M: 118.68 | H-O: 999.00
+2026-07-18 16:42:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.14s | H-M: 142.53 | H-O: 999.00
+2026-07-18 16:42:50 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_164250.jpg
+2026-07-18 16:42:51 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.54s | H-M: 132.26 | H-O: 999.00
+2026-07-18 16:42:52 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_164252.jpg
+2026-07-18 16:42:53 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.84s | H-M: 134.98 | H-O: 999.00
+2026-07-18 16:42:54 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 7.01s | H-M: 122.37 | H-O: 999.00
+2026-07-18 16:42:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_164254.jpg
+2026-07-18 16:42:55 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.26s | H-M: 117.07 | H-O: 999.00
+2026-07-18 16:42:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.48s | H-M: 126.87 | H-O: 999.00
+2026-07-18 16:42:57 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_164257.jpg
+2026-07-18 16:42:58 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 11.08s | H-M: 146.96 | H-O: 999.00
+2026-07-18 16:42:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 11.78s | H-M: 113.22 | H-O: 999.00
+2026-07-18 16:42:59 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_164259.jpg
+2026-07-18 16:43:00 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 13.43s | H-M: 108.50 | H-O: 999.00
+2026-07-18 16:45:26 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:45:30 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:49:44 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:49:48 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:53:50 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:53:54 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:57:58 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 16:58:02 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 16:59:08 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_165908.jpg
+2026-07-18 16:59:08 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 2.21s | H-M: 46.82 | H-O: 116.28
+2026-07-18 16:59:11 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 3.29s | H-M: 36.33 | H-O: 122.69
+2026-07-18 16:59:11 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_165911.jpg
+2026-07-18 16:59:13 - BabyWatcher - WARNING - Event: OBJECT_TO_MOUTH | Duration: 5.52s | H-M: 45.37 | H-O: 115.09
+2026-07-18 16:59:13 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\OBJECT_TO_MOUTH_20260718_165913.jpg
+2026-07-18 17:00:22 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:00:26 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:00:30 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_170030.jpg
+2026-07-18 17:00:31 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.38s | H-M: 105.79 | H-O: 999.00
+2026-07-18 17:00:32 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.29s | H-M: 61.07 | H-O: 999.00
+2026-07-18 17:00:32 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_170032.jpg
+2026-07-18 17:00:33 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.09s | H-M: 78.86 | H-O: 999.00
+2026-07-18 17:00:35 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.40s | H-M: 86.45 | H-O: 999.00
+2026-07-18 17:00:35 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_170035.jpg
+2026-07-18 17:00:41 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_170041.jpg
+2026-07-18 17:00:42 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.86s | H-M: 116.65 | H-O: 999.00
+2026-07-18 17:10:06 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:10:10 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:14:42 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:14:46 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:16:56 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:17:00 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:21:05 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:21:09 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:26:45 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:26:49 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:27:29 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_172729.jpg
+2026-07-18 17:27:30 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.76s | H-M: 104.09 | H-O: 999.00
+2026-07-18 17:27:31 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.01s | H-M: 76.87 | H-O: 999.00
+2026-07-18 17:27:31 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_172731.jpg
+2026-07-18 17:29:16 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:29:20 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:29:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_172954.jpg
+2026-07-18 17:30:02 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173002.jpg
+2026-07-18 17:30:02 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.36s | H-M: 139.12 | H-O: 314.60
+2026-07-18 17:30:03 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.41s | H-M: 125.60 | H-O: 303.69
+2026-07-18 17:31:32 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:31:36 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:31:38 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173138.jpg
+2026-07-18 17:31:42 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.11s | H-M: 162.01 | H-O: 999.00
+2026-07-18 17:31:42 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173142.jpg
+2026-07-18 17:31:43 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.33s | H-M: 95.47 | H-O: 999.00
+2026-07-18 17:31:45 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.27s | H-M: 160.06 | H-O: 999.00
+2026-07-18 17:31:45 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173145.jpg
+2026-07-18 17:31:46 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.43s | H-M: 123.88 | H-O: 999.00
+2026-07-18 17:31:47 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.40s | H-M: 165.84 | H-O: 999.00
+2026-07-18 17:31:47 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173147.jpg
+2026-07-18 17:31:54 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173154.jpg
+2026-07-18 17:31:58 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173158.jpg
+2026-07-18 17:31:59 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.14s | H-M: 169.52 | H-O: 999.00
+2026-07-18 17:32:25 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173225.jpg
+2026-07-18 17:32:25 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.74s | H-M: 162.78 | H-O: 999.00
+2026-07-18 17:32:41 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173241.jpg
+2026-07-18 17:33:50 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173350.jpg
+2026-07-18 17:33:50 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.06s | H-M: 107.01 | H-O: 999.00
+2026-07-18 17:33:52 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.23s | H-M: 111.20 | H-O: 999.00
+2026-07-18 17:33:52 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173352.jpg
+2026-07-18 17:34:06 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173406.jpg
+2026-07-18 17:34:10 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.56s | H-M: 71.52 | H-O: 999.00
+2026-07-18 17:34:10 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173410.jpg
+2026-07-18 17:34:27 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173427.jpg
+2026-07-18 17:34:27 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.38s | H-M: 81.29 | H-O: 999.00
+2026-07-18 17:34:28 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.34s | H-M: 130.11 | H-O: 999.00
+2026-07-18 17:34:29 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173429.jpg
+2026-07-18 17:34:29 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.69s | H-M: 123.96 | H-O: 999.00
+2026-07-18 17:34:31 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.75s | H-M: 114.37 | H-O: 999.00
+2026-07-18 17:34:31 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173431.jpg
+2026-07-18 17:34:32 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 7.39s | H-M: 90.49 | H-O: 999.00
+2026-07-18 17:34:33 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.56s | H-M: 105.20 | H-O: 999.00
+2026-07-18 17:34:33 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173433.jpg
+2026-07-18 17:34:35 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.81s | H-M: 143.90 | H-O: 999.00
+2026-07-18 17:34:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 10.85s | H-M: 108.65 | H-O: 999.00
+2026-07-18 17:34:36 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173436.jpg
+2026-07-18 17:34:39 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173439.jpg
+2026-07-18 17:34:39 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.04s | H-M: 105.78 | H-O: 999.00
+2026-07-18 17:34:53 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173453.jpg
+2026-07-18 17:34:53 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.02s | H-M: 177.10 | H-O: 999.00
+2026-07-18 17:34:57 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173457.jpg
+2026-07-18 17:34:57 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.06s | H-M: 135.85 | H-O: 999.00
+2026-07-18 17:35:03 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.49s | H-M: 106.63 | H-O: 999.00
+2026-07-18 17:35:03 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173503.jpg
+2026-07-18 17:35:06 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.82s | H-M: 53.37 | H-O: 999.00
+2026-07-18 17:35:06 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173506.jpg
+2026-07-18 17:35:07 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 6.42s | H-M: 146.14 | H-O: 999.00
+2026-07-18 17:35:09 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 7.27s | H-M: 125.14 | H-O: 999.00
+2026-07-18 17:35:09 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173509.jpg
+2026-07-18 17:35:10 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 8.59s | H-M: 125.79 | H-O: 999.00
+2026-07-18 17:35:11 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 9.56s | H-M: 79.93 | H-O: 999.00
+2026-07-18 17:35:11 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_173511.jpg
+2026-07-18 17:58:20 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-18 17:58:27 - BabyWatcher - INFO - Processing camera: 0
+2026-07-18 17:58:49 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260718_175849.jpg
+2026-07-23 18:20:12 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-23 18:20:12 - BabyWatcher - INFO - Processing video: C:\Users\Th4iNghia\babywatcher\images\test.mp4
+2026-07-28 01:19:03 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-28 01:21:38 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-28 01:22:55 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully
+2026-07-28 01:23:00 - BabyWatcher - INFO - Processing camera: 0
+2026-07-28 01:23:06 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.27s | H-M: 49.87 | H-O: 999.00
+2026-07-28 01:23:06 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012305.jpg
+2026-07-28 01:23:22 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012322.jpg
+2026-07-28 01:23:23 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 1.43s | H-M: 86.96 | H-O: 999.00
+2026-07-28 01:23:24 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.46s | H-M: 25.07 | H-O: 999.00
+2026-07-28 01:23:25 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012325.jpg
+2026-07-28 01:23:25 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 3.65s | H-M: 71.53 | H-O: 999.00
+2026-07-28 01:23:26 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.76s | H-M: 39.02 | H-O: 999.00
+2026-07-28 01:23:27 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012327.jpg
+2026-07-28 01:23:32 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012332.jpg
+2026-07-28 01:23:32 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 2.27s | H-M: 86.54 | H-O: 999.00
+2026-07-28 01:23:35 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 4.36s | H-M: 111.10 | H-O: 999.00
+2026-07-28 01:23:35 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012335.jpg
+2026-07-28 01:23:36 - BabyWatcher - WARNING - Event: HAND_TO_MOUTH | Duration: 5.79s | H-M: 65.87 | H-O: 999.00
+2026-07-28 01:23:38 - BabyWatcher - INFO - 💾 Saved danger clip: danger_clips\HAND_TO_MOUTH_20260728_012338.jpg
+2026-07-28 01:55:46 - BabyWatcher - INFO - ✅ BabyWatcher initialized successfully

@@ -20,17 +20,23 @@ detection:
   sustained_danger_duration: 0.6  # Chỉ báo cảnh báo sau khi tín hiệu nguy hiểm kéo dài ít nhất 0.6s
   
   # Threshold multipliers for dynamic calculation
-  hand_mouth_multiplier: 0.5  # shoulder_width × 0.5
-  hand_object_multiplier: 0.5  # shoulder_width × 0.5
+  hand_mouth_multiplier: 0.6  # shoulder_width × 0.6
+  hand_object_multiplier: 0.6  # shoulder_width × 0.6
   object_mouth_multiplier: 0.6  # object-to-mouth threshold factor
   object_region_multiplier: 1.2  # region size for object filtering
   object_mouth_history_window: 3  # require repeated evidence before object-to-mouth alert
   
   # Enhanced object detection for occluded/small objects
-  small_object_conf_thresh: 0.15  # Reduced from 0.2
-  inferred_object_distance_thresh: 25  # If hand-mouth < 25px, infer object is held
-  hand_conf_thresh: 0.4  # Lower threshold for hand boxes to improve detection
-  mediapipe_confidence: 0.45  # MediaPipe detection sensitivity
+  small_object_conf_thresh: 0.12  # Lower threshold to catch objects near the hand more easily
+  inferred_object_distance_thresh: 22  # If hand-mouth < 25px, infer object is held
+  hand_conf_thresh: 0.35  # Lower threshold for hand boxes to improve detection
+  hand_near_object_conf_thresh: 0.10  # Keep candidate objects near the hand even at low confidence
+  hand_near_object_roi_scale: 1.6  # Expand hand ROI for nearby object checks
+  object_near_mouth_min_distance: 18  # Only consider objects very close to the mouth as plausible mouth-relevant candidates
+  object_size_limit_multiplier: 0.35  # Limit the size of mouth-relevant objects to reduce false positives
+  enable_hand_detection: false  # MediaPipe hand detector is disabled; core logic uses pose + object detection
+  enable_face_detection: false  # Face detection remains off by default
+  mediapipe_confidence: 0.45  # Retained for compatibility, but not used
 
 # Alert Settings
 alerts:

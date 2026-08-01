@@ -4,13 +4,34 @@ Train custom YOLOv8 model from babyMonitor2 dataset
 Integrated training script for BabyWatcher
 """
 
+import argparse
 import os
 import sys
 from pathlib import Path
-from ultralytics import YOLO
+
+import torch
 import yaml
+from ultralytics import YOLO
+
+
+def resolve_device(requested_device):
+    if requested_device in (None, "", "auto"):
+        return "0" if torch.cuda.is_available() else "cpu"
+
+    if str(requested_device) == "0" and not torch.cuda.is_available():
+        print("⚠️ GPU not available, falling back to CPU")
+        return "cpu"
+
+    return requested_device
+
 
 def main():
+    parser = argparse.ArgumentParser(description="Train custom YOLOv8 model for BabyWatcher")
+    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--imgsz", type=int, default=640)
+    parser.add_argument("--batch", type=int, default=16)
+    parser.add_argument("--device", default="auto")
+    args = parser.parse_args()
     print("=" * 80)
     print("🚀 BABYWATCHER CUSTOM MODEL TRAINING - babyMonitor2")
     print("=" * 80)
@@ -42,9 +63,11 @@ def main():
     print(f"   Dataset: {data_yaml}")
     print(f"   Output: {output_dir}")
     print(f"   Model: YOLOv8 Nano")
-    print(f"   Epochs: 100")
-    print(f"   Image Size: 640")
-    print(f"   Batch Size: 16")
+    device = resolve_device(args.device)
+    print(f"   Epochs: {args.epochs}")
+    print(f"   Image Size: {args.imgsz}")
+    print(f"   Batch Size: {args.batch}")
+    print(f"   Device: {device}")
     
     print(f"\n🔥 Starting training...")
     print("   (This may take 10-30 minutes depending on GPU)")
@@ -57,11 +80,11 @@ def main():
         # Train
         results = model.train(
             data=data_yaml,
-            epochs=100,
-            imgsz=640,
-            batch=16,
+            epochs=args.epochs,
+            imgsz=args.imgsz,
+            batch=args.batch,
             patience=20,
-            device=0,  # GPU 0, or "cpu" for CPU-only
+            device=device,
             project=output_dir,
             name="detector",
             exist_ok=True,

@@ -7,8 +7,8 @@ from src.detector import BabyWatcher
 def test_dynamic_threshold_multiplier_defaults():
     config = Config('config.yaml')
 
-    assert config.get('detection.hand_mouth_multiplier', 0.5) == 0.5
-    assert config.get('detection.hand_object_multiplier', 0.5) == 0.5
+    assert config.get('detection.hand_mouth_multiplier', 0.6) == 0.6
+    assert config.get('detection.hand_object_multiplier', 0.6) == 0.6
     assert config.get('models.hand_model_path', '') == ''
 
 
@@ -28,8 +28,8 @@ def test_proximity_signal_uses_smoothed_history():
     watcher.proximity_history = []
     watcher.proximity_history_window = 3
 
-    assert watcher._evaluate_proximity_signal(35, 40) is False
-    assert watcher._evaluate_proximity_signal(35, 40) is False
+    assert watcher._evaluate_proximity_signal(20, 40) is False
+    assert watcher._evaluate_proximity_signal(20, 40) is False
     assert watcher._evaluate_proximity_signal(20, 40) is True
 
 
@@ -54,9 +54,13 @@ def test_object_to_mouth_uses_dynamic_thresholds():
     watcher = BabyWatcher.__new__(BabyWatcher)
     watcher.object_mouth_multiplier = 0.6
     watcher.dynamic_threshold = True
+    watcher.object_mouth_history = []
+    watcher.object_mouth_history_window = 3
 
+    assert watcher._evaluate_object_to_mouth_signal(10, 20, True, 10, 60) is False
+    assert watcher._evaluate_object_to_mouth_signal(10, 20, True, 10, 60) is False
     assert watcher._evaluate_object_to_mouth_signal(10, 20, True, 10, 60) is True
-    assert watcher._evaluate_object_to_mouth_signal(50, 20, True, 10, 60) is False
+    assert watcher._evaluate_object_to_mouth_signal(50, 20, True, 10, 60) is True
 
 
 def test_filter_objects_by_person_region():
@@ -92,7 +96,30 @@ def test_object_to_mouth_uses_history_for_dynamic_thresholds():
     watcher.object_mouth_history_window = 3
 
     assert watcher._evaluate_object_to_mouth_signal(40, 25, True, 15, 60) is False
-    assert watcher._evaluate_object_to_mouth_signal(40, 25, True, 15, 60) is True
+    assert watcher._evaluate_object_to_mouth_signal(40, 25, True, 15, 60) is False
+    assert watcher._evaluate_object_to_mouth_signal(40, 25, True, 15, 60) is False
+
+
+def test_proximity_signal_requires_current_frame_to_stay_close():
+    watcher = BabyWatcher.__new__(BabyWatcher)
+    watcher.proximity_history = []
+    watcher.proximity_history_window = 3
+
+    assert watcher._evaluate_proximity_signal(20, 40) is False
+    assert watcher._evaluate_proximity_signal(20, 40) is False
+    assert watcher._evaluate_proximity_signal(35, 40) is False
+
+
+def test_object_near_mouth_requires_small_box_and_close_center():
+    watcher = BabyWatcher.__new__(BabyWatcher)
+    watcher.object_near_mouth_min_distance = 18
+    watcher.object_size_limit_multiplier = 0.35
+    mouth = np.array([200, 200])
+    large_box = (0, 0, 1000, 1000)
+    small_box = (180, 185, 220, 215)
+
+    assert watcher._is_object_near_mouth(large_box, mouth, 60) is False
+    assert watcher._is_object_near_mouth(small_box, mouth, 60) is True
 
 
 if __name__ == '__main__':

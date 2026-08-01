@@ -46,15 +46,19 @@ class BabyWatcher:
         self.dynamic_threshold = self.config.get("detection.dynamic_threshold", True)
         
         # Dynamic threshold multipliers
-        self.hand_mouth_multiplier = self.config.get("detection.hand_mouth_multiplier", 0.5)
-        self.hand_object_multiplier = self.config.get("detection.hand_object_multiplier", 0.5)
+        self.hand_mouth_multiplier = self.config.get("detection.hand_mouth_multiplier", 0.6)
+        self.hand_object_multiplier = self.config.get("detection.hand_object_multiplier", 0.6)
         self.object_mouth_multiplier = self.config.get("detection.object_mouth_multiplier", 0.6)
         self.object_region_multiplier = self.config.get("detection.object_region_multiplier", 1.2)
         
         # Enhanced object detection for small/occluded objects
-        self.small_object_conf_thresh = self.config.get("detection.small_object_conf_thresh", 0.15)
-        self.hand_closing_thresh = self.config.get("detection.hand_conf_thresh", 0.4)  # Hand confidence threshold
-        self.inferred_object_distance_thresh = self.config.get("detection.inferred_object_distance_thresh", 25)  # If hand-mouth < 25px, infer object
+        self.small_object_conf_thresh = self.config.get("detection.small_object_conf_thresh", 0.12)
+        self.hand_closing_thresh = self.config.get("detection.hand_conf_thresh", 0.35)  # Hand confidence threshold
+        self.inferred_object_distance_thresh = self.config.get("detection.inferred_object_distance_thresh", 22)  # If hand-mouth < 25px, infer object
+        self.hand_near_object_conf_thresh = self.config.get("detection.hand_near_object_conf_thresh", 0.1)
+        self.hand_near_object_roi_scale = self.config.get("detection.hand_near_object_roi_scale", 1.6)
+        self.object_near_mouth_min_distance = self.config.get("detection.object_near_mouth_min_distance", 18)
+        self.object_size_limit_multiplier = self.config.get("detection.object_size_limit_multiplier", 0.35)
 
         # Load models
         pose_model_path = self.config.get("models.pose_model_path", "yolo26n-pose.pt")
@@ -78,8 +82,9 @@ class BabyWatcher:
         
         # Model availability flags
         self.use_hand_detection = False
-        self.use_face_detection = False
-        print("ℹ️  Hand and face detection are disabled; using pose + object logic only")
+        self.use_face_detection = self.config.get("detection.enable_face_detection", False)
+        self.hand_detector = None
+        print("ℹ️  MediaPipe hand detection disabled; using pose + object logic only")
 
         print("✅ Models loaded successfully")
         
@@ -175,7 +180,7 @@ class BabyWatcher:
             verbose=False
         )[0]
         
-        # Hand and face detection are disabled in this configuration.
+        # Hand and face detection inputs.
         hand_results = None
         face_results = None
         hand_boxes = []
@@ -196,8 +201,14 @@ class BabyWatcher:
         d_hand_obj = 999.0
         hand_mouth_thresh = self.hand_mouth_thresh
         hand_obj_thresh = self.hand_obj_thresh
-        object_scan_threshold = max(20.0, self.hand_obj_thresh)
+        object_scan_threshold = max(20.0, self.hand_obj_thresh * 0.7)
         
+        if self.use_hand_detection and self.hand_detector is not None:
+            try:
+                hand_results = self.hand_detector.detect(frame)
+            except Exception:
+                hand_results = None
+
         # ====== POSE DETECTION ======
         if pose_results.keypoints is not None:
             kpts = pose_results.keypoints.xy.cpu().numpy()
@@ -245,7 +256,14 @@ class BabyWatcher:
                 cv2.circle(frame, tuple(mouth_pt), 5, (0, 255, 255), -1)
                 cv2.circle(frame, tuple(mid_pt), 5, (255, 0, 255), -1)
                 
-                # No hand landmarks are drawn because the hand detector is disabled.
+                # Draw any hand landmarks if available from the hand detector.
+                if self.use_hand_detection and hand_results is not None:
+                    try:
+                        for hand_data in hand_results:
+                            self.hand_detector.draw_hand_skeleton(frame, hand_data)
+                    except Exception:
+                        pass
+
                 if mouth is not None:
                     cv2.circle(frame, tuple(mouth.astype(int)), 6, (255, 0, 255), -1)  # Magenta
                     cv2.putText(frame, "Mouth", tuple((mouth + 10).astype(int)),
@@ -313,11 +331,11 @@ class BabyWatcher:
                 x1, y1, x2, y2 = box
                 # Use lower threshold for small objects that might be in hand
                 box_area = (x2 - x1) * (y2 - y1)
-                threshold = self.small_object_conf_thresh if box_area < 5000 else self.conf_thresh
+                threshold = self.small_object_conf_thresh if box_area < 5000 else max(self.conf_thresh, self.hand_near_object_conf_thresh)
                 
                 if conf < threshold:
                     # Collect lower-confidence near-hand candidates for inference
-                    if conf >= self.small_object_conf_thresh:
+                    if conf >= self.hand_near_object_conf_thresh:
                         object_candidate_boxes.append((x1, y1, x2, y2))
                     continue
                 if int(cls) == 0:  # Skip person class
@@ -332,6 +350,15 @@ class BabyWatcher:
                               (0, 255, 0), 2)
         
         # ====== HAND-OBJECT INTERACTION ======
+        if self.use_hand_detection and hand_results is not None:
+            try:
+                for hand_data in hand_results:
+                    index_tip = self.hand_detector.get_index_finger_tip(hand_data)
+                    if index_tip is not None:
+                        wrists.append(np.array(index_tip, dtype=np.float32))
+            except Exception:
+                pass
+
         for wrist in wrists:
             nearest_dist, nearest_idx, nearest_point = utils.get_nearest_object_box(
                 wrist, detected_boxes
@@ -544,27 +571,65 @@ class BabyWatcher:
             return max(20.0, self.hand_obj_thresh)
         return max(20.0, float(shoulder_width) * 0.5)
 
+    def _is_object_near_mouth(self, box: Tuple[float, float, float, float], mouth_reference: np.ndarray,
+                              threshold: float) -> bool:
+        """Only treat an object as mouth-relevant when it is both close and plausibly small."""
+        self.object_near_mouth_min_distance = getattr(self, 'object_near_mouth_min_distance', 18)
+        self.object_size_limit_multiplier = getattr(self, 'object_size_limit_multiplier', 0.35)
+
+        x1, y1, x2, y2 = box
+        if x2 <= x1 or y2 <= y1:
+            return False
+
+        closest_point = np.array([
+            np.clip(mouth_reference[0], x1, x2),
+            np.clip(mouth_reference[1], y1, y2)
+        ])
+        mouth_distance = float(np.linalg.norm(mouth_reference - closest_point))
+
+        if mouth_distance > max(self.object_near_mouth_min_distance, threshold * 0.8):
+            return False
+
+        box_area = (x2 - x1) * (y2 - y1)
+        size_limit = max(3000.0, threshold * threshold * self.object_size_limit_multiplier)
+        if box_area > size_limit:
+            return False
+
+        return True
+
     def _evaluate_proximity_signal(self, distance: float, threshold: float) -> bool:
-        """Smooth the near-mouth signal over a short history window to reduce false positives."""
-        self.proximity_history.append(distance < threshold * 0.9)
+        """Require the hand to stay close across history and remain close in the current frame."""
+        self.proximity_history = getattr(self, 'proximity_history', [])
+        self.proximity_history_window = getattr(self, 'proximity_history_window', 3)
+
+        current_signal = distance <= max(10.0, threshold * 0.85)
+        self.proximity_history.append(current_signal)
         if len(self.proximity_history) > self.proximity_history_window:
             self.proximity_history.pop(0)
 
         if len(self.proximity_history) < self.proximity_history_window:
             return False
 
-        return sum(self.proximity_history) >= max(2, int(self.proximity_history_window * 0.7))
+        return (
+            sum(self.proximity_history) >= max(2, int(self.proximity_history_window * 0.7))
+            and current_signal
+        )
 
     def _filter_objects_for_person(self, boxes: List[Tuple[float, float, float, float]], mouth_reference: np.ndarray,
                                    wrists: List[np.ndarray], shoulders: List[np.ndarray],
                                    reference_distance: float) -> List[Tuple[float, float, float, float]]:
         """Keep only objects in the upper-body chest-to-mouth region to reduce false positives."""
+        self.object_region_multiplier = getattr(self, 'object_region_multiplier', 1.2)
+
         if not boxes:
             return []
 
         region_radius = max(reference_distance, 80.0) * self.object_region_multiplier
         filtered = []
         for box in boxes:
+            if not self._is_object_near_mouth(box, mouth_reference, reference_distance):
+                continue
+
             x1, y1, x2, y2 = box
             center = np.array([(x1 + x2) / 2.0, (y1 + y2) / 2.0])
 
@@ -597,13 +662,18 @@ class BabyWatcher:
                                          hand_near_mouth: bool, hand_object_distance: float,
                                          threshold: float) -> bool:
         """Use a conservative dynamic threshold and require repeated evidence before triggering."""
+        self.object_mouth_multiplier = getattr(self, 'object_mouth_multiplier', 0.6)
+        self.object_mouth_history = getattr(self, 'object_mouth_history', [])
+        self.object_mouth_history_window = getattr(self, 'object_mouth_history_window', 3)
+        self.dynamic_threshold = getattr(self, 'dynamic_threshold', True)
+
         if not hand_near_mouth:
             return False
 
         body_scale = max(threshold, 1.0)
-        object_threshold = body_scale * self.object_mouth_multiplier * 0.9
-        hand_threshold = body_scale * 0.7
-        object_hand_threshold = body_scale * 0.65
+        object_threshold = body_scale * self.object_mouth_multiplier * 0.75
+        hand_threshold = body_scale * 0.6
+        object_hand_threshold = body_scale * 0.55
 
         object_close = object_mouth_distance <= object_threshold
         hand_close = hand_mouth_distance <= hand_threshold
