@@ -1,9 +1,12 @@
-"""Alert system for BabyWatcher - Sound, Email, Webhooks"""
+"""Alert system for BabyWatcher - Sound and Email"""
 
 import os
 import time
 from typing import Optional
 from abc import ABC, abstractmethod
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 class BaseAlert(ABC):
@@ -135,7 +138,7 @@ class EmailAlert(BaseAlert):
                 self.enabled = False
                 print("⚠️  smtplib not available. Email alerts disabled.")
     
-    def trigger(self, status: str, duration: float):
+    def trigger(self, status: str, duration: float, image_path: Optional[str] = None):
         """Send email alert if threshold exceeded"""
         if not self.enabled or status == "SAFE":
             return
@@ -150,12 +153,12 @@ class EmailAlert(BaseAlert):
         self.last_email_time = current_time
         
         try:
-            self._send_email(status, duration)
+            self._send_email(status, duration, image_path)
         except Exception as e:
             print(f"❌ Error sending email: {e}")
     
-    def _send_email(self, status: str, duration: float):
-        """Send email via SMTP"""
+    def _send_email(self, status: str, duration: float, image_path: Optional[str] = None):
+        """Send email via SMTP with optional image attachment"""
         subject = f"🚨 BabyWatcher Alert: {status}"
         body = f"""
 Baby Safety Alert!
@@ -167,94 +170,34 @@ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}
 Please check the baby immediately!
         """
         
-        message = f"Subject: {subject}\n\n{body}"
+        message = MIMEMultipart()
+        message["From"] = self.sender_email
+        message["To"] = self.recipient_email
+        message["Subject"] = subject
+        message.attach(MIMEText(body, "plain"))
+
+        if image_path and os.path.exists(image_path):
+            with open(image_path, "rb") as image_file:
+                image_attachment = MIMEImage(image_file.read(), name=os.path.basename(image_path))
+            image_attachment.add_header(
+                "Content-Disposition",
+                "attachment",
+                filename=os.path.basename(image_path)
+            )
+            message.attach(image_attachment)
         
         with self.smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
             server.starttls()
             server.login(self.sender_email, self.sender_password)
-            server.sendmail(self.sender_email, self.recipient_email, message)
+            server.sendmail(self.sender_email, self.recipient_email, message.as_string())
         
         print(f"✉️  Email alert sent: {subject}")
-
-
-class WebhookAlert(BaseAlert):
-    """Webhook alert system"""
-    
-    def __init__(self,
-                 enabled: bool = False,
-                 webhook_url: str = "",
-                 retry_count: int = 3):
-        """
-        Initialize webhook alert
-        
-        Args:
-            enabled: Enable/disable webhook alerts
-            webhook_url: Webhook URL to send alerts to
-            retry_count: Number of retries on failure
-        """
-        self.enabled = enabled
-        self.webhook_url = webhook_url
-        self.retry_count = retry_count
-        self.last_webhook_time = 0
-        self.webhook_cooldown = 5.0  # Min 5 seconds between webhooks
-        
-        if enabled:
-            try:
-                import requests
-                self.requests = requests
-                print("✅ Webhook alert initialized")
-            except ImportError:
-                self.enabled = False
-                print("⚠️  requests library not available. Webhook alerts disabled.")
-    
-    def trigger(self, status: str, duration: float, **kwargs):
-        """Send webhook alert"""
-        if not self.enabled or status == "SAFE":
-            return
-        
-        current_time = time.time()
-        if current_time - self.last_webhook_time < self.webhook_cooldown:
-            return  # Cooldown active
-        
-        self.last_webhook_time = current_time
-        
-        try:
-            self._send_webhook(status, duration, **kwargs)
-        except Exception as e:
-            print(f"❌ Error sending webhook: {e}")
-    
-    def _send_webhook(self, status: str, duration: float, **kwargs):
-        """Send webhook POST request"""
-        import json
-        
-        payload = {
-            'status': status,
-            'duration': duration,
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-            **kwargs
-        }
-        
-        for attempt in range(self.retry_count):
-            try:
-                response = self.requests.post(
-                    self.webhook_url,
-                    json=payload,
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    print(f"✅ Webhook sent successfully: {status}")
-                    return
-            except Exception as e:
-                if attempt < self.retry_count - 1:
-                    time.sleep(1)  # Wait before retry
-                else:
-                    raise
 
 
 class AlertManager:
     """Manage all alert types"""
     
-    def __init__(self, alerts_config: dict = None, email_config: dict = None, webhook_config: dict = None):
+    def __init__(self, alerts_config: dict = None, email_config: dict = None):
         """
         Initialize alert manager with all alert types
         
@@ -267,8 +210,6 @@ class AlertManager:
             alerts_config = {}
         if email_config is None:
             email_config = {}
-        if webhook_config is None:
-            webhook_config = {}
         
         # Initialize alerts based on config
         self.sound_alert = SoundAlert(
@@ -290,15 +231,6 @@ class AlertManager:
         
         self.email_alert = EmailAlert(**email_init_config)
         
-        # Webhook config handling
-        webhook_enabled = alerts_config.get('enable_webhook', False) or webhook_config.get('enabled', False)
-        webhook_init_config = {
-            'enabled': webhook_enabled,
-            'webhook_url': webhook_config.get('url', ''),
-            'retry_count': webhook_config.get('retry_count', 3)
-        }
-        
-        self.webhook_alert = WebhookAlert(**webhook_init_config)
     
     def trigger_alert(self, status: str, duration: float, **kwargs):
         """
@@ -313,10 +245,8 @@ class AlertManager:
             return
         
         self.sound_alert.trigger(status, duration)
-        self.email_alert.trigger(status, duration)
-        self.webhook_alert.trigger(status, duration, **kwargs)
+        self.email_alert.trigger(status, duration, image_path=kwargs.get("image_path"))
     
     def __repr__(self) -> str:
         return (f"<AlertManager: Sound={self.sound_alert.enabled}, "
-                f"Email={self.email_alert.enabled}, "
-                f"Webhook={self.webhook_alert.enabled}>")
+                f"Email={self.email_alert.enabled}>")

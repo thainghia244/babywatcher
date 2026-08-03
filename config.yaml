@@ -15,14 +15,18 @@ detection:
   hand_mouth_thresh: 45
   hand_obj_thresh: 60
   dynamic_threshold: true  # Tính threshold động dựa trên shoulder width
+  enable_fallback_fixed_threshold: true  # Dự phòng bằng ngưỡng cố định khi tín hiệu động không đủ tin cậy
+  fallback_hand_mouth_thresh: 60  # Ngưỡng cố định cho khoảng cách tay-miệng
+  fallback_hand_object_thresh: 60  # Ngưỡng cố định cho khoảng cách tay-vật
+  fallback_object_mouth_thresh: 60  # Ngưỡng cố định cho khoảng cách vật-miệng
   confirmation_frames: 3  # Chỉ báo cảnh báo sau khi cùng một tín hiệu lặp lại 3 frame
   proximity_history_window: 3  # Dùng trung bình lịch sử 3 frame cho tín hiệu gần miệng
   sustained_danger_duration: 0.6  # Chỉ báo cảnh báo sau khi tín hiệu nguy hiểm kéo dài ít nhất 0.6s
   
   # Threshold multipliers for dynamic calculation
-  hand_mouth_multiplier: 0.6  # shoulder_width × 0.6
-  hand_object_multiplier: 0.6  # shoulder_width × 0.6
-  object_mouth_multiplier: 0.6  # object-to-mouth threshold factor
+  hand_mouth_multiplier: 0.7  # shoulder_width × 0.7
+  hand_object_multiplier: 0.7  # shoulder_width × 0.7
+  object_mouth_multiplier: 0.7  # object-to-mouth threshold factor
   object_region_multiplier: 1.2  # region size for object filtering
   object_mouth_history_window: 3  # require repeated evidence before object-to-mouth alert
   
@@ -41,7 +45,7 @@ detection:
 # Alert Settings
 alerts:
   enable_sound: true
-  enable_email: false
+  enable_email: true
   enable_webhook: false
   enable_logs: true
   danger_duration_threshold: 3.0  # Cảnh báo sau 3 giây liên tục
@@ -85,12 +89,12 @@ logging:
 #   3. Copy the 16-character password and paste as sender_password
 # For other providers: Use your email password or app-specific password
 email:
-  enabled: false
+  enabled: true
   smtp_server: "smtp.gmail.com"  # Gmail SMTP server
   smtp_port: 587  # TLS port (Gmail: 587, Outlook: 587, Yahoo: 587)
-  sender_email: "your_email@gmail.com"  # Your email address
-  sender_password: "your_app_password"  # Gmail App Password (16 characters)
-  recipient_email: "parent@example.com"  # Where to send alerts
+  sender_email: "nghiaproskt0123@gmail.com"  # Your email address
+  sender_password: "xobq lbiz jxth hpxl"  # Gmail App Password (16 characters)
+  recipient_email: "nghiaproskt0123@gmail.com"  # Where to send alerts
   alert_threshold: 5.0  # Send email when danger > 5 seconds
 
 # Sound Alerts
@@ -100,10 +104,11 @@ sound:
   volume: 0.8  # 0-1
 
 # Webhook Configuration (để gửi thông báo tới service khác)
+# Webhook configuration is disabled; email and sound alerts are used instead.
 webhook:
   enabled: false
-  url: "https://your-webhook-url.com/alert"  # Your webhook URL
-  retry_count: 3  # Number of retries on failure
+  url: ""
+  retry_count: 3
 
 # Display Settings
 display:

@@ -6,23 +6,50 @@ Quick training on baby safety dataset
 
 import os
 import sys
+import argparse
 from pathlib import Path
 from ultralytics import YOLO
 import yaml
 
+def build_dataset_yaml(dataset_dir: str, output_yaml: str, class_names: list[str]):
+    """Create a YOLO-style data.yaml for a custom image dataset."""
+    data_config = {
+        "path": dataset_dir,
+        "train": "train/images",
+        "val": "valid/images",
+        "test": "test/images",
+        "names": class_names,
+    }
+    with open(output_yaml, 'w', encoding='utf-8') as f:
+        yaml.safe_dump(data_config, f, sort_keys=False)
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Train a custom YOLO model for BabyWatcher from image datasets")
+    parser.add_argument("--dataset", default="babyMonitor2.v1i.yolov8", help="Path to the dataset folder")
+    parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
+    parser.add_argument("--batch-size", type=int, default=4, help="Training batch size")
+    parser.add_argument("--img-size", type=int, default=640, help="Training image size")
+    parser.add_argument("--output", default="models/babyMonitor2_custom", help="Output directory for trained model")
+    parser.add_argument("--classes", nargs="+", default=["hand", "object"], help="Class names for training")
+    parser.add_argument("--device", default="0", help="Training device: cpu or 0/1/2 for GPU")
+    args = parser.parse_args()
+
     print("=" * 80)
     print("🚀 BABYWATCHER CUSTOM MODEL TRAINING")
     print("=" * 80)
     
-    dataset_dir = "babyMonitor2.v1i.yolov8"
+    dataset_dir = args.dataset
     data_yaml = os.path.join(dataset_dir, "data.yaml")
     
     # Check dataset
-    if not os.path.exists(data_yaml):
-        print(f"❌ Dataset not found: {data_yaml}")
-        print(f"\nPlease ensure babyMonitor2 dataset is extracted")
+    if not os.path.exists(dataset_dir):
+        print(f"❌ Dataset folder not found: {dataset_dir}")
         return 1
+
+    if not os.path.exists(data_yaml):
+        print(f"⚠️  No data.yaml found in {dataset_dir}; generating a basic one for image folders")
+        build_dataset_yaml(dataset_dir, data_yaml, args.classes)
     
     print(f"✅ Dataset found: {dataset_dir}")
     
@@ -34,19 +61,20 @@ def main():
     for i, name in enumerate(data_config.get('names', [])):
         print(f"   {i}: {name}")
     
-    output_dir = "models/babyMonitor2_custom"
+    output_dir = args.output
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
     # Training config
-    epochs = 50  # Reduced from 100 for speed
-    batch_size = 4  # Reduced for CPU
+    epochs = args.epochs
+    batch_size = args.batch_size
     
     print(f"\n⚙️  Training Configuration:")
     print(f"   Model: YOLOv8 Nano")
     print(f"   Epochs: {epochs}")
     print(f"   Batch Size: {batch_size}")
-    print(f"   Device: CPU (may use GPU if available)")
-    print(f"   Expected Time: 30-45 minutes on CPU")
+    print(f"   Image Size: {args.img_size}")
+    print(f"   Device: {args.device}")
+    print(f"   Output: {output_dir}")
     print(f"\n🔥 Starting training...\n")
     
     try:
@@ -55,7 +83,7 @@ def main():
         results = model.train(
             data=data_yaml,
             epochs=epochs,
-            imgsz=640,
+            imgsz=args.img_size,
             batch=batch_size,
             patience=10,
             save=True,
@@ -64,7 +92,7 @@ def main():
             project=output_dir,
             name="detector",
             exist_ok=True,
-            device=0  # GPU if available, else CPU
+            device=args.device
         )
         
         print("\n" + "=" * 80)

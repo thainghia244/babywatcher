@@ -33,6 +33,12 @@ def main():
         help="Show statistics for a date (YYYY-MM-DD)",
         default=None
     )
+
+    parser.add_argument(
+        "--no-display",
+        action="store_true",
+        help="Disable GUI window display for image processing"
+    )
     
     args = parser.parse_args()
     
@@ -55,7 +61,7 @@ def main():
         else:
             # Process file
             print(f"\n🎬 Processing: {args.input}")
-            watcher.process_file(args.input, args.output)
+            watcher.process_file(args.input, args.output, show_window=not args.no_display)
     
     except Exception as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
