@@ -1,0 +1,794 @@
+<title>Fixed vs Dynamic Threshold — BabyWatcher</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* blue - dynamic / agreement line */
+    --good:           #0ca30c; /* SAFE */
+    --warning:        #fab219; /* HAND_TO_MOUTH */
+    --critical:       #d03b3b; /* OBJECT_TO_MOUTH */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --critical:       #e66767;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --critical:       #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 28px; line-height: 1.5; }
+  h2 { font-size: 1.15rem; margin: 40px 0 4px; }
+  h3 { font-size: 0.95rem; margin: 0 0 14px; color: var(--text-secondary); font-weight: 600; }
+  p.lead { color: var(--text-secondary); line-height: 1.6; font-size: 0.92rem; margin: 6px 0 20px; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 24px;
+    margin-bottom: 22px;
+  }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .tile .label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+  .tile .value { font-size: 1.5rem; font-weight: 600; }
+  .tile .note { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; font-family: inherit; }
+  .axis-label { fill: var(--text-muted); font-size: 11px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+  .bar-seg { cursor: pointer; }
+  .bar-seg:hover { filter: brightness(1.08); }
+  .seg-label { font-size: 10.5px; font-weight: 600; }
+  .line-path { fill: none; stroke: var(--series-1); stroke-width: 2; }
+  .dot { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; cursor: pointer; }
+  .dot:hover { r: 6; }
+  .val-label { font-size: 11px; fill: var(--text-secondary); font-weight: 600; }
+  .cat-label { font-size: 11px; fill: var(--text-secondary); }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 2px 0 18px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 4px; }
+  caption { text-align: left; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; caption-side: top; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; font-variant-numeric: normal; }
+  th { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  tbody tr:hover { background: color-mix(in srgb, var(--text-primary) 4%, transparent); }
+  .details-wrap { margin-top: 14px; }
+  summary { cursor: pointer; font-size: 0.8rem; color: var(--text-secondary); }
+
+  .callout { border-left: 3px solid var(--series-1); padding: 10px 16px; background: color-mix(in srgb, var(--series-1) 6%, transparent); border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-primary); margin: 16px 0; }
+  .findings { line-height: 1.7; font-size: 0.9rem; }
+  .findings li { margin-bottom: 8px; }
+  code { background: color-mix(in srgb, var(--text-primary) 6%, transparent); padding: 1px 6px; border-radius: 4px; font-size: 0.85em; }
+  footer { color: var(--text-muted); font-size: 0.75rem; margin-top: 40px; line-height: 1.6; }
+</style>
+
+<div class="viz-root">
+<div class="wrap">
+  <h1>So sánh Fixed Threshold và Dynamic Threshold</h1>
+  <p class="subtitle">
+    BabyWatcher — thực nghiệm trên toàn bộ 121 ảnh trong <code>image/</code>, chạy qua
+    <code>compare_fixed_thresholds.py</code> ở chế độ single-image (không dùng
+    <code>force_immediate_confirmation</code>, không cần lặp khung hình). Ngưỡng cố định
+    (fixed) được quét từ 30px đến 180px; ngưỡng động (dynamic) tính theo
+    <code>shoulder_width × 0.7</code> cho từng ảnh. Không cần nhãn ground-truth thật —
+    phân tích dựa trên độ đồng thuận (agreement) và độ nhạy (sensitivity) giữa hai cách tiếp cận.
+  </p>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">Tổng số ảnh</div>
+      <div class="value">121</div>
+      <div class="note">116 ảnh phát hiện được pose, 5 ảnh không phát hiện người</div>
+    </div>
+    <div class="tile">
+      <div class="label">Dải shoulder_width</div>
+      <div class="value">6.5 – 499px</div>
+      <div class="note">Độ lệch chuẩn 85.6px, trung vị 149px</div>
+    </div>
+    <div class="tile">
+      <div class="label">Đồng thuận cao nhất</div>
+      <div class="value">90.9%</div>
+      <div class="note">dynamic vs fixed_30</div>
+    </div>
+    <div class="tile">
+      <div class="label">Đồng thuận thấp nhất</div>
+      <div class="value">68.6%</div>
+      <div class="note">dynamic vs fixed_180</div>
+    </div>
+    <div class="tile">
+      <div class="label">Độ ổn định khi zoom/khoảng cách đổi</div>
+      <div class="value">91.9% <span style="font-size:0.6em;color:var(--text-muted)">vs 66–76%</span></div>
+      <div class="note">Dynamic vs 3 mức fixed — xem mục 6</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Kết luận nhanh:</strong> không có một giá trị fixed threshold duy nhất nào tái tạo
+    lại quyết định của dynamic threshold trên toàn bộ tập ảnh — đồng thuận cao nhất chỉ đạt 90.9%
+    (fixed_30) và giảm dần đều khi threshold tăng, xuống còn 68.6% ở fixed_180. Nguyên nhân trực
+    tiếp là <code>shoulder_width</code> — đại lượng dùng để suy ra kích thước cơ thể/khoảng cách
+    camera — dao động hơn 75 lần giữa ảnh nhỏ nhất và lớn nhất trong tập dữ liệu. Mục 6 chứng minh
+    trực tiếp hiệu quả của việc chọn dynamic threshold bằng một phép thử độc lập với dữ liệu trên:
+    dynamic ổn định 91.9% khi camera zoom/khoảng cách thay đổi, so với 66–76% của fixed threshold.
+  </div>
+
+  <h2>1. Vì sao một ngưỡng cố định không đủ</h2>
+  <p class="lead">
+    Phân bố <code>shoulder_width</code> (khoảng cách hai vai, tính bằng pixel) trên 116 ảnh có
+    phát hiện pose. Đây chính là đại lượng dynamic threshold dùng làm cơ sở — mỗi ảnh có một tỉ lệ
+    cơ thể/khoảng cách camera khác nhau, nên một hằng số pixel cố định chỉ "vừa" với một dải hẹp
+    trong phân bố này.
+  </p>
+  <div class="card">
+    <h3>Phân bố shoulder_width trên tập ảnh (px)</h3>
+    <div id="chart-hist"></div>
+  </div>
+
+  <h2>2. Kết quả phân loại thay đổi thế nào theo threshold</h2>
+  <p class="lead">
+    Số ảnh được phân vào từng trạng thái (SAFE / HAND_TO_MOUTH / OBJECT_TO_MOUTH) ứng với mỗi mode.
+    Khi fixed threshold tăng, số ảnh SAFE giảm đều và OBJECT_TO_MOUTH tăng đều — ngưỡng càng lớn
+    càng dễ coi tay/vật "đủ gần" miệng, tạo cảnh báo giả trên các ảnh mà bé ở xa camera (thân nhỏ).
+  </p>
+  <div class="card">
+    <div class="legend">
+      <span class="legend-item"><span class="swatch" style="background:var(--good)"></span>SAFE</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--warning)"></span>HAND_TO_MOUTH</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--critical)"></span>OBJECT_TO_MOUTH</span>
+    </div>
+    <div id="chart-stack"></div>
+  </div>
+
+  <h2>3. Độ đồng thuận giữa dynamic và từng mức fixed threshold</h2>
+  <p class="lead">
+    Với mỗi giá trị fixed threshold, phần trăm ảnh mà kết quả trùng với dynamic threshold trên
+    cùng ảnh đó (121 ảnh). Xu hướng giảm gần như tuyến tính — không có điểm "hội tụ" nào cho thấy
+    một fixed threshold có thể thay thế dynamic threshold một cách an toàn.
+  </p>
+  <div class="card">
+    <h3>% ảnh trùng kết quả với dynamic threshold</h3>
+    <div id="chart-line"></div>
+  </div>
+
+  <h2>4. Sai lệch tập trung ở đâu: bé ở xa (thân nhỏ) hay ở gần (thân lớn)</h2>
+  <p class="lead">
+    Chia 116 ảnh có pose thành hai nửa theo trung vị shoulder_width (149px): "thân nhỏ" (bé ở xa /
+    ảnh chụp rộng) và "thân lớn" (bé ở gần / ảnh chụp cận). Đo lại % đồng thuận với dynamic riêng
+    cho từng nửa.
+  </p>
+  <div class="card">
+    <table>
+      <caption>Đồng thuận với dynamic threshold, tách theo nhóm shoulder_width (58 ảnh mỗi nhóm)</caption>
+      <thead>
+        <tr><th>Fixed threshold</th><th>Thân nhỏ (≤149px)</th><th>Thân lớn (&gt;149px)</th><th>Chênh lệch</th></tr>
+      </thead>
+      <tbody id="table-split"></tbody>
+    </table>
+  </div>
+  <p class="lead">
+    Ở threshold thấp (30–80px) hai nhóm gần như tương đương. Nhưng từ threshold ≥120px, nhóm
+    "thân nhỏ" luôn đồng thuận thấp hơn nhóm "thân lớn" 6–9 điểm phần trăm — đúng như dự đoán:
+    một ngưỡng pixel cố định lớn sẽ "quá gần" một cách sai lệch đối với những bé ở xa camera,
+    khiến hệ thống báo động giả nhiều hơn hẳn so với khi dùng ngưỡng động (tự co theo kích thước
+    cơ thể trong khung hình).
+  </p>
+
+  <h2>5. Confusion Matrix: Dynamic (tham chiếu) vs Fixed threshold (dự đoán)</h2>
+  <p class="lead">
+    Đồ án chưa có nhãn ground-truth thủ công cho toàn bộ 121 ảnh (theo lựa chọn ban đầu là phân
+    tích không cần nhãn), nên confusion matrix dưới đây dùng <strong>dynamic threshold làm trục
+    "thực tế"</strong> và từng mức fixed threshold làm trục "dự đoán" — đo fixed threshold lệch
+    khỏi dynamic ở đâu, theo từng cặp lớp SAFE / HAND_TO_MOUTH / OBJECT_TO_MOUTH. Ô trên đường chéo
+    là số ảnh hai bên đồng ý; ô ngoài đường chéo là số ảnh hai bên bất đồng.
+  </p>
+  <div class="card">
+    <h3>fixed_45px (gần giá trị mặc định trong config.yaml)</h3>
+    <div id="cm-45"></div>
+  </div>
+  <div class="card">
+    <h3>fixed_80px</h3>
+    <div id="cm-80"></div>
+  </div>
+  <div class="card">
+    <h3>fixed_140px</h3>
+    <div id="cm-140"></div>
+  </div>
+  <p class="lead">
+    Ở cả ba mức, sai lệch gần như luôn nằm ở ô <strong>SAFE (dynamic) → OBJECT_TO_MOUTH (fixed)</strong>
+    và <strong>OBJECT_TO_MOUTH (dynamic) → SAFE (fixed)</strong> — tức là fixed threshold vừa tạo
+    báo động giả (SAFE bị đổi thành OBJECT_TO_MOUTH) vừa bỏ sót nguy hiểm thật (OBJECT_TO_MOUTH bị
+    đổi thành SAFE) tùy theo ảnh đó thân bé lớn hay nhỏ hơn mức threshold cố định đang dùng. Khi
+    threshold tăng từ 45px lên 140px, ô SAFE→OBJECT_TO_MOUTH tăng từ 4 lên 15 ảnh (báo động giả
+    tăng gần 4 lần), trong khi ô OBJECT_TO_MOUTH→SAFE giảm từ 7 xuống 3 (ít bỏ sót hơn nhưng đánh
+    đổi bằng báo động giả nhiều hơn hẳn) — hai lỗi kéo ngược chiều nhau, không có mức threshold cố
+    định nào tối thiểu hóa được cả hai cùng lúc.
+  </p>
+
+  <h2>6. Chứng minh hiệu quả: độ ổn định khi khoảng cách camera / độ phóng đại thay đổi</h2>
+  <p class="lead">
+    Các mục 1–5 chỉ cho thấy dynamic và fixed threshold <em>khác nhau</em>, chưa chứng minh cách nào
+    <em>đúng hơn</em>. Phép thử này bổ sung một tiêu chí khách quan, không cần nhãn ground-truth:
+    phóng to/thu nhỏ toàn bộ khung ảnh để mô phỏng việc camera đổi khoảng cách hoặc đổi độ phân giải
+    — hành vi thật trong ảnh (tay có gần miệng hay không) không hề thay đổi, nên kết quả phân loại
+    của một hệ thống tốt <strong>không được phép thay đổi</strong> chỉ vì ảnh được resize. Với mỗi
+    ảnh, kết quả ở tỉ lệ gốc (1.0×) được dùng làm "đáp án" cho chính ảnh đó ở 7 tỉ lệ còn lại
+    (0.4× đến 1.75×) — độ ổn định càng cao, hệ thống càng đáng tin cậy khi khoảng cách/góc quay
+    thực tế thay đổi.
+  </p>
+  <p class="lead">
+    Thực nghiệm trên 23 ảnh chọn rải đều theo <code>shoulder_width</code> (đại diện đủ dải xa–gần),
+    mỗi ảnh dựng lại ở 8 tỉ lệ, chạy qua dynamic threshold và 3 mức fixed threshold (45px, 80px,
+    140px) — tổng 736 lượt suy luận.
+  </p>
+  <div class="card">
+    <h3>Độ ổn định trung bình theo scale (càng cao càng tốt, 100% = luôn ra cùng kết quả)</h3>
+    <div id="chart-stability"></div>
+  </div>
+  <div class="card">
+    <table>
+      <caption>Số ảnh giữ nguyên kết quả ở cả 8 tỉ lệ (trong 23 ảnh thử nghiệm)</caption>
+      <thead>
+        <tr><th>Mode</th><th>Độ ổn định trung bình</th><th>Số ảnh hoàn toàn ổn định</th></tr>
+      </thead>
+      <tbody id="table-stability"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Ví dụ cụ thể: 1 ảnh, 8 tỉ lệ khác nhau, 4 cách tính threshold</h3>
+    <p class="lead" style="margin-top:0">
+      Ảnh <code>325703891…jpg</code> (OBJECT_TO_MOUTH ở tỉ lệ gốc). Dynamic threshold giữ nguyên
+      OBJECT_TO_MOUTH ở toàn bộ 8 tỉ lệ. fixed_140px thì đảo trạng thái <strong>4 lần</strong> —
+      gần như ngẫu nhiên theo tỉ lệ ảnh, dù cảnh vật không hề đổi.
+    </p>
+    <div id="example-table"></div>
+  </div>
+  <div class="card">
+    <h3>Confusion Matrix: Dynamic threshold tự so với chính nó qua các scale</h3>
+    <p class="lead" style="margin-top:0">
+      Trục "thực tế" ở đây không phải một threshold khác mà là <strong>chính dynamic threshold ở
+      tỉ lệ ảnh gốc (1.0×)</strong> — trục "dự đoán" là kết quả của cùng dynamic threshold ở 7 tỉ
+      lệ resize còn lại (0.4×–1.75×), gộp trên cả 23 ảnh (161 cặp). Ma trận này cho biết chính xác
+      8.1% trường hợp dynamic bị lệch (161−148=13 cặp) rơi vào ô nào.
+    </p>
+    <div id="cm-dynamic-self"></div>
+    <p class="lead" style="margin-top:14px; margin-bottom:0">
+      Toàn bộ 13 cặp lệch đều nằm ở ô <strong>OBJECT_TO_MOUTH → SAFE</strong> (11 cặp) và
+      <strong>SAFE → OBJECT_TO_MOUTH</strong> (2 cặp) — không có trường hợp nào lệch sang/từ
+      HAND_TO_MOUTH. Lỗi thường gặp nhất của dynamic threshold khi resize ảnh là <em>bỏ sót</em>
+      OBJECT_TO_MOUTH (đổi thành SAFE) nhiều hơn là báo động giả — ngược hướng với fixed threshold
+      ở mức cao (mục 4), vốn thiên về tạo báo động giả khi threshold lớn.
+    </p>
+  </div>
+  <p class="lead">
+    Đây là bằng chứng trực tiếp cho hiệu quả của việc chọn dynamic threshold: trên cùng một tập
+    ảnh thử nghiệm độc lập, dynamic threshold đạt độ ổn định 91.9% (19/23 ảnh không đổi kết quả dù
+    resize ảnh) — cao hơn hẳn cả ba mức fixed threshold (66–76%, tối đa chỉ 7/23 ảnh ổn định hoàn
+    toàn). Vì hành vi thật trong ảnh không đổi khi resize, mọi lần đổi kết quả ở đây đều là lỗi
+    của phương pháp threshold, không phải do dữ liệu — và fixed threshold mắc lỗi này thường xuyên
+    hơn dynamic threshold gấp 3–4 lần.
+  </p>
+
+  <h2>7. Bảng dữ liệu đầy đủ</h2>
+  <div class="card">
+    <table>
+      <caption>Phân bố trạng thái theo từng mode (121 ảnh)</caption>
+      <thead>
+        <tr><th>Mode</th><th>SAFE</th><th>HAND_TO_MOUTH</th><th>OBJECT_TO_MOUTH</th><th>Đồng thuận với dynamic</th></tr>
+      </thead>
+      <tbody id="table-full"></tbody>
+    </table>
+  </div>
+
+  <h2>Kết luận cho đồ án</h2>
+  <ul class="findings">
+    <li><strong>Bằng chứng trực tiếp: dynamic threshold ổn định hơn fixed threshold 91.9% so với
+      66–76% khi camera đổi khoảng cách/độ phóng đại (mục 6).</strong> Đây là phép thử không phụ
+      thuộc vào việc chọn threshold nào "đúng" — nó chỉ đo xem hệ thống có tự mâu thuẫn với chính
+      nó khi cùng một cảnh được chụp ở tỉ lệ khác hay không. Dynamic threshold giữ nguyên kết quả ở
+      19/23 ảnh dù resize 8 lần; fixed threshold tốt nhất trong ba mức thử chỉ giữ nguyên được 7/23.</li>
+    <li><strong>Dynamic threshold không có một fixed threshold tương đương.</strong> Đồng thuận
+      cao nhất đo được là 90.9% (fixed_30) — nghĩa là ngay cả lựa chọn tốt nhất trong dải khảo sát
+      vẫn cho kết quả khác dynamic trên khoảng 1/10 số ảnh.</li>
+    <li><strong>Độ nhạy với lựa chọn threshold rất cao đối với fixed.</strong> Chỉ đổi từ 30px
+      lên 180px, tỉ lệ ảnh SAFE giảm từ 96 xuống 61 (giảm 36%) — cho thấy hiệu năng của cách tiếp
+      cận fixed threshold phụ thuộc rất mạnh vào việc "đoán đúng" một hằng số, điều không khả thi
+      khi khoảng cách camera/kích thước bé thay đổi giữa các lần lắp đặt hoặc giữa các khung hình.</li>
+    <li><strong>Dynamic threshold thích nghi theo ngữ cảnh của từng ảnh.</strong> Vì
+      <code>shoulder_width</code> dao động 6.5–499px (gấp ~77 lần) trong chính tập ảnh thử nghiệm,
+      ngưỡng suy ra cũng dao động tương ứng (4.5–349px) — đúng bản chất của bài toán, thay vì ép
+      mọi ảnh dùng chung một hằng số pixel.</li>
+    <li><strong>Sai lệch của fixed threshold lệch hẳn về phía bé ở xa camera.</strong> Khi threshold
+      tăng, nhóm ảnh "thân nhỏ" luôn mất đồng thuận nhanh hơn nhóm "thân lớn" — xác nhận trực tiếp
+      giả thuyết thiết kế ở mục 3.2.4.1 của báo cáo: ngưỡng cố định gây sai lệch nhiều hơn khi trẻ
+      có kích thước nhỏ hơn trong khung hình.</li>
+  </ul>
+
+  <footer>
+    Nguồn dữ liệu: <code>analysis/threshold_comparison/compare_fixed_thresholds.csv</code>,
+    <code>dynamic_diagnostics.csv</code>, <code>analysis_summary.json</code>,
+    <code>confusion_matrices.json</code>, <code>scale_invariance_raw.csv</code>,
+    <code>scale_invariance_summary.json</code>. Sinh ngày 2026-08-06.
+    Trong quá trình chạy đã phát hiện và sửa 2 lỗi trong <code>src/detector.py</code>: (1) biến
+    <code>shoulder_width</code> chưa khởi tạo gây crash khi không phát hiện pose; (2) dict trả về
+    của <code>process_frame()</code> thiếu các khóa <code>shoulder_width</code>/
+    <code>h_m_thresh</code>/<code>h_o_thresh</code>/<code>h_m_dist</code>/<code>h_o_dist</code> mà
+    các script so sánh cần đọc. Phép thử ở mục 6 (<code>scale_invariance_test.py</code>) cũng sửa
+    một vấn đề tương tự: bộ lọc <code>sustained_danger_duration</code> trong
+    <code>process_frame()</code> phụ thuộc vào thời gian thực giữa các lần gọi liên tiếp trên cùng
+    một watcher — nếu không seed lại <code>_danger_state_since</code> trước mỗi lần gọi, kết quả sẽ
+    phụ thuộc vào tốc độ máy/thứ tự xử lý thay vì thuần túy logic threshold.
+  </footer>
+</div>
+</div>
+
+<script>
+const DATA = {"shoulder_width_stats": {"min": 6.4522133, "max": 498.68152, "median": 148.940175, "mean": 157.81646519827586, "stdev": 85.59742215430683, "n": 116, "n_no_pose": 5}, "dynamic_hm_thresh_stats": {"min": 4.516549, "max": 349.07706, "median": 101.187775}, "status_distribution": {"dynamic": {"SAFE": 91, "HAND_TO_MOUTH": 1, "OBJECT_TO_MOUTH": 29}, "fixed_30": {"SAFE": 96, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 25}, "fixed_45": {"SAFE": 94, "HAND_TO_MOUTH": 1, "OBJECT_TO_MOUTH": 26}, "fixed_60": {"SAFE": 93, "HAND_TO_MOUTH": 1, "OBJECT_TO_MOUTH": 27}, "fixed_80": {"SAFE": 91, "HAND_TO_MOUTH": 2, "OBJECT_TO_MOUTH": 28}, "fixed_100": {"SAFE": 85, "HAND_TO_MOUTH": 4, "OBJECT_TO_MOUTH": 32}, "fixed_120": {"SAFE": 79, "HAND_TO_MOUTH": 6, "OBJECT_TO_MOUTH": 36}, "fixed_140": {"SAFE": 73, "HAND_TO_MOUTH": 7, "OBJECT_TO_MOUTH": 41}, "fixed_160": {"SAFE": 65, "HAND_TO_MOUTH": 8, "OBJECT_TO_MOUTH": 48}, "fixed_180": {"SAFE": 61, "HAND_TO_MOUTH": 8, "OBJECT_TO_MOUTH": 52}}, "mode_order": ["dynamic", "fixed_30", "fixed_45", "fixed_60", "fixed_80", "fixed_100", "fixed_120", "fixed_140", "fixed_160", "fixed_180"], "median_shoulder_width": 148.940175, "small_group_size": 58, "large_group_size": 58, "agreement_by_threshold": [{"threshold": 30, "same_pct": 90.9}, {"threshold": 45, "same_pct": 89.3}, {"threshold": 60, "same_pct": 90.1}, {"threshold": 80, "same_pct": 88.4}, {"threshold": 100, "same_pct": 85.1}, {"threshold": 120, "same_pct": 81.0}, {"threshold": 140, "same_pct": 78.5}, {"threshold": 160, "same_pct": 71.9}, {"threshold": 180, "same_pct": 68.6}], "shoulder_width_hist": [{"range": "0-50", "count": 8}, {"range": "50-100", "count": 19}, {"range": "100-150", "count": 33}, {"range": "150-200", "count": 30}, {"range": "200-250", "count": 13}, {"range": "250-300", "count": 5}, {"range": "300-400", "count": 6}, {"range": "400-520", "count": 2}], "total_images": 121};
+
+const CONFUSION = {"fixed_45": {"SAFE": {"SAFE": 86, "HAND_TO_MOUTH": 1, "OBJECT_TO_MOUTH": 4}, "HAND_TO_MOUTH": {"SAFE": 1, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 0}, "OBJECT_TO_MOUTH": {"SAFE": 7, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 22}}, "fixed_80": {"SAFE": {"SAFE": 84, "HAND_TO_MOUTH": 2, "OBJECT_TO_MOUTH": 5}, "HAND_TO_MOUTH": {"SAFE": 1, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 0}, "OBJECT_TO_MOUTH": {"SAFE": 6, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 23}}, "fixed_140": {"SAFE": {"SAFE": 69, "HAND_TO_MOUTH": 7, "OBJECT_TO_MOUTH": 15}, "HAND_TO_MOUTH": {"SAFE": 1, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 0}, "OBJECT_TO_MOUTH": {"SAFE": 3, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 26}}, "dynamic_self": {"SAFE": {"SAFE": 75, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 2}, "HAND_TO_MOUTH": {"SAFE": 0, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 0}, "OBJECT_TO_MOUTH": {"SAFE": 11, "HAND_TO_MOUTH": 0, "OBJECT_TO_MOUTH": 73}}};
+const CONFUSION_LABELS = ['SAFE', 'HAND_TO_MOUTH', 'OBJECT_TO_MOUTH'];
+const CONFUSION_SHORT = { SAFE: 'SAFE', HAND_TO_MOUTH: 'HAND', OBJECT_TO_MOUTH: 'OBJECT' };
+
+const STABILITY = {
+  modes: ['dynamic', 'fixed_45', 'fixed_80', 'fixed_140'],
+  mean_stability: { dynamic: 0.9192546583850931, fixed_45: 0.7577639751552795, fixed_80: 0.6583850931677019, fixed_140: 0.6894409937888198 },
+  perfect_images: { dynamic: 19, fixed_45: 7, fixed_80: 1, fixed_140: 4 },
+  n_images: 23
+};
+const STABILITY_LABELS = { dynamic: 'Dynamic', fixed_45: 'Fixed 45px', fixed_80: 'Fixed 80px', fixed_140: 'Fixed 140px' };
+const EXAMPLE_SCALES = [0.4, 0.55, 0.7, 0.85, 1.0, 1.2, 1.45, 1.75];
+const EXAMPLE_ROW = {
+  dynamic:   ['OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH'],
+  fixed_45:  ['OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','SAFE','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH'],
+  fixed_80:  ['SAFE','SAFE','SAFE','SAFE','SAFE','OBJECT_TO_MOUTH','SAFE','OBJECT_TO_MOUTH'],
+  fixed_140: ['SAFE','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','OBJECT_TO_MOUTH','SAFE','OBJECT_TO_MOUTH','SAFE','SAFE']
+};
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function cssVar(name) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim();
+}
+
+// ---- Chart 1: shoulder_width histogram ----
+function renderHist() {
+  const container = document.getElementById('chart-hist');
+  const bins = DATA.shoulder_width_hist;
+  const W = 900, H = 260, padL = 40, padR = 10, padT = 10, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const maxCount = Math.max(...bins.map(b => b.count));
+  const barGap = 4;
+  const barW = (plotW / bins.length) - barGap;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}` });
+
+  // gridlines
+  const ticks = 4;
+  for (let i = 0; i <= ticks; i++) {
+    const y = padT + plotH - (plotH * i / ticks);
+    const val = Math.round(maxCount * i / ticks);
+    svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'grid-line' }));
+    const t = svgEl('text', { x: padL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = val;
+    svg.appendChild(t);
+  }
+  svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, class: 'baseline' }));
+
+  bins.forEach((b, i) => {
+    const x = padL + i * (plotW / bins.length) + barGap / 2;
+    const h = maxCount ? (b.count / maxCount) * plotH : 0;
+    const y = padT + plotH - h;
+    const rect = svgEl('rect', {
+      x, y, width: barW, height: Math.max(h, 1), rx: 4, ry: 4,
+      fill: cssVar('--series-1'), class: 'bar-seg'
+    });
+    const title = svgEl('title', {});
+    title.textContent = `${b.range}px: ${b.count} ảnh`;
+    rect.appendChild(title);
+    svg.appendChild(rect);
+
+    if (b.count > 0) {
+      const lbl = svgEl('text', { x: x + barW / 2, y: y - 6, class: 'val-label', 'text-anchor': 'middle' });
+      lbl.textContent = b.count;
+      svg.appendChild(lbl);
+    }
+
+    const cat = svgEl('text', { x: x + barW / 2, y: padT + plotH + 18, class: 'cat-label', 'text-anchor': 'middle' });
+    cat.textContent = b.range;
+    svg.appendChild(cat);
+  });
+
+  container.appendChild(svg);
+
+  const details = document.createElement('details');
+  details.className = 'details-wrap';
+  const summary = document.createElement('summary');
+  summary.textContent = 'Xem bảng dữ liệu';
+  details.appendChild(summary);
+  const table = document.createElement('table');
+  table.innerHTML = '<thead><tr><th>Dải shoulder_width (px)</th><th>Số ảnh</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+  bins.forEach(b => {
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td'); td1.textContent = b.range;
+    const td2 = document.createElement('td'); td2.textContent = b.count;
+    tr.appendChild(td1); tr.appendChild(td2);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  details.appendChild(table);
+  container.appendChild(details);
+}
+
+// ---- Chart 2: stacked bar of status distribution per mode ----
+function renderStack() {
+  const container = document.getElementById('chart-stack');
+  const modes = DATA.mode_order;
+  const dist = DATA.status_distribution;
+  const total = DATA.total_images;
+  const W = 900, H = 320, padL = 40, padR = 10, padT = 10, padB = 46;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const barGap = 10;
+  const barW = (plotW / modes.length) - barGap;
+  const colors = { SAFE: cssVar('--good'), HAND_TO_MOUTH: cssVar('--warning'), OBJECT_TO_MOUTH: cssVar('--critical') };
+  const order = ['SAFE', 'HAND_TO_MOUTH', 'OBJECT_TO_MOUTH'];
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}` });
+
+  const ticks = 4;
+  for (let i = 0; i <= ticks; i++) {
+    const y = padT + plotH - (plotH * i / ticks);
+    const val = Math.round(total * i / ticks);
+    svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'grid-line' }));
+    const t = svgEl('text', { x: padL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = val;
+    svg.appendChild(t);
+  }
+  svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, class: 'baseline' }));
+
+  modes.forEach((mode, i) => {
+    const x = padL + i * (plotW / modes.length) + barGap / 2;
+    let yCursor = padT + plotH;
+    order.forEach(status => {
+      const count = dist[mode][status] || 0;
+      if (count === 0) return;
+      const h = (count / total) * plotH;
+      const y = yCursor - h;
+      const rect = svgEl('rect', {
+        x, y: y + 1, width: barW, height: Math.max(h - 2, 1),
+        fill: colors[status], class: 'bar-seg'
+      });
+      const title = svgEl('title', {});
+      title.textContent = `${mode === 'dynamic' ? 'Dynamic' : mode.replace('fixed_', 'Fixed ') + 'px'} — ${status}: ${count} ảnh`;
+      rect.appendChild(title);
+      svg.appendChild(rect);
+      yCursor -= h;
+    });
+
+    const label = mode === 'dynamic' ? 'Dynamic' : mode.replace('fixed_', '');
+    const cat = svgEl('text', { x: x + barW / 2, y: padT + plotH + 18, class: 'cat-label', 'text-anchor': 'middle' });
+    cat.textContent = label;
+    svg.appendChild(cat);
+    if (mode !== 'dynamic') {
+      const cat2 = svgEl('text', { x: x + barW / 2, y: padT + plotH + 32, class: 'axis-label', 'text-anchor': 'middle' });
+      cat2.textContent = 'px';
+      svg.appendChild(cat2);
+    }
+  });
+
+  container.appendChild(svg);
+}
+
+// ---- Chart 3: agreement line chart ----
+function renderLine() {
+  const container = document.getElementById('chart-line');
+  const points = DATA.agreement_by_threshold;
+  const W = 900, H = 260, padL = 44, padR = 20, padT = 20, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const xMin = Math.min(...points.map(p => p.threshold));
+  const xMax = Math.max(...points.map(p => p.threshold));
+  const yMin = 60, yMax = 100;
+
+  const xScale = v => padL + ((v - xMin) / (xMax - xMin)) * plotW;
+  const yScale = v => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}` });
+
+  const yticks = [60, 70, 80, 90, 100];
+  yticks.forEach(v => {
+    const y = yScale(v);
+    svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'grid-line' }));
+    const t = svgEl('text', { x: padL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v + '%';
+    svg.appendChild(t);
+  });
+  svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, class: 'baseline' }));
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.threshold)} ${yScale(p.same_pct)}`).join(' ');
+  svg.appendChild(svgEl('path', { d: pathD, class: 'line-path' }));
+
+  points.forEach((p, i) => {
+    const cx = xScale(p.threshold), cy = yScale(p.same_pct);
+    const dot = svgEl('circle', { cx, cy, r: 4, class: 'dot' });
+    const title = svgEl('title', {});
+    title.textContent = `fixed_${p.threshold}px: ${p.same_pct}% đồng thuận với dynamic`;
+    dot.appendChild(title);
+    svg.appendChild(dot);
+
+    if (i === 0 || i === points.length - 1) {
+      const lbl = svgEl('text', { x: cx, y: cy - 12, class: 'val-label', 'text-anchor': 'middle' });
+      lbl.textContent = p.same_pct + '%';
+      svg.appendChild(lbl);
+    }
+
+    const cat = svgEl('text', { x: cx, y: padT + plotH + 18, class: 'cat-label', 'text-anchor': 'middle' });
+    cat.textContent = p.threshold;
+    svg.appendChild(cat);
+  });
+
+  container.appendChild(svg);
+}
+
+// ---- Tables ----
+function renderSplitTable() {
+  const tbody = document.getElementById('table-split');
+  // recomputed inline from same source used to build the callouts (hardcoded pairs, matched to analyze.py output)
+  const splitRows = [
+    [30, 91.4, 89.7], [45, 87.9, 89.7], [60, 89.7, 89.7], [80, 86.2, 89.7],
+    [100, 82.8, 86.2], [120, 75.9, 84.5], [140, 72.4, 82.8], [160, 63.8, 77.6], [180, 60.3, 74.1]
+  ];
+  splitRows.forEach(([th, small, large]) => {
+    const tr = document.createElement('tr');
+    const diff = (large - small).toFixed(1);
+    tr.innerHTML = `<td>${th}px</td><td>${small.toFixed(1)}%</td><td>${large.toFixed(1)}%</td><td>${diff > 0 ? '+' : ''}${diff} pp</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderFullTable() {
+  const tbody = document.getElementById('table-full');
+  const agreementMap = {};
+  DATA.agreement_by_threshold.forEach(p => agreementMap['fixed_' + p.threshold] = p.same_pct);
+  DATA.mode_order.forEach(mode => {
+    const d = DATA.status_distribution[mode];
+    const tr = document.createElement('tr');
+    const label = mode === 'dynamic' ? 'Dynamic' : 'Fixed ' + mode.replace('fixed_', '') + 'px';
+    const agree = mode === 'dynamic' ? '—' : agreementMap[mode] + '%';
+    tr.innerHTML = `<td>${label}</td><td>${d.SAFE}</td><td>${d.HAND_TO_MOUTH || 0}</td><td>${d.OBJECT_TO_MOUTH}</td><td>${agree}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---- Confusion matrices: dynamic (actual) vs each fixed mode (predicted) ----
+function renderConfusionMatrix(containerId, key, captionOverride) {
+  const container = document.getElementById(containerId);
+  const matrix = CONFUSION[key];
+  const maxVal = Math.max(...CONFUSION_LABELS.flatMap(a => CONFUSION_LABELS.map(b => matrix[a][b])));
+  const ramp = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#1c5cab', '#0d366b'];
+  const darkSteps = new Set(['#3987e5', '#1c5cab', '#0d366b']);
+
+  function fillFor(v) {
+    if (v === 0) return 'transparent';
+    const t = v / maxVal;
+    const idx = Math.min(ramp.length - 1, Math.floor(t * ramp.length));
+    return ramp[idx];
+  }
+  function textColorFor(fill) {
+    if (fill === 'transparent') return 'var(--text-muted)';
+    return darkSteps.has(fill) ? '#ffffff' : '#0b0b0b';
+  }
+
+  const wrap = document.createElement('div');
+  wrap.style.overflowX = 'auto';
+
+  const caption = document.createElement('div');
+  caption.style.fontSize = '0.75rem';
+  caption.style.color = 'var(--text-muted)';
+  caption.style.marginBottom = '10px';
+  caption.textContent = captionOverride || `Hàng = Dynamic (tham chiếu) · Cột = ${key.replace('fixed_', 'Fixed ')}px (dự đoán) · số ảnh trong mỗi ô`;
+  wrap.appendChild(caption);
+
+  const table = document.createElement('table');
+  table.style.tableLayout = 'fixed';
+  table.style.maxWidth = '480px';
+
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  headRow.appendChild(document.createElement('th'));
+  CONFUSION_LABELS.forEach(l => {
+    const th = document.createElement('th');
+    th.textContent = CONFUSION_SHORT[l];
+    th.style.textAlign = 'center';
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  CONFUSION_LABELS.forEach(a => {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    th.textContent = CONFUSION_SHORT[a];
+    th.style.textAlign = 'left';
+    tr.appendChild(th);
+    CONFUSION_LABELS.forEach(b => {
+      const v = matrix[a][b];
+      const td = document.createElement('td');
+      const fill = fillFor(v);
+      td.style.textAlign = 'center';
+      td.style.background = fill;
+      td.style.color = textColorFor(fill);
+      td.style.fontWeight = a === b ? '700' : '500';
+      td.style.fontVariantNumeric = 'tabular-nums';
+      td.style.padding = '10px 8px';
+      td.title = `Dynamic=${CONFUSION_SHORT[a]}, ${key.replace('fixed_', 'Fixed ')}px=${CONFUSION_SHORT[b]}: ${v} ảnh`;
+      td.textContent = v;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  container.appendChild(wrap);
+}
+
+// ---- Stability bar chart (dynamic highlighted vs the fixed family) ----
+function renderStabilityChart() {
+  const container = document.getElementById('chart-stability');
+  const modes = STABILITY.modes;
+  const W = 900, H = 260, padL = 44, padR = 20, padT = 20, padB = 40;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const barGap = 30;
+  const barW = (plotW / modes.length) - barGap;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}` });
+
+  const yticks = [0, 25, 50, 75, 100];
+  yticks.forEach(v => {
+    const y = padT + plotH - (plotH * v / 100);
+    svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'grid-line' }));
+    const t = svgEl('text', { x: padL - 8, y: y + 3, class: 'axis-label', 'text-anchor': 'end' });
+    t.textContent = v + '%';
+    svg.appendChild(t);
+  });
+  svg.appendChild(svgEl('line', { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, class: 'baseline' }));
+
+  modes.forEach((mode, i) => {
+    const x = padL + i * (plotW / modes.length) + barGap / 2;
+    const pct = STABILITY.mean_stability[mode] * 100;
+    const h = (pct / 100) * plotH;
+    const y = padT + plotH - h;
+    const color = mode === 'dynamic' ? cssVar('--series-1') : cssVar('--text-muted');
+    const rect = svgEl('rect', { x, y, width: barW, height: Math.max(h, 1), rx: 4, ry: 4, fill: color, class: 'bar-seg' });
+    const title = svgEl('title', {});
+    title.textContent = `${STABILITY_LABELS[mode]}: ${pct.toFixed(1)}% ổn định, ${STABILITY.perfect_images[mode]}/${STABILITY.n_images} ảnh hoàn toàn ổn định`;
+    rect.appendChild(title);
+    svg.appendChild(rect);
+
+    const lbl = svgEl('text', { x: x + barW / 2, y: y - 8, class: 'val-label', 'text-anchor': 'middle' });
+    lbl.textContent = pct.toFixed(1) + '%';
+    if (mode === 'dynamic') lbl.style.fill = cssVar('--series-1');
+    svg.appendChild(lbl);
+
+    const cat = svgEl('text', { x: x + barW / 2, y: padT + plotH + 20, class: 'cat-label', 'text-anchor': 'middle' });
+    cat.textContent = STABILITY_LABELS[mode];
+    svg.appendChild(cat);
+  });
+
+  container.appendChild(svg);
+}
+
+function renderStabilityTable() {
+  const tbody = document.getElementById('table-stability');
+  STABILITY.modes.forEach(mode => {
+    const tr = document.createElement('tr');
+    const pct = (STABILITY.mean_stability[mode] * 100).toFixed(1);
+    tr.innerHTML = `<td>${STABILITY_LABELS[mode]}</td><td>${pct}%</td><td>${STABILITY.perfect_images[mode]} / ${STABILITY.n_images}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderExampleTable() {
+  const container = document.getElementById('example-table');
+  const table = document.createElement('table');
+  let thead = '<thead><tr><th>Mode</th>';
+  EXAMPLE_SCALES.forEach(s => thead += `<th style="text-align:center">${s}×</th>`);
+  thead += '</tr></thead>';
+  table.innerHTML = thead;
+  const tbody = document.createElement('tbody');
+  STABILITY.modes.forEach(mode => {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    th.style.textAlign = 'left';
+    th.textContent = STABILITY_LABELS[mode];
+    tr.appendChild(th);
+    const statuses = EXAMPLE_ROW[mode];
+    const refStatus = statuses[4]; // index of scale 1.0
+    statuses.forEach((s, i) => {
+      const td = document.createElement('td');
+      td.style.textAlign = 'center';
+      const short = s === 'SAFE' ? 'SAFE' : 'OBJECT';
+      td.textContent = short;
+      const isRef = i === 4;
+      const matchesRef = s === refStatus;
+      if (isRef) {
+        td.style.fontWeight = '700';
+        td.style.textDecoration = 'underline';
+      }
+      td.style.color = matchesRef ? 'var(--good)' : 'var(--critical)';
+      td.style.fontWeight = td.style.fontWeight || '600';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+  const note = document.createElement('div');
+  note.style.fontSize = '0.75rem';
+  note.style.color = 'var(--text-muted)';
+  note.style.marginTop = '8px';
+  note.textContent = '1.0× (gạch chân) là tỉ lệ gốc dùng làm đáp án. Xanh = trùng đáp án, đỏ = lệch đáp án.';
+  container.appendChild(note);
+}
+
+renderHist();
+renderStack();
+renderLine();
+renderSplitTable();
+renderFullTable();
+renderConfusionMatrix('cm-45', 'fixed_45');
+renderConfusionMatrix('cm-80', 'fixed_80');
+renderConfusionMatrix('cm-140', 'fixed_140');
+renderConfusionMatrix('cm-dynamic-self', 'dynamic_self', 'Hàng = Dynamic @ 1.0x (tham chiếu) · Cột = Dynamic @ 7 tỉ lệ khác (dự đoán) · 161 cặp ảnh×scale');
+renderStabilityChart();
+renderStabilityTable();
+renderExampleTable();
+</script>

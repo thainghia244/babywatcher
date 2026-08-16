@@ -1,0 +1,8 @@
+Các chỉ số đánh giá hệ thống BabyWatcher (dựa trên kết quả đã ghi trong báo cáo)
+============================================================
+Recall: 52%
+mAP@0.5: 59%
+mAP@0.5:0.95: 41%
+F1-score: 64%
+
+Hình ảnh biểu đồ đã được lưu tại: metrics_summary.png

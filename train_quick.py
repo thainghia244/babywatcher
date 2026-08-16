@@ -14,7 +14,11 @@ def main():
     print("🚀 BABYWATCHER QUICK TRAINING - babyMonitor2")
     print("=" * 80)
     
-    dataset_dir = "babyMonitor2.v1i.yolov8"
+    # 3-class version (baby, blanket, toy) with the near-empty 'other' class
+    # (5 instances total) dropped -- see fix_class_imbalance.py -- merged with
+    # 3 supplementary public datasets (Baby Monitoring 4, Baby-Detection,
+    # kid-toys) and re-split 80/10/10 -- see merge_datasets.py.
+    dataset_dir = "babyMonitor2_merged.v1i.yolov8"
     data_yaml = os.path.join(dataset_dir, "data.yaml")
     
     if not os.path.exists(data_yaml):

@@ -3,6 +3,7 @@
 import argparse
 import sys
 from src.detector import BabyWatcher
+from src.launch_screen import show_launch_screen
 
 
 def main():
@@ -13,7 +14,13 @@ def main():
     
     parser.add_argument(
         "input",
-        help="Input file path (image/video) or camera index (0, 1) or alias (camera, cam, webcam)"
+        help=(
+            "Input file path (image/video) or camera index (0, 1) or alias (camera, cam, webcam). "
+            "NOTE: a single image path is a quick DEBUG look at one photo, not an accuracy benchmark -- "
+            "it skips the multi-frame confirmation that video/camera mode relies on to avoid false "
+            "alarms, so it flags things more readily than the real product does. Use a video or the "
+            "camera for anything you want to judge accuracy from."
+        )
     )
     
     parser.add_argument(
@@ -59,6 +66,9 @@ def main():
             print(f"Max Duration: {stats['max_danger_duration']:.2f}s")
             print("="*50 + "\n")
         else:
+            if not args.no_display:
+                show_launch_screen(watcher, config_path=args.config)
+
             # Process file
             print(f"\n🎬 Processing: {args.input}")
             watcher.process_file(args.input, args.output, show_window=not args.no_display)

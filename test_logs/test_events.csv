@@ -1,3 +1,0 @@
-timestamp,status,duration_seconds,hand_mouth_distance,hand_object_distance,frame_saved,notes
-2026-05-26 09:12:56,HAND_TO_MOUTH,2.50,40.00,999.00,0,Test event
-2026-05-26 09:12:56,OBJECT_TO_MOUTH,5.00,35.00,55.00,1,Test danger event

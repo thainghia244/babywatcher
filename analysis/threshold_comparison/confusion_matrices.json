@@ -1,0 +1,155 @@
+{
+  "fixed_30": {
+    "SAFE": {
+      "SAFE": 88,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 3
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 7,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 22
+    }
+  },
+  "fixed_45": {
+    "SAFE": {
+      "SAFE": 86,
+      "HAND_TO_MOUTH": 1,
+      "OBJECT_TO_MOUTH": 4
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 7,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 22
+    }
+  },
+  "fixed_60": {
+    "SAFE": {
+      "SAFE": 86,
+      "HAND_TO_MOUTH": 1,
+      "OBJECT_TO_MOUTH": 4
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 6,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 23
+    }
+  },
+  "fixed_80": {
+    "SAFE": {
+      "SAFE": 84,
+      "HAND_TO_MOUTH": 2,
+      "OBJECT_TO_MOUTH": 5
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 6,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 23
+    }
+  },
+  "fixed_100": {
+    "SAFE": {
+      "SAFE": 79,
+      "HAND_TO_MOUTH": 4,
+      "OBJECT_TO_MOUTH": 8
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 5,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 24
+    }
+  },
+  "fixed_120": {
+    "SAFE": {
+      "SAFE": 74,
+      "HAND_TO_MOUTH": 5,
+      "OBJECT_TO_MOUTH": 12
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 4,
+      "HAND_TO_MOUTH": 1,
+      "OBJECT_TO_MOUTH": 24
+    }
+  },
+  "fixed_140": {
+    "SAFE": {
+      "SAFE": 69,
+      "HAND_TO_MOUTH": 7,
+      "OBJECT_TO_MOUTH": 15
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 3,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 26
+    }
+  },
+  "fixed_160": {
+    "SAFE": {
+      "SAFE": 61,
+      "HAND_TO_MOUTH": 8,
+      "OBJECT_TO_MOUTH": 22
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 3,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 26
+    }
+  },
+  "fixed_180": {
+    "SAFE": {
+      "SAFE": 57,
+      "HAND_TO_MOUTH": 8,
+      "OBJECT_TO_MOUTH": 26
+    },
+    "HAND_TO_MOUTH": {
+      "SAFE": 1,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 0
+    },
+    "OBJECT_TO_MOUTH": {
+      "SAFE": 3,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 26
+    }
+  }
+}

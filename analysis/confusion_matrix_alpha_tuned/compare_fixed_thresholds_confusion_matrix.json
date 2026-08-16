@@ -1,0 +1,72 @@
+{
+  "confusion_matrix": {
+    "dynamic": {
+      "HAND_TO_MOUTH": {
+        "HAND_TO_MOUTH": 1,
+        "OBJECT_TO_MOUTH": 6,
+        "SAFE": 6
+      },
+      "OBJECT_TO_MOUTH": {
+        "HAND_TO_MOUTH": 0,
+        "OBJECT_TO_MOUTH": 2,
+        "SAFE": 8
+      },
+      "SAFE": {
+        "HAND_TO_MOUTH": 1,
+        "OBJECT_TO_MOUTH": 7,
+        "SAFE": 90
+      }
+    },
+    "fixed_80": {
+      "HAND_TO_MOUTH": {
+        "HAND_TO_MOUTH": 2,
+        "OBJECT_TO_MOUTH": 6,
+        "SAFE": 5
+      },
+      "OBJECT_TO_MOUTH": {
+        "HAND_TO_MOUTH": 0,
+        "OBJECT_TO_MOUTH": 2,
+        "SAFE": 8
+      },
+      "SAFE": {
+        "HAND_TO_MOUTH": 3,
+        "OBJECT_TO_MOUTH": 9,
+        "SAFE": 86
+      }
+    },
+    "fixed_110": {
+      "HAND_TO_MOUTH": {
+        "HAND_TO_MOUTH": 1,
+        "OBJECT_TO_MOUTH": 8,
+        "SAFE": 4
+      },
+      "OBJECT_TO_MOUTH": {
+        "HAND_TO_MOUTH": 0,
+        "OBJECT_TO_MOUTH": 4,
+        "SAFE": 6
+      },
+      "SAFE": {
+        "HAND_TO_MOUTH": 2,
+        "OBJECT_TO_MOUTH": 24,
+        "SAFE": 72
+      }
+    },
+    "fixed_140": {
+      "HAND_TO_MOUTH": {
+        "HAND_TO_MOUTH": 0,
+        "OBJECT_TO_MOUTH": 9,
+        "SAFE": 4
+      },
+      "OBJECT_TO_MOUTH": {
+        "HAND_TO_MOUTH": 0,
+        "OBJECT_TO_MOUTH": 6,
+        "SAFE": 4
+      },
+      "SAFE": {
+        "HAND_TO_MOUTH": 3,
+        "OBJECT_TO_MOUTH": 30,
+        "SAFE": 65
+      }
+    }
+  }
+}

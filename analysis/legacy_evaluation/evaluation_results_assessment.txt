@@ -1,0 +1,10 @@
+Các chỉ số đánh giá BabyWatcher (dựa trên kết quả huấn luyện thực tế)
+============================================================
+Nguồn dữ liệu: runs\detect\models\babyMonitor2\detector\results.csv
+============================================================
+Recall: 52.43%
+mAP@0.5: 59.14%
+mAP@0.5:0.95: 41.12%
+F1-score: 63.86%
+
+Hình ảnh biểu đồ đã được lưu tại: evaluation_results_assessment.png

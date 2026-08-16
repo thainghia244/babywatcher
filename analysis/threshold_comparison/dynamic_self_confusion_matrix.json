@@ -1,0 +1,17 @@
+{
+  "SAFE": {
+    "SAFE": 75,
+    "HAND_TO_MOUTH": 0,
+    "OBJECT_TO_MOUTH": 2
+  },
+  "HAND_TO_MOUTH": {
+    "SAFE": 0,
+    "HAND_TO_MOUTH": 0,
+    "OBJECT_TO_MOUTH": 0
+  },
+  "OBJECT_TO_MOUTH": {
+    "SAFE": 11,
+    "HAND_TO_MOUTH": 0,
+    "OBJECT_TO_MOUTH": 73
+  }
+}

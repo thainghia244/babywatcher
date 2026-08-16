@@ -1,0 +1,156 @@
+{
+  "shoulder_width_stats": {
+    "min": 6.4522133,
+    "max": 498.68152,
+    "median": 148.940175,
+    "mean": 157.81646519827586,
+    "stdev": 85.59742215430683,
+    "n": 116,
+    "n_no_pose": 5
+  },
+  "dynamic_hm_thresh_stats": {
+    "min": 4.516549,
+    "max": 349.07706,
+    "median": 101.187775
+  },
+  "status_distribution": {
+    "dynamic": {
+      "SAFE": 91,
+      "HAND_TO_MOUTH": 1,
+      "OBJECT_TO_MOUTH": 29
+    },
+    "fixed_30": {
+      "SAFE": 96,
+      "HAND_TO_MOUTH": 0,
+      "OBJECT_TO_MOUTH": 25
+    },
+    "fixed_45": {
+      "SAFE": 94,
+      "HAND_TO_MOUTH": 1,
+      "OBJECT_TO_MOUTH": 26
+    },
+    "fixed_60": {
+      "SAFE": 93,
+      "HAND_TO_MOUTH": 1,
+      "OBJECT_TO_MOUTH": 27
+    },
+    "fixed_80": {
+      "SAFE": 91,
+      "HAND_TO_MOUTH": 2,
+      "OBJECT_TO_MOUTH": 28
+    },
+    "fixed_100": {
+      "SAFE": 85,
+      "HAND_TO_MOUTH": 4,
+      "OBJECT_TO_MOUTH": 32
+    },
+    "fixed_120": {
+      "SAFE": 79,
+      "HAND_TO_MOUTH": 6,
+      "OBJECT_TO_MOUTH": 36
+    },
+    "fixed_140": {
+      "SAFE": 73,
+      "HAND_TO_MOUTH": 7,
+      "OBJECT_TO_MOUTH": 41
+    },
+    "fixed_160": {
+      "SAFE": 65,
+      "HAND_TO_MOUTH": 8,
+      "OBJECT_TO_MOUTH": 48
+    },
+    "fixed_180": {
+      "SAFE": 61,
+      "HAND_TO_MOUTH": 8,
+      "OBJECT_TO_MOUTH": 52
+    }
+  },
+  "mode_order": [
+    "dynamic",
+    "fixed_30",
+    "fixed_45",
+    "fixed_60",
+    "fixed_80",
+    "fixed_100",
+    "fixed_120",
+    "fixed_140",
+    "fixed_160",
+    "fixed_180"
+  ],
+  "median_shoulder_width": 148.940175,
+  "small_group_size": 58,
+  "large_group_size": 58,
+  "agreement_by_threshold": [
+    {
+      "threshold": 30,
+      "same_pct": 90.9
+    },
+    {
+      "threshold": 45,
+      "same_pct": 89.3
+    },
+    {
+      "threshold": 60,
+      "same_pct": 90.1
+    },
+    {
+      "threshold": 80,
+      "same_pct": 88.4
+    },
+    {
+      "threshold": 100,
+      "same_pct": 85.1
+    },
+    {
+      "threshold": 120,
+      "same_pct": 81.0
+    },
+    {
+      "threshold": 140,
+      "same_pct": 78.5
+    },
+    {
+      "threshold": 160,
+      "same_pct": 71.9
+    },
+    {
+      "threshold": 180,
+      "same_pct": 68.6
+    }
+  ],
+  "shoulder_width_hist": [
+    {
+      "range": "0-50",
+      "count": 8
+    },
+    {
+      "range": "50-100",
+      "count": 19
+    },
+    {
+      "range": "100-150",
+      "count": 33
+    },
+    {
+      "range": "150-200",
+      "count": 30
+    },
+    {
+      "range": "200-250",
+      "count": 13
+    },
+    {
+      "range": "250-300",
+      "count": 5
+    },
+    {
+      "range": "300-400",
+      "count": 6
+    },
+    {
+      "range": "400-520",
+      "count": 2
+    }
+  ],
+  "total_images": 121
+}

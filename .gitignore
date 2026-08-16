@@ -7,6 +7,9 @@ venv/
 .env
 .idea/
 .vscode/
+.claude/
+
+*.zip
 
 runs/
 output/
@@ -27,3 +30,28 @@ val/
 *.jpeg
 *.png
 *.bmp
+
+# Roboflow / training datasets -- large, re-downloadable via Roboflow or the
+# Colab notebooks (colab_train_babymonitor.ipynb, colab_train_hand_pose.ipynb),
+# not meant to live in the repo itself.
+babyMonitor2*.v1i.yolov8/
+danger_clips_pseudo.v1i.yolov8/
+hand labelled baby.v1i.yolov8/
+merge_preview/
+pseudo_label_preview*/
+
+# Real data captured from actual camera use -- contains real photos/video of
+# a real child and caregiver-registered hazard objects. Never commit this,
+# regardless of whether the repo is public or private.
+danger_clips/
+hazard_gallery/
+logs/
+test_logs/
+video1*.mp4
+
+# Exceptions: these directories hold images that ARE meant to be tracked --
+# the *.jpg/*.png rule above is intentionally broad, so carve out what's
+# actually needed for reproducibility and report deliverables.
+!image/**
+!analysis/**
+!bao_cao_hinh_anh/**

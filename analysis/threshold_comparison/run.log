@@ -1,0 +1,116 @@
+2026-08-06 17:14:23 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:15:46 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:17:14 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:18:47 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:20:18 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:21:55 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:23:48 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:25:28 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:27:35 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+2026-08-06 17:29:44 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+Running mode: dynamic
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  dynamic: {'SAFE': 91, 'OBJECT_TO_MOUTH': 29, 'HAND_TO_MOUTH': 1} errors=0
+Running mode: fixed_30
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_30: {'SAFE': 96, 'OBJECT_TO_MOUTH': 25} errors=0
+Running mode: fixed_45
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_45: {'SAFE': 94, 'OBJECT_TO_MOUTH': 26, 'HAND_TO_MOUTH': 1} errors=0
+Running mode: fixed_60
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_60: {'SAFE': 93, 'OBJECT_TO_MOUTH': 27, 'HAND_TO_MOUTH': 1} errors=0
+Running mode: fixed_80
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_80: {'SAFE': 91, 'OBJECT_TO_MOUTH': 28, 'HAND_TO_MOUTH': 2} errors=0
+Running mode: fixed_100
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_100: {'SAFE': 85, 'OBJECT_TO_MOUTH': 32, 'HAND_TO_MOUTH': 4} errors=0
+Running mode: fixed_120
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_120: {'SAFE': 79, 'OBJECT_TO_MOUTH': 36, 'HAND_TO_MOUTH': 6} errors=0
+Running mode: fixed_140
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_140: {'SAFE': 73, 'OBJECT_TO_MOUTH': 41, 'HAND_TO_MOUTH': 7} errors=0
+Running mode: fixed_160
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_160: {'SAFE': 65, 'OBJECT_TO_MOUTH': 48, 'HAND_TO_MOUTH': 8} errors=0
+Running mode: fixed_180
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  fixed_180: {'SAFE': 61, 'OBJECT_TO_MOUTH': 52, 'HAND_TO_MOUTH': 8} errors=0
+Completed 121 images in 1006.79s
+Wrote analysis\threshold_comparison\compare_fixed_thresholds.json
+Wrote analysis\threshold_comparison\compare_fixed_thresholds.csv
+Wrote analysis\threshold_comparison\compare_fixed_thresholds_mode_comparison.csv
+Wrote analysis\threshold_comparison\compare_fixed_thresholds_pairwise_summary.txt
+Comparison finished.

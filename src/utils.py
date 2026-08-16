@@ -2,7 +2,64 @@
 
 import numpy as np
 import cv2
-from typing import Tuple, List
+from typing import Optional, Tuple, List
+
+
+def select_box_by_mouse(frame: np.ndarray, window_name: str = "Ve khung (ENTER=xong, r=ve lai, c=huy)"
+                        ) -> Optional[Tuple[int, int, int, int]]:
+    """Custom click-drag rectangle selector -- used instead of cv2.selectROI,
+    which was found to return coordinates misaligned with the actual image on
+    at least one Windows setup (likely a display DPI-scaling mismatch inside
+    its internal window handling). This owns the mouse callback and drawing
+    loop directly against `frame`'s own pixel coordinates, so there is no
+    intermediate scaling step that could introduce that kind of drift.
+
+    Controls: drag to draw, ENTER/SPACE to confirm, 'r' to redraw, 'c' to cancel.
+    Returns (x1, y1, x2, y2) in `frame`'s coordinate space, or None if cancelled.
+    """
+    state = {'dragging': False, 'start': None, 'end': None}
+
+    def on_mouse(event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            state['dragging'] = True
+            state['start'] = (x, y)
+            state['end'] = (x, y)
+        elif event == cv2.EVENT_MOUSEMOVE and state['dragging']:
+            state['end'] = (x, y)
+        elif event == cv2.EVENT_LBUTTONUP:
+            state['dragging'] = False
+            state['end'] = (x, y)
+
+    cv2.namedWindow(window_name)
+    cv2.setMouseCallback(window_name, on_mouse)
+
+    box = None
+    try:
+        while True:
+            display = frame.copy()
+            if state['start'] is not None and state['end'] is not None:
+                cv2.rectangle(display, state['start'], state['end'], (0, 255, 0), 2)
+            cv2.imshow(window_name, display)
+            key = cv2.waitKey(20) & 0xFF
+
+            if key in (13, 32):  # ENTER or SPACE
+                if state['start'] is not None and state['end'] is not None:
+                    x1, y1 = state['start']
+                    x2, y2 = state['end']
+                    x1, x2 = sorted((x1, x2))
+                    y1, y2 = sorted((y1, y2))
+                    if x2 > x1 and y2 > y1:
+                        box = (x1, y1, x2, y2)
+                break
+            if key == ord('c'):
+                box = None
+                break
+            if key == ord('r'):
+                state['start'] = state['end'] = None
+    finally:
+        cv2.destroyWindow(window_name)
+
+    return box
 
 
 def distance(p1: np.ndarray, p2: np.ndarray) -> float:
@@ -271,10 +328,12 @@ def compose_display_frame(frame: np.ndarray,
                           show_info_panel: bool = True,
                           skeleton_enabled: bool = True) -> Tuple[np.ndarray, Tuple[int, int, int, int]]:
     """Compose a display canvas with a top warning banner, a right-side info panel, and a skeleton toggle button."""
+    hazard_name = info_dict.get('hazard_name')
+
     frame_h, frame_w = frame.shape[:2]
     banner_height = 58 if status != "SAFE" else 0
     panel_width = 260 if show_info_panel else 0
-    panel_height = 170 if show_info_panel else 0
+    panel_height = (190 if hazard_name else 170) if show_info_panel else 0
     canvas_h = frame_h + banner_height + 20
     canvas_w = frame_w + (panel_width + 20 if show_info_panel else 0)
 
@@ -325,7 +384,13 @@ def compose_display_frame(frame: np.ndarray,
         cv2.putText(canvas, f"H-O Thr : {info_dict.get('h_o_thresh', 0.0):.1f}", (tx, ty + line_gap * 4), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 0), 1)
         cv2.putText(canvas, f"Time: {info_dict.get('duration', 0.0):.2f}s", (tx, ty + line_gap * 5), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
         cv2.putText(canvas, f"Status: {status}", (tx, ty + line_gap * 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, get_status_color(status), 1)
-        cv2.putText(canvas, f"Skeleton: {'ON' if skeleton_enabled else 'OFF'}", (tx, ty + line_gap * 7), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+        line = 7
+        if hazard_name:
+            confident = info_dict.get('hazard_confident', True)
+            label = f"Hazard: {hazard_name}" if confident else f"Hazard?: {hazard_name}"
+            cv2.putText(canvas, label, (tx, ty + line_gap * line), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+            line += 1
+        cv2.putText(canvas, f"Skeleton: {'ON' if skeleton_enabled else 'OFF'}", (tx, ty + line_gap * line), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
 
     return canvas, button_rect
 

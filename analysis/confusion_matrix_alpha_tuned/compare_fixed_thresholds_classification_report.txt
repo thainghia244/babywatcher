@@ -1,0 +1,33 @@
+Classification report:
+
+Mode: dynamic
+  Accuracy: 0.7686
+  Total: 121
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.5000, recall=0.0769, f1=0.1333, support=13
+    OBJECT_TO_MOUTH: precision=0.1333, recall=0.2000, f1=0.1600, support=10
+    SAFE: precision=0.8654, recall=0.9184, f1=0.8911, support=98
+
+Mode: fixed_80
+  Accuracy: 0.7438
+  Total: 121
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.4000, recall=0.1538, f1=0.2222, support=13
+    OBJECT_TO_MOUTH: precision=0.1176, recall=0.2000, f1=0.1481, support=10
+    SAFE: precision=0.8687, recall=0.8776, f1=0.8731, support=98
+
+Mode: fixed_110
+  Accuracy: 0.6364
+  Total: 121
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.3333, recall=0.0769, f1=0.1250, support=13
+    OBJECT_TO_MOUTH: precision=0.1111, recall=0.4000, f1=0.1739, support=10
+    SAFE: precision=0.8780, recall=0.7347, f1=0.8000, support=98
+
+Mode: fixed_140
+  Accuracy: 0.5868
+  Total: 121
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=13
+    OBJECT_TO_MOUTH: precision=0.1333, recall=0.6000, f1=0.2182, support=10
+    SAFE: precision=0.8904, recall=0.6633, f1=0.7602, support=98

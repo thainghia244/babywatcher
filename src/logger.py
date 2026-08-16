@@ -35,22 +35,52 @@ class EventLogger:
     
     def _init_csv(self):
         """Initialize CSV file with headers"""
+        expected_headers = [
+            'timestamp',
+            'status',
+            'duration_seconds',
+            'hand_mouth_distance',
+            'hand_object_distance',
+            'frame_saved',
+            'source',
+            'device',
+            'platform',
+            'notes'
+        ]
+
         if not os.path.exists(self.log_path):
             try:
                 with open(self.log_path, 'w', newline='', encoding='utf-8') as f:
                     writer = csv.writer(f)
-                    writer.writerow([
-                        'timestamp',
-                        'status',
-                        'duration_seconds',
-                        'hand_mouth_distance',
-                        'hand_object_distance',
-                        'frame_saved',
-                        'notes'
-                    ])
+                    writer.writerow(expected_headers)
                 print(f"✅ CSV log file created: {self.log_path}")
             except Exception as e:
                 print(f"❌ Error creating CSV file: {e}")
+            return
+
+        try:
+            with open(self.log_path, 'r', newline='', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                existing_headers = next(reader, None)
+                rows = list(reader)
+        except Exception as e:
+            print(f"❌ Error reading existing CSV file: {e}")
+            return
+
+        if existing_headers != expected_headers:
+            try:
+                with open(self.log_path, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(expected_headers)
+                    for row in rows:
+                        if len(row) < len(expected_headers):
+                            row += [''] * (len(expected_headers) - len(row))
+                        elif len(row) > len(expected_headers):
+                            row = row[: len(expected_headers)]
+                        writer.writerow(row)
+                print(f"✅ CSV log file headers updated: {self.log_path}")
+            except Exception as e:
+                print(f"❌ Error updating CSV file headers: {e}")
     
     def _setup_logger(self) -> logging.Logger:
         """Setup Python logging"""
@@ -87,6 +117,9 @@ class EventLogger:
                   hand_mouth_distance: float = 0.0,
                   hand_object_distance: float = 0.0,
                   frame_saved: bool = False,
+                  source: str = "unknown",
+                  device: str = "unknown",
+                  platform: str = "unknown",
                   notes: str = ""):
         """
         Log a danger event to CSV
@@ -97,6 +130,9 @@ class EventLogger:
             hand_mouth_distance: Distance between hand and mouth
             hand_object_distance: Distance between hand and object
             frame_saved: Whether the frame was saved
+            source: Input source (video path, camera index, image path)
+            device: Device type or accelerator used
+            platform: Platform identifier
             notes: Additional notes
         """
         try:
@@ -111,6 +147,9 @@ class EventLogger:
                     f"{hand_mouth_distance:.2f}",
                     f"{hand_object_distance:.2f}",
                     int(frame_saved),
+                    source,
+                    device,
+                    platform,
                     notes
                 ])
             

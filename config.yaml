@@ -2,11 +2,13 @@
 
 # Hardware Settings
 hardware:
-  platform: "auto"  # "auto", "jetson", "desktop", "raspberry_pi"
-  jetson_model: "nano"  # "nano", "tx2", "xavier", "orin"
-  enable_tensorrt: true  # Sử dụng TensorRT cho Jetson Nano
-  enable_csi_camera: false  # Sử dụng CSI camera trên Jetson
-  power_mode: "maxn"  # Jetson power mode: "maxn", "5w", "10w"
+  platform: "desktop"  # Ghim cứng "desktop" thay vì "auto" -- chạy trên laptop này, không phải Jetson Nano.
+                        # Việc này tắt hẳn _setup_jetson() (không gọi nvpmodel/jetson_clocks, vốn không tồn tại trên Windows)
+                        # và mọi nhánh export/dùng TensorRT trong src/detector.py (chỉ kích hoạt khi platform bắt đầu bằng "jetson").
+  jetson_model: "nano"  # Không dùng khi platform="desktop" -- giữ lại giá trị mặc định phòng khi quay lại triển khai Jetson sau này.
+  enable_tensorrt: false  # Không có tác dụng trên laptop (không có TensorRT runtime); đồng thời code đã tự chặn theo platform ở trên.
+  enable_csi_camera: false  # CSI camera là phần cứng riêng của Jetson -- laptop dùng webcam USB/tích hợp qua OpenCV VideoCapture bình thường.
+  power_mode: "maxn"  # Không dùng khi platform="desktop" -- chỉ có ý nghĩa với lệnh nvpmodel trên Jetson.
 
 # Detection Settings
 detection:
@@ -24,23 +26,35 @@ detection:
   sustained_danger_duration: 0.6  # Chỉ báo cảnh báo sau khi tín hiệu nguy hiểm kéo dài ít nhất 0.6s
   
   # Threshold multipliers for dynamic calculation
-  hand_mouth_multiplier: 0.7  # shoulder_width × 0.7
+  hand_mouth_multiplier: 0.7  # shoulder_width × 0.7 -- tay gần miệng (α_hm)
   hand_object_multiplier: 0.7  # shoulder_width × 0.7
-  object_mouth_multiplier: 0.7  # object-to-mouth threshold factor
+  object_mouth_multiplier: 0.7  # shoulder_width × 0.7 -- vật gần miệng (α_om)
+  object_hand_hold_multiplier: 0.3  # shoulder_width × 0.3 -- ngưỡng "đang cầm vật" (α_ho), xem _get_object_proximity_threshold()
   object_region_multiplier: 1.2  # region size for object filtering
   object_mouth_history_window: 3  # require repeated evidence before object-to-mouth alert
   
   # Enhanced object detection for occluded/small objects
-  small_object_conf_thresh: 0.12  # Lower threshold to catch objects near the hand more easily
+  small_object_conf_thresh: 0.25  # Raised from 0.12 -- the retrained babymonitor2 model (P=90%/R=89%, mAP50=95.7%) is confident enough that low-conf noise no longer needs to be let through to catch real objects, and doing so was the main source of SAFE->OBJECT_TO_MOUTH false alarms
   inferred_object_distance_thresh: 22  # If hand-mouth < 25px, infer object is held
   hand_conf_thresh: 0.35  # Lower threshold for hand boxes to improve detection
-  hand_near_object_conf_thresh: 0.10  # Keep candidate objects near the hand even at low confidence
+  hand_near_object_conf_thresh: 0.20  # Raised from 0.10 for the same reason as small_object_conf_thresh above
   hand_near_object_roi_scale: 1.6  # Expand hand ROI for nearby object checks
   object_near_mouth_min_distance: 18  # Only consider objects very close to the mouth as plausible mouth-relevant candidates
   object_size_limit_multiplier: 0.35  # Limit the size of mouth-relevant objects to reduce false positives
   enable_hand_detection: false  # MediaPipe hand detector is disabled; core logic uses pose + object detection
   enable_face_detection: false  # Face detection remains off by default
   mediapipe_confidence: 0.45  # Retained for compatibility, but not used
+
+  # Hazard gallery: reinforces (never gates) OBJECT_TO_MOUTH for objects the
+  # caregiver pre-registered as dangerous via register_hazard_objects.py.
+  # Empty path disables the feature entirely (default).
+  hazard_gallery_path: "hazard_gallery/gallery.json"  # cập nhật tự động qua giao diện đăng ký vật nguy hiểm
+  hazard_match_threshold: 0.75  # cosine similarity for a CONFIDENT match (fast-tracked confirmation)
+  hazard_possible_match_threshold: 0.5  # cosine similarity for a WEAKER "possible" match -- still counts as an
+  # object-to-mouth signal and gets shown on screen, but keeps normal (non-fast-tracked) confirmation timing
+  # since the evidence is weaker
+  hazard_confirmation_frames: 1  # frames needed to confirm when matched (vs confirmation_frames above)
+  hazard_sustained_danger_duration: 0.2  # seconds needed to confirm when matched (vs sustained_danger_duration above)
 
 # Alert Settings
 alerts:
@@ -56,7 +70,7 @@ alerts:
 # Model Settings
 models:
   pose_model_path: "yolo26n-pose.pt"
-  object_model_path: "yolo26n.pt"
+  object_model_path: "models/babyMonitor2/babymonitor2_best.pt"
   # Optional: hand detection with YOLO hand model - set to "" to disable
   hand_model_path: ""
   # Optional: Face detection - set to "" to disable
@@ -72,7 +86,7 @@ performance:
   track_fps: true  # Theo dõi FPS
   enable_profiling: false  # Bật profiling để debug
   batch_size: 1  # Batch processing (1 = xử lý từng frame)
-  jetson_optimization: true  # Tối ưu cho Jetson Nano
+  jetson_optimization: false  # Tắt vì chạy trên laptop, không phải Jetson Nano
 
 # Logging Settings
 logging:
@@ -81,6 +95,17 @@ logging:
   save_danger_clips: true
   clips_dir: "danger_clips"
   log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+  # Lưu VIDEO (không chỉ ảnh chụp) khi phát hiện HAND_TO_MOUTH/OBJECT_TO_MOUTH --
+  # bổ sung cho save_danger_clips ở trên (ảnh JPG), không thay thế. Dùng bộ đệm
+  # cuộn (rolling buffer) để video còn ghi lại được vài giây TRƯỚC lúc nguy hiểm
+  # được xác nhận, không chỉ từ đúng khoảnh khắc xác nhận trở đi.
+  save_danger_videos: true
+  danger_videos_dir: "danger_clips/videos"
+  danger_video_pre_seconds: 2.0   # Số giây trước khi nguy hiểm xác nhận cũng được đưa vào video
+  danger_video_post_seconds: 3.0  # Quay thêm sau khi hết nguy hiểm, để thấy trẻ đã an toàn trở lại
+  danger_video_max_seconds: 15.0  # Giới hạn 1 clip, tránh video quá dài nếu nguy hiểm kéo dài liên tục
+  danger_video_fps: 8             # FPS ghi video -- xấp xỉ theo tốc độ xử lý thật trên CPU, không phải FPS camera gốc
 
 # Email Notifications Configuration
 # For Gmail:
@@ -93,7 +118,7 @@ email:
   smtp_server: "smtp.gmail.com"  # Gmail SMTP server
   smtp_port: 587  # TLS port (Gmail: 587, Outlook: 587, Yahoo: 587)
   sender_email: "nghiaproskt0123@gmail.com"  # Your email address
-  sender_password: "xobq lbiz jxth hpxl"  # Gmail App Password (16 characters)
+  sender_password: ""  # Gmail App Password (16 characters) -- DO NOT commit a real value here, fill in locally only
   recipient_email: "nghiaproskt0123@gmail.com"  # Where to send alerts
   alert_threshold: 5.0  # Send email when danger > 5 seconds
 
@@ -116,8 +141,10 @@ display:
   show_keypoints: true
   show_info_panel: true
   show_fps: true
-  frame_width: 640
-  frame_height: 640
+  frame_width: 960
+  frame_height: 960
+  enhance_contrast: false
+  sharpen: false
 
 # Roboflow Integration for Custom Object Detection
 roboflow:

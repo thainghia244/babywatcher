@@ -1,0 +1,21 @@
+{
+  "confusion_matrix": {
+    "dynamic_instant": {
+      "HAND_TO_MOUTH": {
+        "HAND_TO_MOUTH": 1,
+        "OBJECT_TO_MOUTH": 9,
+        "SAFE": 3
+      },
+      "OBJECT_TO_MOUTH": {
+        "HAND_TO_MOUTH": 0,
+        "OBJECT_TO_MOUTH": 5,
+        "SAFE": 5
+      },
+      "SAFE": {
+        "HAND_TO_MOUTH": 2,
+        "OBJECT_TO_MOUTH": 30,
+        "SAFE": 66
+      }
+    }
+  }
+}

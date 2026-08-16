@@ -1,0 +1,25 @@
+Classification report:
+
+Mode: fixed_80
+  Accuracy: 0.2500
+  Total: 8
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=3
+    OBJECT_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=2
+    SAFE: precision=0.3333, recall=0.6667, f1=0.4444, support=3
+
+Mode: fixed_110
+  Accuracy: 0.2500
+  Total: 8
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=3
+    OBJECT_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=2
+    SAFE: precision=0.3333, recall=0.6667, f1=0.4444, support=3
+
+Mode: fixed_140
+  Accuracy: 0.2500
+  Total: 8
+  Label metrics:
+    HAND_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=3
+    OBJECT_TO_MOUTH: precision=0.0000, recall=0.0000, f1=0.0000, support=2
+    SAFE: precision=0.2857, recall=0.6667, f1=0.4000, support=3

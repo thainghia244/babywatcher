@@ -1,0 +1,23 @@
+2026-08-06 21:56:45 - BabyWatcher - INFO - \u2705 BabyWatcher initialized successfully
+Found 608 labeled danger clips
+✅ Configuration loaded from config.yaml
+🖥️  Platform detected: desktop
+🖥️  Using CPU
+🔄 Loading YOLO pose and object models...
+ℹ️  Hand and face models are disabled; using pose + object logic only
+ℹ️  MediaPipe hand detection disabled; using pose + object logic only
+✅ Models loaded successfully
+✅ Email alert initialized
+  [50/608] elapsed=27s
+  [100/608] elapsed=55s
+  [150/608] elapsed=78s
+  [200/608] elapsed=101s
+  [250/608] elapsed=124s
+  [300/608] elapsed=147s
+  [350/608] elapsed=171s
+  [400/608] elapsed=194s
+  [450/608] elapsed=223s
+  [500/608] elapsed=252s
+  [550/608] elapsed=279s
+  [600/608] elapsed=307s
+Wrote analysis\threshold_comparison\danger_clips_dynamic_eval.csv (608 rows, 0 errors) in 311.3s

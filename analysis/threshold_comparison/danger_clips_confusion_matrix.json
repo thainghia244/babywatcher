@@ -1,0 +1,12 @@
+{
+  "HAND_TO_MOUTH": {
+    "SAFE": 187,
+    "HAND_TO_MOUTH": 136,
+    "OBJECT_TO_MOUTH": 101
+  },
+  "OBJECT_TO_MOUTH": {
+    "SAFE": 60,
+    "HAND_TO_MOUTH": 56,
+    "OBJECT_TO_MOUTH": 68
+  }
+}

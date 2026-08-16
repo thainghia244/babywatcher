@@ -1,0 +1,7 @@
+Fixed threshold pairwise summary:
+  dynamic vs fixed_80: same=101, different=21, same_pct=0.828
+  dynamic vs fixed_110: same=94, different=28, same_pct=0.770
+  dynamic vs fixed_140: same=87, different=35, same_pct=0.713
+  fixed_80 vs fixed_110: same=101, different=21, same_pct=0.828
+  fixed_80 vs fixed_140: same=92, different=30, same_pct=0.754
+  fixed_110 vs fixed_140: same=110, different=12, same_pct=0.902

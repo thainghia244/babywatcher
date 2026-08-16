@@ -1,0 +1,5 @@
+dynamic vs fixed_yaml: same=121, different=0, same_pct=1.0000
+
+dynamic vs fixed_50: same=121, different=0, same_pct=1.0000
+
+fixed_yaml vs fixed_50: same=121, different=0, same_pct=1.0000

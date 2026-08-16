@@ -142,6 +142,9 @@ def test_logger():
             duration=2.5,
             hand_mouth_distance=40.0,
             hand_object_distance=999.0,
+            source="test_camera:0",
+            device="CPU",
+            platform="windows",
             notes="Test event"
         )
         print_test("Log HAND_TO_MOUTH event", True)
@@ -152,6 +155,9 @@ def test_logger():
             hand_mouth_distance=35.0,
             hand_object_distance=55.0,
             frame_saved=True,
+            source="test_video.mp4",
+            device="CPU",
+            platform="windows",
             notes="Test danger event"
         )
         print_test("Log OBJECT_TO_MOUTH event", True)
